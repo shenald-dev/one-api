@@ -1,0 +1,20 @@
+{
+  "name": "one-api-921bea",
+  "version": "1.0.0",
+  "description": "LLM API 管理 &amp; 分发系统，支持 OpenAI、Azure、Anthropic Claude、Google Gemini、DeepSeek、字节豆包、ChatGLM、文心一言、讯飞星火",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node tests/test.js",
+    "benchmark": "node benchmarks/run.js"
+  },
+  "dependencies": {},
+  "keywords": [
+    "songquanpeng",
+    "one api",
+    "vibe-coder",
+    "research"
+  ],
+  "author": "shenald.dev",
+  "license": "MIT"
+}
