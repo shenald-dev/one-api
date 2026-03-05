@@ -22,4 +22,10 @@ curl http://localhost:3000/v1/chat/completions \
   }'
 ```
 
+## 🤝 Contributing
+Help us build the ultimate universal API gateway! 🌍
+- 🐛 **Found a bug?** Open an issue to let us know.
+- ✨ **Have a feature idea?** We are open to PRs! Just make sure to run `npm run build` and keep the edge runtime clean.
+- 🎨 **Documentation tweaks?** Always welcome!
+
 *Crafted by a Vibe Coder. No complex configurations.*
