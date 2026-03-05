@@ -1,29 +1,30 @@
 {
-  "name": "one-api",
-  "version": "1.0.0",
-  "description": "One API to rule them all. Unified gateway for 20+ LLM providers. OpenAI-compatible, single binary, zero config.",
-  "main": "src/index.js",
-  "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "test": "node tests/test.js",
-    "benchmark": "node benchmarks/run.js",
-    "docker:build": "docker build -t shenald/one-api .",
-    "docker:run": "docker run -p 3000:3000 shenald/one-api"
-  },
-  "keywords": [
-    "llm",
-    "api-gateway",
-    "openai",
-    "anthropic",
-    "gemini",
-    "unified-api",
-    "vibe-coder"
-  ],
-  "author": "shenald.dev",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/shenald-dev/one-api.git"
-  }
+    "name": "one-api",
+    "version": "1.0.0",
+    "description": "⚡ One API for 20+ LLM providers. OpenAI-compatible, single binary, runs forever.",
+    "main": "dist/index.js",
+    "scripts": {
+        "start": "tsx src/index.ts",
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc"
+    },
+    "keywords": [
+        "llm",
+        "api",
+        "gateway",
+        "hono"
+    ],
+    "author": "shenald-dev",
+    "license": "MIT",
+    "dependencies": {
+        "@hono/node-server": "^1.8.2",
+        "@hono/zod-openapi": "^0.9.5",
+        "hono": "^4.1.0",
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.24",
+        "tsx": "^4.7.1",
+        "typescript": "^5.3.3"
+    }
 }
