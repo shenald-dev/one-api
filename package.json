@@ -1,20 +1,29 @@
 {
-  "name": "one-api-921bea",
+  "name": "one-api",
   "version": "1.0.0",
-  "description": "LLM API 管理 &amp; 分发系统，支持 OpenAI、Azure、Anthropic Claude、Google Gemini、DeepSeek、字节豆包、ChatGLM、文心一言、讯飞星火",
+  "description": "One API to rule them all. Unified gateway for 20+ LLM providers. OpenAI-compatible, single binary, zero config.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "test": "node tests/test.js",
-    "benchmark": "node benchmarks/run.js"
+    "benchmark": "node benchmarks/run.js",
+    "docker:build": "docker build -t shenald/one-api .",
+    "docker:run": "docker run -p 3000:3000 shenald/one-api"
   },
-  "dependencies": {},
   "keywords": [
-    "songquanpeng",
-    "one api",
-    "vibe-coder",
-    "research"
+    "llm",
+    "api-gateway",
+    "openai",
+    "anthropic",
+    "gemini",
+    "unified-api",
+    "vibe-coder"
   ],
   "author": "shenald.dev",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shenald-dev/one-api.git"
+  }
 }
