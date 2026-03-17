@@ -1,5 +1,6 @@
 // one-api
 const { performance } = require('perf_hooks');
+const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -30,7 +31,7 @@ app.post('/v1/chat/completions', (req, res) => {
 
   // Mock unified response
   res.json({
-    id: `chatcmpl-${Math.random().toString(36).substr(2, 9)}`,
+    id: `chatcmpl-${crypto.randomUUID()}`,
     object: 'chat.completion',
     created: Math.floor(Date.now() / 1000),
     model: model,
