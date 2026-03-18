@@ -35,3 +35,13 @@ test('POST /v1/chat/completions fails without model', async () => {
   assert.strictEqual(res.status, 400);
   assert.strictEqual(res.body.error, 'Missing model or messages');
 });
+
+test('POST /v1/chat/completions fails with invalid JSON gracefully', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .set('Content-Type', 'application/json')
+    .send('{invalid_json');
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.error, 'Invalid JSON payload');
+});
