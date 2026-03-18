@@ -22,6 +22,14 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
+// Handle invalid JSON gracefully
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: 'Invalid JSON payload' });
+  }
+  next(err);
+});
+
 // API endpoints
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body;
