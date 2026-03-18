@@ -65,6 +65,17 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// 404 handler — return JSON for unknown routes
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found', path: req.path });
+});
+
+// Generic error handler — never leak stack traces
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 function heavyComputation(iterations) {
   let sum = 0;
   for (let i = 0; i < iterations; i++) {
