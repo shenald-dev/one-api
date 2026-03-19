@@ -20,3 +20,11 @@ The `heavyComputation` function was being called repeatedly with identical argum
 
 Action:
 Implemented a `Map`-based cache for `heavyComputation` in `src/index.js`. Subsequent calls with the same `iterations` parameter now return the cached result in $O(1)$ time (~0.01ms), improving performance by several orders of magnitude for repeated inputs. Added unit tests in `tests/heavy_computation.test.js` to verify correctness and timing improvements.
+
+## 2026-03-20 — Tested Generic Error Handler
+
+Learning:
+The generic error handler in the API was returning a 500 status code but was not covered by any automated tests, leaving a gap in coverage for unexpected server-side failures.
+
+Action:
+Added a test case in `tests/api.test.js` that intentionally mocks a failure in an internal dependency (`crypto.randomUUID`) to trigger the generic error handler. The test asserts that the handler returns a 500 status code and a sanitized JSON response (`{ error: 'Internal server error' }`) without leaking stack traces. Additionally, `console.error` was temporarily suppressed during the test to keep test output clean.

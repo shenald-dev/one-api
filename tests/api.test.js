@@ -45,3 +45,31 @@ test('POST /v1/chat/completions fails with invalid JSON gracefully', async () =>
   assert.strictEqual(res.status, 400);
   assert.strictEqual(res.body.error, 'Invalid JSON payload');
 });
+
+test('Generic error handler returns 500 without leaking stack traces', async () => {
+  const crypto = require('crypto');
+  const originalRandomUUID = crypto.randomUUID;
+  const originalConsoleError = console.error;
+
+  // Mock internal failure
+  crypto.randomUUID = () => { throw new Error('Mock internal failure'); };
+
+  // Suppress expected console.error from the error handler
+  console.error = () => {};
+
+  try {
+    const res = await request(app)
+      .post('/v1/chat/completions')
+      .send({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: 'Hello!' }]
+      });
+
+    assert.strictEqual(res.status, 500);
+    assert.deepStrictEqual(res.body, { error: 'Internal server error' });
+  } finally {
+    // Restore originals
+    crypto.randomUUID = originalRandomUUID;
+    console.error = originalConsoleError;
+  }
+});
