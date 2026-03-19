@@ -1,5 +1,4 @@
 const { performance } = require('perf_hooks');
-const path = require('path');
 
 async function run() {
   const mod = require('../src/index.js');
