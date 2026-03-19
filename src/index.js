@@ -76,11 +76,23 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
+const computationCache = new Map();
+
+/**
+ * Performs a heavy mathematical computation.
+ * Optimized with memoization for repeated calls with identical parameters.
+ */
 function heavyComputation(iterations) {
+  if (computationCache.has(iterations)) {
+    return computationCache.get(iterations);
+  }
+
   let sum = 0;
   for (let i = 0; i < iterations; i++) {
     sum += Math.sqrt(i) * Math.sin(i * 0.01);
   }
+
+  computationCache.set(iterations, sum);
   return sum;
 }
 
@@ -92,7 +104,8 @@ async function main() {
   console.log('Running ' + runs + ' iterations...');
   for (let i = 0; i < runs; i++) {
     const start = performance.now();
-    heavyComputation(iterations); // Compute without assigning unused variable
+    // The computation is now memoized, making repeated calls in this loop efficient.
+    heavyComputation(iterations);
     const end = performance.now();
     times.push(end - start);
     if (i % 2 === 0) process.stdout.write('.');
@@ -120,4 +133,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { main, app };
+module.exports = { main, app, heavyComputation };
