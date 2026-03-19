@@ -119,17 +119,22 @@ async function main() {
 }
 
 if (require.main === module) {
-  // If no args, run benchmark
-  if (process.argv.includes('--benchmark')) {
-    main().then(r => { console.log('Results:', r); process.exit(0); }).catch(e => { console.error(e); process.exit(1); });
-  } else if (process.argv.includes('--server')) {
+  if (process.argv.includes('--server')) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
       console.log(`One API Gateway listening on port ${PORT}`);
     });
   } else {
-    // Original behavior default: run benchmark
-    main().then(r => { console.log('Results:', r); process.exit(0); }).catch(e => { console.error(e); process.exit(1); });
+    // Default to benchmark if no --server flag
+    main()
+      .then(r => {
+        console.log('Results:', r);
+        process.exit(0);
+      })
+      .catch(e => {
+        console.error(e);
+        process.exit(1);
+      });
   }
 }
 
