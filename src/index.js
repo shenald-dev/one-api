@@ -32,7 +32,7 @@ app.use((err, req, res, next) => {
 
 // API endpoints
 app.post('/v1/chat/completions', (req, res) => {
-  const { model, messages } = req.body;
+  const { model, messages } = req.body || {};
   if (!model || !messages) {
     return res.status(400).json({ error: 'Missing model or messages' });
   }
