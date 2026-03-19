@@ -28,3 +28,10 @@ The generic error handler in the API was returning a 500 status code but was not
 
 Action:
 Added a test case in `tests/api.test.js` that intentionally mocks a failure in an internal dependency (`crypto.randomUUID`) to trigger the generic error handler. The test asserts that the handler returns a 500 status code and a sanitized JSON response (`{ error: 'Internal server error' }`) without leaking stack traces. Additionally, `console.error` was temporarily suppressed during the test to keep test output clean.
+## 2026-03-21 — Prevent 500 Error Crash from Undefined req.body
+
+Learning:
+In Express, when a POST request is sent with a non-JSON `Content-Type` (like `text/plain`), the `express.json()` middleware does not parse the body, resulting in `req.body` being `undefined`. Destructuring properties directly from `req.body` (e.g., `const { model, messages } = req.body;`) without a fallback will throw a `TypeError`, leading to an unhandled 500 Internal Server Error.
+
+Action:
+Modified the `/v1/chat/completions` endpoint to safely destructure using a fallback (`const { model, messages } = req.body || {};`). This ensures the endpoint gracefully catches missing parameters and correctly returns a `400 Bad Request` instead of crashing. Added a test in `tests/api_robustness.test.js` to prevent regressions.
