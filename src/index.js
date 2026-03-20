@@ -9,12 +9,12 @@ require('dotenv').config();
 // Self-healing / Process Management
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
-  // Optional: Add recovery or graceful shutdown logic
+  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // Optional: Add recovery or graceful shutdown logic
+  process.exit(1);
 });
 
 const app = express();
