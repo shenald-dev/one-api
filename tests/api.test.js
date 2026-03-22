@@ -46,6 +46,20 @@ test('POST /v1/chat/completions fails with invalid JSON gracefully', async () =>
   assert.strictEqual(res.body.error, 'Invalid JSON payload');
 });
 
+test('POST /v1/chat/completions returns 413 for payload > 10mb', async () => {
+  // Generate a payload larger than 10MB
+  const largeString = 'a'.repeat(10 * 1024 * 1024 + 100);
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: largeString }]
+    });
+
+  assert.strictEqual(res.status, 413);
+  assert.strictEqual(res.body.error, 'Payload Too Large');
+});
+
 test('Generic error handler returns 500 without leaking stack traces', async () => {
   const crypto = require('crypto');
   const originalRandomUUID = crypto.randomUUID;
