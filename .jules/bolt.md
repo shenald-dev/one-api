@@ -12,3 +12,11 @@ The default Express `express.json()` middleware limits incoming JSON payloads to
 
 Action:
 Increased the JSON payload limit in `src/index.js` to 10mb, and added an explicit error handler to intercept `err.type === 'entity.too.large'` and return a standardized `413 Payload Too Large` JSON response.
+
+## 2024-05-24 — Improve array validation and bound computationCache memory map size
+
+Learning:
+Unbounded Map caches in repeated serverless or long-running operations can cause memory leaks. Also, `req.body.messages` without `Array.isArray()` validation can lead to crashes if a string is provided and later mapped.
+
+Action:
+Added strict `!Array.isArray(messages)` validation to the `/v1/chat/completions` API route, and restricted the `computationCache` Map size to 1000 items in `src/index.js` to ensure long-term stability and resilience.

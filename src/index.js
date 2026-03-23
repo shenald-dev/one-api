@@ -37,8 +37,8 @@ app.use((err, req, res, next) => {
 // API endpoints
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body || {};
-  if (!model || !messages) {
-    return res.status(400).json({ error: 'Missing model or messages' });
+  if (!model || !messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Missing or invalid model or messages' });
   }
 
   // Mock unified response
@@ -89,6 +89,11 @@ const computationCache = new Map();
 function heavyComputation(iterations) {
   if (computationCache.has(iterations)) {
     return computationCache.get(iterations);
+  }
+
+  // Prevent memory leak from unbounded cache growth
+  if (computationCache.size >= 1000) {
+    computationCache.clear();
   }
 
   let sum = 0;
