@@ -33,7 +33,19 @@ test('POST /v1/chat/completions fails without model', async () => {
     });
 
   assert.strictEqual(res.status, 400);
-  assert.strictEqual(res.body.error, 'Missing model or messages');
+  assert.strictEqual(res.body.error, 'Missing or invalid model or messages');
+});
+
+test('POST /v1/chat/completions fails when messages is not an array', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages: "Hello!"
+    });
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.error, 'Missing or invalid model or messages');
 });
 
 test('POST /v1/chat/completions fails with invalid JSON gracefully', async () => {
