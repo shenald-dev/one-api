@@ -88,12 +88,17 @@ const computationCache = new Map();
  */
 function heavyComputation(iterations) {
   if (computationCache.has(iterations)) {
-    return computationCache.get(iterations);
+    // Refresh LRU by deleting and re-inserting
+    const val = computationCache.get(iterations);
+    computationCache.delete(iterations);
+    computationCache.set(iterations, val);
+    return val;
   }
 
-  // Prevent memory leak from unbounded cache growth
+  // Prevent memory leak from unbounded cache growth by evicting the oldest entry (LRU)
   if (computationCache.size >= 1000) {
-    computationCache.clear();
+    const oldestKey = computationCache.keys().next().value;
+    computationCache.delete(oldestKey);
   }
 
   let sum = 0;

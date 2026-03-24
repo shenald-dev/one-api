@@ -20,3 +20,11 @@ Unbounded Map caches in repeated serverless or long-running operations can cause
 
 Action:
 Added strict `!Array.isArray(messages)` validation to the `/v1/chat/completions` API route, and restricted the `computationCache` Map size to 1000 items in `src/index.js` to ensure long-term stability and resilience.
+
+## 2024-05-30 — Implemented LRU Cache Eviction
+
+Learning:
+Clearing an entire `Map` cache (cache stampede) when it reaches its size limit causes subsequent calls to experience cache misses all at once, leading to sudden performance drops.
+
+Action:
+Modified the memoization cache logic in `src/index.js` to refresh items on hit and evict only the single oldest entry (LRU - Least Recently Used) using `computationCache.keys().next().value` when the size limit of 1000 is reached. This maintains a bounded cache while smoothing out performance and avoiding sudden cache misses for active items.
