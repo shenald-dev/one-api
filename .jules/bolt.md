@@ -28,3 +28,11 @@ Clearing an entire `Map` cache (cache stampede) when it reaches its size limit c
 
 Action:
 Modified the memoization cache logic in `src/index.js` to refresh items on hit and evict only the single oldest entry (LRU - Least Recently Used) using `computationCache.keys().next().value` when the size limit of 1000 is reached. This maintains a bounded cache while smoothing out performance and avoiding sudden cache misses for active items.
+
+## 2024-06-05 — Delegating Error Handling When Headers Are Sent
+
+Learning:
+If headers have already been sent to the client (`res.headersSent === true`) in an Express application and an error occurs, attempting to send another response in a custom error handler using methods like `res.status(500).json(...)` throws an `ERR_HTTP_HEADERS_SENT` exception. This crashes the application and leaves the client connection hanging indefinitely.
+
+Action:
+Modified the custom generic error handler in `src/index.js` to check if `res.headersSent` is true. If it is, `next(err)` is returned to delegate handling to the default Express error handler, which safely closes the connection and prevents application crashes. Always add this check when writing custom error handlers in Express.

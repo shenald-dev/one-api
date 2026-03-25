@@ -77,6 +77,9 @@ app.use((req, res) => {
 // Generic error handler — never leak stack traces
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
+  if (res.headersSent) {
+    return next(err);
+  }
   res.status(500).json({ error: 'Internal server error' });
 });
 
