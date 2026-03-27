@@ -148,9 +148,31 @@ async function main() {
 if (require.main === module) {
   if (process.argv.includes('--server')) {
     const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`One API Gateway listening on port ${PORT}`);
     });
+
+    // Increase timeouts to prevent early disconnections from load balancers or slow clients
+    server.keepAliveTimeout = 65000; // 65 seconds
+    server.headersTimeout = 66000;   // 66 seconds (must be larger than keepAliveTimeout)
+
+    // Graceful shutdown logic
+    const shutdown = (signal) => {
+      console.log(`\nReceived ${signal}. Shutting down gracefully...`);
+      server.close(() => {
+        console.log('Closed out remaining connections.');
+        process.exit(0);
+      });
+
+      // Force shutdown after 10 seconds
+      setTimeout(() => {
+        console.error('Could not close connections in time, forcefully shutting down');
+        process.exit(1);
+      }, 10000);
+    };
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
   } else {
     // Default to benchmark if no --server flag
     main()

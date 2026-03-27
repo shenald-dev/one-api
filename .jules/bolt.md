@@ -44,3 +44,11 @@ Relaxed API validation parameters can allow bad input to bypass basic shape chec
 
 Action:
 Strengthened `/v1/chat/completions` API boundary checks in `src/index.js` by explicitly verifying that string variables (`model`) are not empty (`!model.trim()`), ensuring that `messages` has a `length > 0`, and heavily validating the shape of each individual message object (verifying types, required fields, and preventing accidental arrays from masquerading as object inputs) before passing the data onward.
+
+## 2024-06-16 — Express Graceful Shutdown and Connection Timeouts
+
+Learning:
+In a long-running Express server or API gateway, sudden process termination drops active client connections mid-flight, causing errors and degrading reliability. Furthermore, default Express keep-alive timeouts (5 seconds) are often shorter than those of upstream load balancers (e.g., AWS ALB is 60s), which can lead to intermittent 502/504 errors when the load balancer tries to reuse a connection the Express server has just closed.
+
+Action:
+Added graceful shutdown logic in `src/index.js` to handle `SIGINT` and `SIGTERM` signals by calling `server.close()` to cleanly finish active requests before exiting, with a 10-second timeout fallback. Additionally, increased `server.keepAliveTimeout` to 65000ms (65s) and `server.headersTimeout` to 66000ms (66s) to ensure the server gracefully handles long-lived connections from load balancers or slower clients without abruptly terminating them.
