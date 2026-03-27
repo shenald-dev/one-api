@@ -10,7 +10,7 @@ test('POST /v1/chat/completions handles undefined req.body (e.g. non-JSON conten
     .send('some text');
 
   assert.strictEqual(res.status, 400);
-  assert.strictEqual(res.body.error, 'Missing or invalid model or messages');
+  assert.strictEqual(res.body.error, 'Missing or invalid model');
 });
 
 test('POST /v1/chat/completions handles payload too large gracefully', async () => {

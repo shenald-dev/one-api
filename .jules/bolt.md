@@ -36,3 +36,11 @@ If headers have already been sent to the client (`res.headersSent === true`) in 
 
 Action:
 Modified the custom generic error handler in `src/index.js` to check if `res.headersSent` is true. If it is, `next(err)` is returned to delegate handling to the default Express error handler, which safely closes the connection and prevents application crashes. Always add this check when writing custom error handlers in Express.
+
+## 2024-06-10 — Hardening API Payload Validation
+
+Learning:
+Relaxed API validation parameters can allow bad input to bypass basic shape checks resulting in unpredictable application state or potential prototype pollution / downstream SDK failure. For example, simply checking `!Array.isArray(messages)` allowed empty arrays to pass. Furthermore, deep validation of individual objects within arrays is crucial since LLM libraries rely on specific internal array structures.
+
+Action:
+Strengthened `/v1/chat/completions` API boundary checks in `src/index.js` by explicitly verifying that string variables (`model`) are not empty (`!model.trim()`), ensuring that `messages` has a `length > 0`, and heavily validating the shape of each individual message object (verifying types, required fields, and preventing accidental arrays from masquerading as object inputs) before passing the data onward.

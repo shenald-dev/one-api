@@ -37,8 +37,18 @@ app.use((err, req, res, next) => {
 // API endpoints
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body || {};
-  if (!model || !messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Missing or invalid model or messages' });
+  if (!model || typeof model !== 'string' || !model.trim()) {
+    return res.status(400).json({ error: 'Missing or invalid model' });
+  }
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ error: 'Missing or invalid messages' });
+  }
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    if (!msg || typeof msg !== 'object' || Array.isArray(msg) || !msg.role || typeof msg.role !== 'string' || typeof msg.content !== 'string') {
+      return res.status(400).json({ error: 'Malformed message object' });
+    }
   }
 
   // Mock unified response
