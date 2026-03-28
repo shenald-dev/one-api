@@ -52,3 +52,11 @@ In a long-running Express server or API gateway, sudden process termination drop
 
 Action:
 Added graceful shutdown logic in `src/index.js` to handle `SIGINT` and `SIGTERM` signals by calling `server.close()` to cleanly finish active requests before exiting, with a 10-second timeout fallback. Additionally, increased `server.keepAliveTimeout` to 65000ms (65s) and `server.headersTimeout` to 66000ms (66s) to ensure the server gracefully handles long-lived connections from load balancers or slower clients without abruptly terminating them.
+
+## 2024-06-21 — API Response Compression
+
+Learning:
+LLM API interactions often involve large JSON payloads (both requests and responses). Without response compression, serving large API payloads consumes excess bandwidth and increases API latency, particularly over slower networks.
+
+Action:
+Introduenced the `compression` middleware to `src/index.js` to automatically compress API responses using gzip/deflate. This improves overall throughput, reduces payload sizes, and lowers API latency.
