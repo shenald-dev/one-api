@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 require('dotenv').config();
 
 // Self-healing / Process Management
@@ -20,6 +21,8 @@ process.on('unhandledRejection', (reason, promise) => {
 const app = express();
 app.use(helmet());
 app.use(cors());
+// Compress all responses to reduce bandwidth and latency
+app.use(compression());
 // Set a larger JSON limit since LLM contexts can be quite large
 app.use(express.json({ limit: '10mb' }));
 
