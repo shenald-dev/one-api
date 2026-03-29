@@ -59,4 +59,12 @@ Learning:
 LLM API interactions often involve large JSON payloads (both requests and responses). Without response compression, serving large API payloads consumes excess bandwidth and increases API latency, particularly over slower networks.
 
 Action:
-Introduenced the `compression` middleware to `src/index.js` to automatically compress API responses using gzip/deflate. This improves overall throughput, reduces payload sizes, and lowers API latency.
+Introduced the `compression` middleware to `src/index.js` to automatically compress API responses using gzip/deflate. This improves overall throughput, reduces payload sizes, and lowers API latency.
+
+## 2024-06-25 — Map Cache Single Get Lookup
+
+Learning:
+In performance-critical caching logic using a JavaScript `Map`, using `.has()` followed by `.get()` results in redundant hash lookups.
+
+Action:
+Optimized the caching logic in `heavyComputation` within `src/index.js` to use a single `.get()` call followed by a strict `!== undefined` check. This reduces lookup overhead, assuming `undefined` is not a valid cached result.
