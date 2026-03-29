@@ -2,8 +2,9 @@
 const Module = require('module');
 const originalRequire = Module.prototype.require;
 Module.prototype.require = function(name) {
-  if (['express', 'cors', 'helmet', 'dotenv'].includes(name)) {
+  if (['express', 'cors', 'helmet', 'dotenv', 'compression'].includes(name)) {
     if (name === 'dotenv') return { config: () => {} };
+    if (name === 'compression') return () => (req, res, next) => next();
     if (name === 'express') {
       const mockApp = {
         use: () => mockApp,
