@@ -103,12 +103,12 @@ const computationCache = new Map();
  * Optimized with memoization for repeated calls with identical parameters.
  */
 function heavyComputation(iterations) {
-  if (computationCache.has(iterations)) {
+  const cachedVal = computationCache.get(iterations);
+  if (cachedVal !== undefined) {
     // Refresh LRU by deleting and re-inserting
-    const val = computationCache.get(iterations);
     computationCache.delete(iterations);
-    computationCache.set(iterations, val);
-    return val;
+    computationCache.set(iterations, cachedVal);
+    return cachedVal;
   }
 
   // Prevent memory leak from unbounded cache growth by evicting the oldest entry (LRU)
