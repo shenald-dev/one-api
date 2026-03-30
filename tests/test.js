@@ -36,7 +36,7 @@ test('main function exists', () => {
 
 });
 
-test('main function returns expected performance metrics', async (t) => {
+test('main function returns expected performance metrics', async () => {
   const { main } = require('../src/index.js');
   const result = await main();
 
