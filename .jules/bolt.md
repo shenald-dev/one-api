@@ -76,3 +76,11 @@ Iterating through arrays using standard `for (let i = 0; ...)` loops inside crit
 
 Action:
 Replaced the `for` loop in `app.post('/v1/chat/completions')` array validation in `src/index.js` with a `for...of` loop. `for...of` in modern V8 engines is slightly faster for straightforward iteration and provides more readable and cleaner code than classical `for` loops by avoiding indexing operations on every iteration.
+
+## 2026-04-02 — Speeding Up Graceful Shutdown of Keep-Alive Connections
+
+Learning:
+When calling `server.close()` to cleanly shut down an Express server, Node.js waits for all existing connections to naturally end. Because we increased `server.keepAliveTimeout` to 65s for load balancer compatibility, idle keep-alive connections will block the shutdown process for up to a minute, causing the fallback timeout (10s) to be hit unnecessarily.
+
+Action:
+Added `server.closeIdleConnections()` before `server.close()` in `src/index.js` to instantly close all inactive keep-alive connections without dropping active requests. Also added `server.closeAllConnections()` inside the force-shutdown timeout to explicitly sever any stalled connections before `process.exit(1)`. This speeds up deployment rollouts and cleanly terminates idle load balancer sockets.

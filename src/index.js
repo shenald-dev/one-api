@@ -161,6 +161,13 @@ if (require.main === module) {
     // Graceful shutdown logic
     const shutdown = (signal) => {
       console.log(`\nReceived ${signal}. Shutting down gracefully...`);
+
+      // Immediately sever idle keep-alive connections to prevent them from
+      // hanging the graceful shutdown process.
+      if (server.closeIdleConnections) {
+        server.closeIdleConnections();
+      }
+
       server.close(() => {
         console.log('Closed out remaining connections.');
         process.exit(0);
@@ -169,6 +176,9 @@ if (require.main === module) {
       // Force shutdown after 10 seconds
       setTimeout(() => {
         console.error('Could not close connections in time, forcefully shutting down');
+        if (server.closeAllConnections) {
+          server.closeAllConnections();
+        }
         process.exit(1);
       }, 10000);
     };

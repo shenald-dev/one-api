@@ -20,3 +20,9 @@ Observation / Pruned:
 Assessed JULES/BOLT's optimization replacing `for (let i = 0; ...)` with `for...of` in array validation loop within `src/index.js`. This aligns with modern V8 execution optimizations. Ran complete checks, verifying survival. Checked for orphaned files, dead dependencies and outdated dependencies. Zero dead code identified and pruned.
 Alignment / Deferred:
 Appended release notes. Version bumped to 1.1.3.
+
+2026-04-02 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed JULES/BOLT's optimization adding `server.closeIdleConnections()` and `server.closeAllConnections()` to the graceful shutdown logic. This prevents long-lived keep-alive connections (increased previously for load-balancer compatibility) from unnecessarily stalling process termination up to the forced timeout. Checked dependencies, no unused found.
+Alignment / Deferred:
+Appended release notes to CHANGELOG.md specifying the fast graceful shutdown fix. Version bumped to 1.1.4.

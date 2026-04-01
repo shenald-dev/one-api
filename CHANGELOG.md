@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.4] - 2026-04-02
+### Changed
+* **[Reliability]:** Added `server.closeIdleConnections()` and `server.closeAllConnections()` to the Express server shutdown sequence to speed up process termination by explicitly severing inactive keep-alive connections rather than waiting for them to naturally time out. No dead code pruned.
+
 ## [v1.1.3] - 2026-04-01
 ### Changed
 * **[Performance]:** Replaced traditional `for` loop with a `for...of` loop in the `/v1/chat/completions` API payload validation to improve V8 execution speed and code readability.
