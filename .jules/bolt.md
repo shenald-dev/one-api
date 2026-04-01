@@ -68,3 +68,11 @@ In performance-critical caching logic using a JavaScript `Map`, using `.has()` f
 
 Action:
 Optimized the caching logic in `heavyComputation` within `src/index.js` to use a single `.get()` call followed by a strict `!== undefined` check. This reduces lookup overhead, assuming `undefined` is not a valid cached result.
+
+## 2026-03-31 — Array Validation Loop Optimization
+
+Learning:
+Iterating through arrays using standard `for (let i = 0; ...)` loops inside critical hot paths, such as the payload validation sequence in `/v1/chat/completions`, requires extra syntax overhead, continuous `length` lookups, index variable allocation, and array indexing calls.
+
+Action:
+Replaced the `for` loop in `app.post('/v1/chat/completions')` array validation in `src/index.js` with a `for...of` loop. `for...of` in modern V8 engines is slightly faster for straightforward iteration and provides more readable and cleaner code than classical `for` loops by avoiding indexing operations on every iteration.

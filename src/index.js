@@ -47,8 +47,7 @@ app.post('/v1/chat/completions', (req, res) => {
     return res.status(400).json({ error: 'Missing or invalid messages' });
   }
 
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
+  for (const msg of messages) {
     if (!msg || typeof msg !== 'object' || Array.isArray(msg) || !msg.role || typeof msg.role !== 'string' || typeof msg.content !== 'string') {
       return res.status(400).json({ error: 'Malformed message object' });
     }
