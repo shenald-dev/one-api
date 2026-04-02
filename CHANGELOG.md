@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.5] - 2026-04-03
+### Changed
+* **[Performance]:** Disabled default ETag generation in Express to save CPU cycles and improve throughput by skipping useless MD5 hashing of dynamic JSON API responses. No dead code pruned.
+
 ## [v1.1.4] - 2026-04-02
 ### Changed
 * **[Reliability]:** Added `server.closeIdleConnections()` and `server.closeAllConnections()` to the Express server shutdown sequence to speed up process termination by explicitly severing inactive keep-alive connections rather than waiting for them to naturally time out. No dead code pruned.

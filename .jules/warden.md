@@ -26,3 +26,9 @@ Observation / Pruned:
 Assessed JULES/BOLT's optimization adding `server.closeIdleConnections()` and `server.closeAllConnections()` to the graceful shutdown logic. This prevents long-lived keep-alive connections (increased previously for load-balancer compatibility) from unnecessarily stalling process termination up to the forced timeout. Checked dependencies, no unused found.
 Alignment / Deferred:
 Appended release notes to CHANGELOG.md specifying the fast graceful shutdown fix. Version bumped to 1.1.4.
+
+2026-04-03 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed JULES/BOLT's optimization disabling `etag` generation in Express. The change safely skips md5 hashing of highly dynamic JSON API payloads. Verified through performance macro-benchmarks using `supertest`. Zero dead code found to prune.
+Alignment / Deferred:
+Appended release notes to CHANGELOG.md specifying the CPU performance improvement. Version bumped to 1.1.5.

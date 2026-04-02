@@ -84,3 +84,11 @@ When calling `server.close()` to cleanly shut down an Express server, Node.js wa
 
 Action:
 Added `server.closeIdleConnections()` before `server.close()` in `src/index.js` to instantly close all inactive keep-alive connections without dropping active requests. Also added `server.closeAllConnections()` inside the force-shutdown timeout to explicitly sever any stalled connections before `process.exit(1)`. This speeds up deployment rollouts and cleanly terminates idle load balancer sockets.
+
+## 2026-04-03 — Express ETag Disabling
+
+Learning:
+Express generates an `ETag` (md5 hash) for all responses by default. For APIs returning highly dynamic and unique JSON payloads (like an LLM gateway), this ETags are useless for caching and just waste CPU cycles computing md5 hashes of the response payload.
+
+Action:
+Added `app.set('etag', false);` in `src/index.js` to disable the default `etag` generation. This reduces CPU usage and improves overall throughput and latency.

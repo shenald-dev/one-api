@@ -7,6 +7,7 @@ Module.prototype.require = function(name) {
     if (name === 'compression') return () => (req, res, next) => next();
     if (name === 'express') {
       const mockApp = {
+        set: () => mockApp,
         use: () => mockApp,
         post: () => mockApp,
         get: () => mockApp,
