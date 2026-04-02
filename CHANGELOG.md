@@ -4,11 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [v1.1.5] - 2026-04-03
 ### Changed
-
 * **[Performance]:** Disabled default ETag generation in Express to save CPU cycles and improve throughput by skipping useless MD5 hashing of dynamic JSON API responses. No dead code pruned.
-
 * **[Lifecycle]:** Safely bumped `dotenv` dependency to version `17.4.0`. No dead code was pruned as the codebase remains highly optimized following previous improvements.
-
 
 ## [v1.1.4] - 2026-04-02
 ### Changed
