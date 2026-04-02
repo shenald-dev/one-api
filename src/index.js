@@ -19,6 +19,9 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
+// Disable ETag generation for highly dynamic JSON APIs to save CPU cycles
+app.set('etag', false);
+
 app.use(helmet());
 app.use(cors());
 // Compress all responses to reduce bandwidth and latency

@@ -10,6 +10,7 @@ Module.prototype.require = function(name) {
         use: () => mockApp,
         post: () => mockApp,
         get: () => mockApp,
+        set: () => mockApp,
         listen: (port, cb) => { if (cb) cb(); return mockApp; }
       };
       const expressMock = () => mockApp;
