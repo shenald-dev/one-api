@@ -92,3 +92,8 @@ For Express applications serving highly dynamic JSON APIs (such as an LLM gatewa
 
 Action:
 Disabled ETag generation globally via `app.set('etag', false);` in `src/index.js` to save CPU cycles and reduce latency, aligning with the performance standard to eliminate duplicate/unnecessary computation.
+
+## 2025-02-14 — Idempotent Graceful Shutdown
+
+Learning: During process termination in containerized environments (like Docker or Kubernetes), signals like `SIGTERM` can be sent multiple times if the shutdown takes time. If the Node.js graceful shutdown handler lacks an idempotency check, `server.close()` and fallback `setTimeout` callbacks will be invoked repeatedly, causing unhandled duplicate state mutations.
+Action: Guarded the `shutdown(signal)` handler in `src/index.js` with an `isShuttingDown` flag to ensure process cleanup logic is strictly run exactly once.

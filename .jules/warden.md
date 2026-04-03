@@ -44,3 +44,7 @@ Observation / Pruned:
 Assessed repository state. No functional regressions found. Verified baseline functionality via tests. Zero dead code identified and pruned. Updated minor/patch dependencies minimatch and path-to-regexp.
 Alignment / Deferred:
 Updated dependencies. Appended release notes. Version bumped to 1.1.7.
+
+2025-02-14 — Assessment & Lifecycle
+Observation / Pruned: Detected that rapid, duplicate termination signals (`SIGINT` or `SIGTERM`) inside containerized environments caused the Express `server.close()` graceful shutdown logic to execute multiple times, spawning multiple timeout timers and duplicate closures.
+Alignment / Deferred: Added an `isShuttingDown` boolean flag to the `shutdown` handler to guarantee idempotent execution and prevent memory or logic duplication.
