@@ -96,7 +96,7 @@ No database, no migrations. JSON file storage. Just run.
 - **Single binary** — no Node, no Python, just `npm i && npm start` or Docker
 - **OpenAI-compatible** — your existing code works unchanged
 - **Lightweight** — no admin UI bloat, just the API
-- **Fast** — response compression built-in for reduced bandwidth and lower latency
+- **Fast** — response compression built-in and disabled ETag generation for purely dynamic JSON responses, reducing bandwidth, CPU cycles, and latency
 - **Free & open** — MIT license, no SaaS tier
 
 ---

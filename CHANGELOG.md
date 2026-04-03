@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.7] - 2026-04-03
+### Changed
+* **[Lifecycle]:** Assured JULES/BOLT's optimization disabling Express ETag generation. Verified tests, pruned zero dead code, synced `README.md` to mention the optimization, and cut the release.
+
 ## [v1.1.6] - 2026-04-03
 ### Changed
 * **[Performance]:** Disabled Express ETag generation globally to save CPU cycles and reduce latency, as generating MD5 hashes for purely dynamic LLM JSON API responses is unnecessary overhead. Zero unused files pruned.
