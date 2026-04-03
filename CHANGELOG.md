@@ -2,9 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v1.1.7] - 2026-04-03
+## [v1.1.8] - 2026-04-03
 ### Changed
 * **[Performance]:** Disabled the Express query parser to eliminate the overhead of parsing query strings, as the LLM gateway exclusively processes JSON request bodies. This improves overall API latency and routing speed without affecting functionality. Zero unused files pruned.
+
+## [v1.1.7] - 2026-04-03
+### Changed
+* **[Lifecycle]:** Safely bumped `minimatch` and `path-to-regexp` minor/patch versions. Verified baseline tests pass. Zero dead code was pruned as the codebase remains highly optimized following previous improvements.
+
 
 ## [v1.1.6] - 2026-04-03
 ### Changed

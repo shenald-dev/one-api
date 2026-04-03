@@ -41,6 +41,12 @@ Appended release notes to CHANGELOG.md specifying the performance improvement. V
 
 2026-04-03 — Assessment & Lifecycle
 Observation / Pruned:
+Assessed repository state. No functional regressions found. Verified baseline functionality via tests. Zero dead code identified and pruned. Updated minor/patch dependencies minimatch and path-to-regexp.
+Alignment / Deferred:
+Updated dependencies. Appended release notes. Version bumped to 1.1.7.
+
+2026-04-03 — Assessment & Lifecycle
+Observation / Pruned:
 Assessed JULES/BOLT's optimization to disable the Express query parser (`app.set('query parser', false)`). This bypasses the overhead of the `qs` module since the LLM gateway relies exclusively on JSON payloads, successfully improving routing speed without sacrificing any needed functionality. Ran checks and verified survival. No dead code found.
 Alignment / Deferred:
-Appended release notes to CHANGELOG.md specifying the query parser optimization. Version bumped to 1.1.7.
+Appended release notes to CHANGELOG.md specifying the query parser optimization. Version bumped to 1.1.8.
