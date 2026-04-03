@@ -92,3 +92,11 @@ For Express applications serving highly dynamic JSON APIs (such as an LLM gatewa
 
 Action:
 Disabled ETag generation globally via `app.set('etag', false);` in `src/index.js` to save CPU cycles and reduce latency, aligning with the performance standard to eliminate duplicate/unnecessary computation.
+
+## 2026-04-03 — Disable Express Query Parser for Performance
+
+Learning:
+For APIs that strictly use JSON request bodies and path parameters (like this LLM gateway), parsing query strings using the complex `qs` module for every request is completely unnecessary CPU overhead. Express enables query parsing by default.
+
+Action:
+Disabled query parsing via `app.set('query parser', false);` in `src/index.js` to eliminate `qs` overhead and reduce API latency, reinforcing the performance standard to strictly perform work that provides value.

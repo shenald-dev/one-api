@@ -21,6 +21,8 @@ process.on('unhandledRejection', (reason, promise) => {
 const app = express();
 // Disable ETag generation for highly dynamic JSON APIs to save CPU cycles
 app.set('etag', false);
+// Disable query parsing since this API uses JSON bodies exclusively, saving CPU on qs parsing
+app.set('query parser', false);
 
 app.use(helmet());
 app.use(cors());

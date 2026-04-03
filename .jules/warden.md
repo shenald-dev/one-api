@@ -38,3 +38,9 @@ Observation / Pruned:
 Assessed JULES/BOLT's optimization disabling Express ETag generation. This prevents computing unnecessary MD5 hashes for purely dynamic JSON payloads, successfully saving CPU cycles without sacrificing functionality. Tests verified, mock app enhanced to pass tests. Zero dead code or unused files found.
 Alignment / Deferred:
 Appended release notes to CHANGELOG.md specifying the performance improvement. Version bumped to 1.1.6.
+
+2026-04-03 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed JULES/BOLT's optimization to disable the Express query parser (`app.set('query parser', false)`). This bypasses the overhead of the `qs` module since the LLM gateway relies exclusively on JSON payloads, successfully improving routing speed without sacrificing any needed functionality. Ran checks and verified survival. No dead code found.
+Alignment / Deferred:
+Appended release notes to CHANGELOG.md specifying the query parser optimization. Version bumped to 1.1.7.

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.7] - 2026-04-03
+### Changed
+* **[Performance]:** Disabled the Express query parser to eliminate the overhead of parsing query strings, as the LLM gateway exclusively processes JSON request bodies. This improves overall API latency and routing speed without affecting functionality. Zero unused files pruned.
+
 ## [v1.1.6] - 2026-04-03
 ### Changed
 * **[Performance]:** Disabled Express ETag generation globally to save CPU cycles and reduce latency, as generating MD5 hashes for purely dynamic LLM JSON API responses is unnecessary overhead. Zero unused files pruned.
