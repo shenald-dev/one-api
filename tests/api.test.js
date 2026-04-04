@@ -72,6 +72,30 @@ test('POST /v1/chat/completions fails with malformed message objects', async () 
   assert.strictEqual(res.body.error, 'Malformed message object');
 });
 
+test('POST /v1/chat/completions fails with more than 1000 messages', async () => {
+  const messages = Array.from({ length: 1001 }).map(() => ({ role: 'user', content: 'test' }));
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages
+    });
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.error, 'Too many messages (limit is 1000)');
+});
+
+test('isValidMessage helper function correctly validates messages', () => {
+  const { isValidMessage } = require('../src/index.js');
+
+  assert.strictEqual(isValidMessage({ role: 'user', content: 'hello' }), true);
+  assert.strictEqual(isValidMessage({ role: 'user' }), false); // Missing content
+  assert.strictEqual(isValidMessage({ content: 'hello' }), false); // Missing role
+  assert.strictEqual(isValidMessage(null), false); // null
+  assert.strictEqual(isValidMessage([]), false); // array
+  assert.strictEqual(isValidMessage("string"), false); // string
+});
+
 test('POST /v1/chat/completions fails with invalid JSON gracefully', async () => {
   const res = await request(app)
     .post('/v1/chat/completions')

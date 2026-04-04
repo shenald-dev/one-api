@@ -92,3 +92,8 @@ For Express applications serving highly dynamic JSON APIs (such as an LLM gatewa
 
 Action:
 Disabled ETag generation globally via `app.set('etag', false);` in `src/index.js` to save CPU cycles and reduce latency, aligning with the performance standard to eliminate duplicate/unnecessary computation.
+## 2025-02-12 — Security and Maintainability Refactor
+
+Learning: Deep array iteration and validation logic inside API route handlers reduces code readability, makes it harder to write granular unit tests, and exposes the application to resource exhaustion DoS vulnerabilities if bounds are unconstrained.
+
+Action: Ensure large arrays in API inputs always have strict length limits, and refactor complex conditionals in route handlers into small, pure helper functions.

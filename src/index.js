@@ -50,8 +50,12 @@ app.post('/v1/chat/completions', (req, res) => {
     return res.status(400).json({ error: 'Missing or invalid messages' });
   }
 
+  if (messages.length > 1000) {
+    return res.status(400).json({ error: 'Too many messages (limit is 1000)' });
+  }
+
   for (const msg of messages) {
-    if (!msg || typeof msg !== 'object' || Array.isArray(msg) || !msg.role || typeof msg.role !== 'string' || typeof msg.content !== 'string') {
+    if (!isValidMessage(msg)) {
       return res.status(400).json({ error: 'Malformed message object' });
     }
   }
@@ -104,6 +108,10 @@ const computationCache = new Map();
  * Performs a heavy mathematical computation.
  * Optimized with memoization for repeated calls with identical parameters.
  */
+function isValidMessage(msg) {
+  return !!(msg && typeof msg === 'object' && !Array.isArray(msg) && msg.role && typeof msg.role === 'string' && typeof msg.content === 'string');
+}
+
 function heavyComputation(iterations) {
   const cachedVal = computationCache.get(iterations);
   if (cachedVal !== undefined) {
@@ -202,4 +210,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { main, app, heavyComputation };
+module.exports = { main, app, heavyComputation, isValidMessage };

@@ -37,3 +37,4 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 * **[QA]:** Added `compression` mock to `tests/test.js` to ensure the module loads properly in restricted environments.
+* **Security:** Refactored message validation into a standalone function and enforced a strict upper bound of 1000 messages per request to prevent resource exhaustion DoS.
