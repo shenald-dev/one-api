@@ -92,3 +92,11 @@ For Express applications serving highly dynamic JSON APIs (such as an LLM gatewa
 
 Action:
 Disabled ETag generation globally via `app.set('etag', false);` in `src/index.js` to save CPU cycles and reduce latency, aligning with the performance standard to eliminate duplicate/unnecessary computation.
+
+## 2024-06-26 — API Payload Limits and Route Handler Refactoring
+
+Learning:
+Unbounded arrays in API payloads can lead to DoS. Complex logic inside route handlers reduces readability.
+
+Action:
+Refactored message validation into a standalone function and added a length limit of 100 to the `messages` array.

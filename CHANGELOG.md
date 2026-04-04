@@ -37,3 +37,5 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 * **[QA]:** Added `compression` mock to `tests/test.js` to ensure the module loads properly in restricted environments.
+
+* **[Security/Maintainability]:** Hardened API payload limits by capping the messages array to 100 items to prevent resource exhaustion, and extracted message validation logic into a standalone helper function for better readability and testability.

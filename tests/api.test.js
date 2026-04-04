@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 const request = require('supertest');
-const { app } = require('../src/index.js');
+const { app, isValidMessage } = require('../src/index.js');
 
 test('GET /health returns 200', async () => {
   const res = await request(app).get('/health');
@@ -70,6 +70,31 @@ test('POST /v1/chat/completions fails with malformed message objects', async () 
 
   assert.strictEqual(res.status, 400);
   assert.strictEqual(res.body.error, 'Malformed message object');
+});
+
+test('POST /v1/chat/completions fails when messages array exceeds length limit of 100', async () => {
+  const messages = Array(101).fill({ role: 'user', content: 'test' });
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages
+    });
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.error, 'Messages array exceeds maximum allowed length of 100');
+});
+
+test('isValidMessage correctly validates message objects', () => {
+  assert.ok(isValidMessage({ role: 'user', content: 'test' }));
+  assert.ok(!isValidMessage(null));
+  assert.ok(!isValidMessage(undefined));
+  assert.ok(!isValidMessage('string'));
+  assert.ok(!isValidMessage([]));
+  assert.ok(!isValidMessage({ content: 'test' }));
+  assert.ok(!isValidMessage({ role: 'user' }));
+  assert.ok(!isValidMessage({ role: 123, content: 'test' }));
+  assert.ok(!isValidMessage({ role: 'user', content: 123 }));
 });
 
 test('POST /v1/chat/completions fails with invalid JSON gracefully', async () => {
