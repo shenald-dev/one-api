@@ -2,7 +2,7 @@ const { performance } = require('perf_hooks');
 
 async function run() {
   const mod = require('../src/index.js');
-  const func = mod.main || mod.runBenchmark || mod.runExperiment;
+  const func = mod.main;
 
   if (!func) {
     console.error('No benchmark function found');

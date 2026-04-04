@@ -37,3 +37,4 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 * **[QA]:** Added `compression` mock to `tests/test.js` to ensure the module loads properly in restricted environments.
+* **Lifecycle:** Added missing `.env.example` file, added adversarial test case for 404 handler, and pruned dead code from testing and benchmark suites.

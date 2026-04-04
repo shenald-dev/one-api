@@ -82,6 +82,12 @@ test('POST /v1/chat/completions fails with invalid JSON gracefully', async () =>
   assert.strictEqual(res.body.error, 'Invalid JSON payload');
 });
 
+test('404 handler works for unknown routes', async () => {
+  const res = await request(app).get('/unknown-route');
+  assert.strictEqual(res.status, 404);
+  assert.deepStrictEqual(res.body, { error: 'Not found', path: '/unknown-route' });
+});
+
 test('Generic error handler returns 500 without leaking stack traces', async () => {
   const crypto = require('crypto');
   const originalRandomUUID = crypto.randomUUID;

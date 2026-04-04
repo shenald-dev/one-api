@@ -25,7 +25,7 @@ Module.prototype.require = function(name) {
 const { test } = require('node:test');
 const assert = require('node:assert');
 
-test('module loads', async () => {
+test('module loads', () => {
   const mod = require('../src/index.js');
   assert.ok(mod, 'Module should be defined');
 
@@ -33,7 +33,7 @@ test('module loads', async () => {
 
 test('main function exists', () => {
   const mod = require('../src/index.js');
-  assert.ok(typeof mod.main === 'function' || typeof mod.runBenchmark === 'function', 'Should have main/benchmark function');
+  assert.ok(typeof mod.main === 'function', 'Should have main function');
 
 });
 
