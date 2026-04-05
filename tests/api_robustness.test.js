@@ -13,6 +13,19 @@ test('POST /v1/chat/completions handles undefined req.body (e.g. non-JSON conten
   assert.strictEqual(res.body.error, 'Missing or invalid model');
 });
 
+test('POST /v1/chat/completions enforces max 1000 messages limit', async () => {
+  const messages = Array(1001).fill({ role: 'user', content: 'x' });
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages
+    });
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.error, 'Too many messages');
+});
+
 test('POST /v1/chat/completions handles payload too large gracefully', async () => {
   const largeString = 'a'.repeat(11 * 1024 * 1024); // 11mb, which is > 10mb limit
   const res = await request(app)

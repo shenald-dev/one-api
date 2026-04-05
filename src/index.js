@@ -40,6 +40,17 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
+function isValidMessage(msg) {
+  return !!(
+    msg &&
+    typeof msg === 'object' &&
+    !Array.isArray(msg) &&
+    msg.role &&
+    typeof msg.role === 'string' &&
+    typeof msg.content === 'string'
+  );
+}
+
 // API endpoints
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body || {};
@@ -49,9 +60,12 @@ app.post('/v1/chat/completions', (req, res) => {
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Missing or invalid messages' });
   }
+  if (messages.length > 1000) {
+    return res.status(400).json({ error: 'Too many messages' });
+  }
 
   for (const msg of messages) {
-    if (!msg || typeof msg !== 'object' || Array.isArray(msg) || !msg.role || typeof msg.role !== 'string' || typeof msg.content !== 'string') {
+    if (!isValidMessage(msg)) {
       return res.status(400).json({ error: 'Malformed message object' });
     }
   }
@@ -202,4 +216,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { main, app, heavyComputation };
+module.exports = { main, app, heavyComputation, isValidMessage };

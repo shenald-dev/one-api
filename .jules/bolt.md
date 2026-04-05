@@ -92,3 +92,11 @@ For Express applications serving highly dynamic JSON APIs (such as an LLM gatewa
 
 Action:
 Disabled ETag generation globally via `app.set('etag', false);` in `src/index.js` to save CPU cycles and reduce latency, aligning with the performance standard to eliminate duplicate/unnecessary computation.
+
+## 2025-04-05 — Secure and modularize message validation
+
+Learning:
+Complex multi-clause inline conditionals in request handlers are difficult to test properly, and unbounded arrays in request bodies present an immediate DoS vector via resource exhaustion.
+
+Action:
+Always extract multi-clause object validation rules into standalone, pure helper functions with strict boolean returns (`!!()`). Enforce static length constraints on input arrays on hot paths immediately after structural validation.
