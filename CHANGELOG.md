@@ -37,3 +37,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 * **[QA]:** Added `compression` mock to `tests/test.js` to ensure the module loads properly in restricted environments.
+
+## [v1.1.8] - 2026-04-03
+### Changed
+* **[Lifecycle]:** Safely bumped minor/patch versions using npm update. Verified baseline tests pass. Zero dead code was pruned.
