@@ -18,6 +18,21 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
+function isValidModel(model) {
+  return !!(model && typeof model === 'string' && model.trim());
+}
+
+function isValidMessage(msg) {
+  return !!(
+    msg &&
+    typeof msg === 'object' &&
+    !Array.isArray(msg) &&
+    msg.role &&
+    typeof msg.role === 'string' &&
+    typeof msg.content === 'string'
+  );
+}
+
 const app = express();
 // Disable ETag generation for highly dynamic JSON APIs to save CPU cycles
 app.set('etag', false);
@@ -43,15 +58,18 @@ app.use((err, req, res, next) => {
 // API endpoints
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body || {};
-  if (!model || typeof model !== 'string' || !model.trim()) {
+  if (!isValidModel(model)) {
     return res.status(400).json({ error: 'Missing or invalid model' });
   }
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Missing or invalid messages' });
   }
+  if (messages.length > 1000) {
+    return res.status(413).json({ error: 'Too many messages' });
+  }
 
   for (const msg of messages) {
-    if (!msg || typeof msg !== 'object' || Array.isArray(msg) || !msg.role || typeof msg.role !== 'string' || typeof msg.content !== 'string') {
+    if (!isValidMessage(msg)) {
       return res.status(400).json({ error: 'Malformed message object' });
     }
   }
@@ -202,4 +220,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { main, app, heavyComputation };
+module.exports = { main, app, heavyComputation, isValidModel, isValidMessage };

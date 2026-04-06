@@ -92,3 +92,6 @@ For Express applications serving highly dynamic JSON APIs (such as an LLM gatewa
 
 Action:
 Disabled ETag generation globally via `app.set('etag', false);` in `src/index.js` to save CPU cycles and reduce latency, aligning with the performance standard to eliminate duplicate/unnecessary computation.
+2023-10-27 — Validation Extracted and Bounded
+Learning: Complex conditionals inside route handlers reduce readability and make unit testing difficult. Unbounded input arrays pose a DoS risk.
+Action: Extracted multi-clause conditionals into standalone helpers and enforced strict boundaries on input arrays.
