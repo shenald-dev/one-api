@@ -109,3 +109,23 @@ test('Generic error handler returns 500 without leaking stack traces', async () 
     console.error = originalConsoleError;
   }
 });
+
+test('POST /v1/chat/completions fails with more than 1000 messages', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages: new Array(1001).fill({ role: 'user', content: 'test' })
+    });
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.error, 'Too many messages');
+});
+
+test('isValidMessage validation helper', () => {
+  const { isValidMessage } = require('../src/index.js');
+  assert.strictEqual(isValidMessage({ role: 'user', content: 'hello' }), true);
+  assert.strictEqual(isValidMessage(null), false);
+  assert.strictEqual(isValidMessage([]), false);
+  assert.strictEqual(isValidMessage({ role: 'user' }), false);
+});
