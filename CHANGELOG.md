@@ -37,3 +37,6 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 * **[QA]:** Added `compression` mock to `tests/test.js` to ensure the module loads properly in restricted environments.
+
+## [1.1.8] - 2026-04-03
+* **Continuous Upgrades:** Bumped `dotenv` minor version to `17.4.1` for security and bugfixes. Checked code stability, no unused code found. Cut the patch release.
