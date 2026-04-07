@@ -37,3 +37,4 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 * **[QA]:** Added `compression` mock to `tests/test.js` to ensure the module loads properly in restricted environments.
+* **Maintenance:** Bumped dotenv patch version.
