@@ -92,3 +92,7 @@ For Express applications serving highly dynamic JSON APIs (such as an LLM gatewa
 
 Action:
 Disabled ETag generation globally via `app.set('etag', false);` in `src/index.js` to save CPU cycles and reduce latency, aligning with the performance standard to eliminate duplicate/unnecessary computation.
+
+2025-04-07 — Input Array Bounds
+Learning: Unbounded input arrays in API endpoints can lead to Denial of Service (DoS) through resource exhaustion.
+Action: Enforce strict upper bounds on all input arrays during validation.

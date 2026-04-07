@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 const request = require('supertest');
-const { app } = require('../src/index.js');
+const { app, isValidMessage } = require('../src/index.js');
 
 test('GET /health returns 200', async () => {
   const res = await request(app).get('/health');
@@ -108,4 +108,25 @@ test('Generic error handler returns 500 without leaking stack traces', async () 
     crypto.randomUUID = originalRandomUUID;
     console.error = originalConsoleError;
   }
+});
+
+test('isValidMessage strict validation', () => {
+  assert.strictEqual(isValidMessage({ role: 'user', content: 'test' }), true);
+  assert.strictEqual(isValidMessage(null), false);
+  assert.strictEqual(isValidMessage([]), false);
+  assert.strictEqual(isValidMessage({ role: 'user' }), false);
+  assert.strictEqual(isValidMessage({ role: 123, content: 'test' }), false);
+});
+
+test('POST /v1/chat/completions enforces max messages bound', async () => {
+  const msgs = Array(1001).fill({ role: 'user', content: 'test' });
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages: msgs
+    });
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.error, 'Too many messages');
 });
