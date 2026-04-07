@@ -49,6 +49,9 @@ app.post('/v1/chat/completions', (req, res) => {
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Missing or invalid messages' });
   }
+  if (messages.length > 100) {
+    return res.status(400).json({ error: 'Too many messages' });
+  }
 
   for (const msg of messages) {
     if (!msg || typeof msg !== 'object' || Array.isArray(msg) || !msg.role || typeof msg.role !== 'string' || typeof msg.content !== 'string') {
