@@ -1,4 +1,35 @@
 {
+<<<<<<< Updated upstream
+    "name": "one-api",
+    "version": "1.0.0",
+    "description": "⚡ One API for 20+ LLM providers. OpenAI-compatible, single binary, runs forever.",
+    "main": "dist/index.js",
+    "scripts": {
+        "start": "tsx src/index.ts",
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc"
+    },
+    "keywords": [
+        "llm",
+        "api",
+        "gateway",
+        "hono"
+    ],
+    "author": "shenald-dev",
+    "license": "MIT",
+    "dependencies": {
+        "@hono/node-server": "^1.8.2",
+        "@hono/zod-openapi": "^0.9.5",
+        "hono": "^4.1.0",
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.24",
+        "tsx": "^4.7.1",
+        "typescript": "^5.3.3"
+    }
+}
+=======
   "name": "one-api",
   "version": "1.1.7",
   "description": "One API to rule them all. Unified gateway for 20+ LLM providers. OpenAI-compatible, single binary, zero config.",
@@ -38,3 +69,4 @@
     "supertest": "^7.2.2"
   }
 }
+>>>>>>> Stashed changes
