@@ -37,4 +37,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 * **[QA]:** Added `compression` mock to `tests/test.js` to ensure the module loads properly in restricted environments.
+
+## [1.1.8] - 2026-04-03
+* **Dependencies:** Safely bumped patch version of `dotenv` dependency and verified survival. No regressions found, zero dead code pruned.
 * **Security:** Refactored message validation into a standalone function and enforced a strict upper bound of 1000 messages per request to prevent resource exhaustion DoS.

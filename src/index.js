@@ -41,6 +41,10 @@ app.use((err, req, res, next) => {
 });
 
 // API endpoints
+function isValidMessage(msg) {
+  return !!(msg && typeof msg === 'object' && !Array.isArray(msg) && msg.role && typeof msg.role === 'string' && typeof msg.content === 'string');
+}
+
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body || {};
   if (!model || typeof model !== 'string' || !model.trim()) {
@@ -49,7 +53,6 @@ app.post('/v1/chat/completions', (req, res) => {
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Missing or invalid messages' });
   }
-
   if (messages.length > 1000) {
     return res.status(400).json({ error: 'Too many messages (limit is 1000)' });
   }
@@ -170,7 +173,10 @@ if (require.main === module) {
     server.headersTimeout = 66000;   // 66 seconds (must be larger than keepAliveTimeout)
 
     // Graceful shutdown logic
+    let isShuttingDown = false;
     const shutdown = (signal) => {
+      if (isShuttingDown) return;
+      isShuttingDown = true;
       console.log(`\nReceived ${signal}. Shutting down gracefully...`);
 
       // Immediately sever idle keep-alive connections to prevent them from
