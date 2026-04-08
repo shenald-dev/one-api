@@ -100,3 +100,11 @@ When multiple termination signals (e.g., SIGINT and SIGTERM) are received concur
 
 Action:
 Added an `isShuttingDown` idempotency flag to the `shutdown` function in `src/index.js`. This ensures the shutdown sequence only executes once, ignoring subsequent termination signals, resulting in cleaner and more reliable process termination.
+
+## 2026-04-04 — Always Remove Scratchpad Files Before Commit
+
+Learning:
+When writing temporary scripts (e.g., `test-crash-error.js`) to explore the codebase or verify bugs/fixes in isolation, leaving them in the repository root pollutes the workspace and leads to dirty commits that degrade codebase quality.
+
+Action:
+Always execute a cleanup command (e.g., `rm -f test-*.js`) to remove any scratchpad files created during exploration before concluding the run and finalizing the commit.
