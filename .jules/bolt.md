@@ -93,6 +93,15 @@ For Express applications serving highly dynamic JSON APIs (such as an LLM gatewa
 Action:
 Disabled ETag generation globally via `app.set('etag', false);` in `src/index.js` to save CPU cycles and reduce latency, aligning with the performance standard to eliminate duplicate/unnecessary computation.
 
+<<<<<<< HEAD
+## 2026-04-03 — Graceful Shutdown Idempotency
+
+Learning:
+When multiple termination signals (e.g., SIGINT and SIGTERM) are received concurrently by the Express server, the graceful shutdown logic executes multiple times, potentially leading to redundant `server.close()` calls and race conditions during process termination.
+
+Action:
+Added an `isShuttingDown` idempotency flag to the `shutdown` function in `src/index.js`. This ensures the shutdown sequence only executes once, ignoring subsequent termination signals, resulting in cleaner and more reliable process termination.
+=======
 ## 2025-04-05 — Secure and modularize message validation
 
 Learning:
@@ -100,3 +109,4 @@ Complex multi-clause inline conditionals in request handlers are difficult to te
 
 Action:
 Always extract multi-clause object validation rules into standalone, pure helper functions with strict boolean returns (`!!()`). Enforce static length constraints on input arrays on hot paths immediately after structural validation.
+>>>>>>> 2884a54 (WIP: stash changes before rebase)

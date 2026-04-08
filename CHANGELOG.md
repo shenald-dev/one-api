@@ -38,4 +38,9 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 * **[QA]:** Added `compression` mock to `tests/test.js` to ensure the module loads properly in restricted environments.
 
+<<<<<<< HEAD
+## [1.1.8] - 2026-04-03
+* **Dependencies:** Safely bumped patch version of `dotenv` dependency and verified survival. No regressions found, zero dead code pruned.
+=======
 * **Security:** Enforced a maximum array bound (1000 messages) on `/v1/chat/completions` inputs to prevent denial of service (DoS) attacks via resource exhaustion, and extracted validation logic for increased test coverage.
+>>>>>>> 2884a54 (WIP: stash changes before rebase)
