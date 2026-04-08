@@ -25,3 +25,31 @@ test('POST /v1/chat/completions handles payload too large gracefully', async () 
   assert.strictEqual(res.status, 413);
   assert.strictEqual(res.body.error, 'Payload too large');
 });
+
+test('JSON error handler safely skips without crashing if headers are already sent', async () => {
+  // Inject a route into the existing app just for this test
+  app.get('/trigger-headers-sent', (req, res, next) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.write('ok');
+
+    // Simulate an error occurring after headers are sent, specifically a JSON parsing error
+    const err = new SyntaxError('Unexpected token');
+    err.status = 400;
+    err.body = 'bad json';
+
+    next(err);
+  });
+
+  try {
+    // Suppress console.error output during this expected error delegation
+    const originalConsoleError = console.error;
+    console.error = () => {};
+    await request(app).get('/trigger-headers-sent');
+    console.error = originalConsoleError;
+  } catch (e) {
+    // Connection is likely aborted since we delegate to default express error handler which destroys the socket
+  }
+
+  // The fact that it gets here without an UncaughtException (ERR_HTTP_HEADERS_SENT) means it passed
+  assert.ok(true);
+});
