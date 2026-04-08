@@ -162,7 +162,10 @@ if (require.main === module) {
     server.headersTimeout = 66000;   // 66 seconds (must be larger than keepAliveTimeout)
 
     // Graceful shutdown logic
+    let isShuttingDown = false;
     const shutdown = (signal) => {
+      if (isShuttingDown) return;
+      isShuttingDown = true;
       console.log(`\nReceived ${signal}. Shutting down gracefully...`);
 
       // Immediately sever idle keep-alive connections to prevent them from
