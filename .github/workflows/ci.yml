@@ -1,3 +1,25 @@
+<<<<<<< HEAD
+name: Build & Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build
+=======
 name: CI
 on:
   push:
@@ -25,3 +47,4 @@ jobs:
           node-version: '20'
       - run: npm ci
       - run: npx eslint src/**/*.js --max-warnings 0 || echo 'No ESLint'
+>>>>>>> a4cc5fe (chore(release): v1.1.7 (#32))
