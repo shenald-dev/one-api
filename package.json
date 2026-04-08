@@ -1,6 +1,6 @@
 {
   "name": "one-api",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "One API to rule them all. Unified gateway for 20+ LLM providers. OpenAI-compatible, single binary, zero config.",
   "main": "src/index.js",
   "scripts": {
@@ -29,7 +29,7 @@
   "dependencies": {
     "compression": "^1.8.1",
     "cors": "^2.8.6",
-    "dotenv": "^17.4.0",
+    "dotenv": "^17.4.1",
     "express": "^5.2.1",
     "helmet": "^8.1.0"
   },
