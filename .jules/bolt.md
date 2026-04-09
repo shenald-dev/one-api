@@ -108,3 +108,10 @@ When writing temporary scripts (e.g., `test-crash-error.js`) to explore the code
 
 Action:
 Always execute a cleanup command (e.g., `rm -f test-*.js`) to remove any scratchpad files created during exploration before concluding the run and finalizing the commit.
+## 2026-04-09 — Abstract multi-clause conditionals to helper functions
+
+Learning:
+Multi-clause logic conditionals inside API route handlers decrease readability and make unit testing logic boundaries difficult.
+
+Action:
+Extracted complex boolean conditionals used to validate the `model` and `messages` arrays in `/v1/chat/completions` into standalone `isValidModel` and `isValidMessagesArray` helper functions, and exported them to `tests/api.test.js` to individually verify input boundaries.
