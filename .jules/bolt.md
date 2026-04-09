@@ -115,3 +115,10 @@ Multi-clause logic conditionals inside API route handlers decrease readability a
 
 Action:
 Extracted complex boolean conditionals used to validate the `model` and `messages` arrays in `/v1/chat/completions` into standalone `isValidModel` and `isValidMessagesArray` helper functions, and exported them to `tests/api.test.js` to individually verify input boundaries.
+## 2026-04-10 — Restrict CORS Origins via Environment Variable
+
+Learning:
+Using a default open CORS policy (`app.use(cors())`) is a security risk, especially for an API gateway handling sensitive operations or LLM inferences. It allows any domain to send cross-origin requests to the API.
+
+Action:
+Replaced the default open CORS policy in `src/index.js` with a restricted one. The allowed origins are now parsed from the `ALLOWED_ORIGINS` environment variable as a comma-separated list. If the variable is unset, `origin` defaults to `false`, disabling cross-origin requests entirely by default to enforce secure-by-default behavior.
