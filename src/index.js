@@ -44,16 +44,24 @@ app.use((err, req, res, next) => {
 });
 
 // API endpoints
+function isValidModel(model) {
+  return !!(model && typeof model === 'string' && model.trim());
+}
+
+function isValidMessagesArray(messages) {
+  return !!(messages && Array.isArray(messages) && messages.length > 0);
+}
+
 function isValidMessage(msg) {
   return !!(msg && typeof msg === 'object' && !Array.isArray(msg) && msg.role && typeof msg.role === 'string' && typeof msg.content === 'string');
 }
 
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body || {};
-  if (!model || typeof model !== 'string' || !model.trim()) {
+  if (!isValidModel(model)) {
     return res.status(400).json({ error: 'Missing or invalid model' });
   }
-  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+  if (!isValidMessagesArray(messages)) {
     return res.status(400).json({ error: 'Missing or invalid messages' });
   }
   if (messages.length > 1000) {
@@ -215,4 +223,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { main, app, heavyComputation, isValidMessage };
+module.exports = { main, app, heavyComputation, isValidModel, isValidMessagesArray, isValidMessage };

@@ -129,3 +129,20 @@ test('isValidMessage validation helper', () => {
   assert.strictEqual(isValidMessage([]), false);
   assert.strictEqual(isValidMessage({ role: 'user' }), false);
 });
+
+test('isValidModel validation helper', () => {
+  const { isValidModel } = require('../src/index.js');
+  assert.strictEqual(isValidModel('gpt-4'), true);
+  assert.strictEqual(isValidModel(''), false);
+  assert.strictEqual(isValidModel('   '), false);
+  assert.strictEqual(isValidModel(null), false);
+  assert.strictEqual(isValidModel(123), false);
+});
+
+test('isValidMessagesArray validation helper', () => {
+  const { isValidMessagesArray } = require('../src/index.js');
+  assert.strictEqual(isValidMessagesArray([{ role: 'user', content: 'hello' }]), true);
+  assert.strictEqual(isValidMessagesArray([]), false);
+  assert.strictEqual(isValidMessagesArray(null), false);
+  assert.strictEqual(isValidMessagesArray("not an array"), false);
+});
