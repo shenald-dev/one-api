@@ -40,3 +40,7 @@ All notable changes to this project will be documented in this file.
 
 ## [1.1.8] - 2026-04-03
 * **Dependencies:** Safely bumped patch version of `dotenv` dependency and verified survival. No regressions found, zero dead code pruned.
+
+## [1.1.9] - 2026-04-09
+### Changed
+* **[Reliability]:** Safely skip generic error handlers if response headers are already sent, preventing `ERR_HTTP_HEADERS_SENT` application crashes. Zero dead code was pruned.
