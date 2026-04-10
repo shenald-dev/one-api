@@ -44,3 +44,7 @@ All notable changes to this project will be documented in this file.
 ## [1.1.9] - 2026-04-09
 ### Changed
 * **[Reliability]:** Safely skip generic error handlers if response headers are already sent, preventing `ERR_HTTP_HEADERS_SENT` application crashes. Zero dead code was pruned.
+
+## [1.1.10] - 2026-04-09
+### Changed
+* **[Maintainability]:** Refactored API route handlers by extracting complex multi-clause conditionals into standalone helper functions (`isValidModel`, `isValidMessagesArray`, `isValidMessage`). Improved code readability, enabled granular unit testing, and reduced function complexity. Zero dead code pruned.
