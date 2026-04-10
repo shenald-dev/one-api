@@ -23,7 +23,18 @@ const app = express();
 app.set('etag', false);
 
 app.use(helmet());
-app.use(cors());
+
+const allowedOriginsEnv = process.env.ALLOWED_ORIGINS;
+let corsOrigin = false;
+if (allowedOriginsEnv) {
+  if (allowedOriginsEnv.trim() === '*') {
+    corsOrigin = '*';
+  } else {
+    corsOrigin = allowedOriginsEnv.split(',').map(o => o.trim()).filter(Boolean);
+  }
+}
+app.use(cors({ origin: corsOrigin }));
+
 // Compress all responses to reduce bandwidth and latency
 app.use(compression());
 // Set a larger JSON limit since LLM contexts can be quite large

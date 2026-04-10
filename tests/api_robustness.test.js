@@ -53,3 +53,12 @@ test('JSON error handler safely skips without crashing if headers are already se
   // The fact that it gets here without an UncaughtException (ERR_HTTP_HEADERS_SENT) means it passed
   assert.ok(true);
 });
+
+test('CORS is disabled by default if ALLOWED_ORIGINS is unset', async () => {
+  const res = await request(app)
+    .options('/health')
+    .set('Origin', 'http://evil.com')
+    .set('Access-Control-Request-Method', 'GET');
+
+  assert.strictEqual(res.headers['access-control-allow-origin'], undefined);
+});
