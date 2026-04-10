@@ -53,3 +53,9 @@ test('JSON error handler safely skips without crashing if headers are already se
   // The fact that it gets here without an UncaughtException (ERR_HTTP_HEADERS_SENT) means it passed
   assert.ok(true);
 });
+
+test('CORS headers reflect ALLOWED_ORIGINS fallback', async () => {
+  // Tests without ALLOWED_ORIGINS (should default to '*')
+  let res1 = await request(app).options('/v1/chat/completions').set('Origin', 'http://malicious.com');
+  assert.strictEqual(res1.headers['access-control-allow-origin'], '*');
+});

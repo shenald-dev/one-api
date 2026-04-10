@@ -115,3 +115,8 @@ Multi-clause logic conditionals inside API route handlers decrease readability a
 
 Action:
 Extracted complex boolean conditionals used to validate the `model` and `messages` arrays in `/v1/chat/completions` into standalone `isValidModel` and `isValidMessagesArray` helper functions, and exported them to `tests/api.test.js` to individually verify input boundaries.
+
+## 2026-04-10 — Restrict CORS Default Security Insight
+
+Learning: When adding security configurations that change global defaults (like replacing `app.use(cors())` with an environment-driven setup), changing the fallback to a restrictive posture can break backward compatibility for existing unauthenticated consumer apps.
+Action: Always evaluate the risk of backward-incompatible defaults. Ensure that new security patches preserve the original open behavior as a default fallback unless the prompt or task context explicitly specifies that the change is an emergency vulnerability patch that mandates a breaking regression.
