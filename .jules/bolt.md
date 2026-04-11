@@ -115,3 +115,11 @@ Multi-clause logic conditionals inside API route handlers decrease readability a
 
 Action:
 Extracted complex boolean conditionals used to validate the `model` and `messages` arrays in `/v1/chat/completions` into standalone `isValidModel` and `isValidMessagesArray` helper functions, and exported them to `tests/api.test.js` to individually verify input boundaries.
+
+## 2026-04-11 — Secure CORS Configuration
+
+Learning:
+CORS middleware, if instantiated without a specific `origin` configuration or passed a wildly parsed wildcard array `['*']`, defaults incorrectly or too permissively in this specific Express environment. Parsing `process.env.ALLOWED_ORIGINS` dynamically provides robust security boundaries but requires careful string mapping of the literal `*` wildcard to preserve intended legacy behavior.
+
+Action:
+Always configure CORS explicitly using environment-provided comma-separated strings for flexible deployments. Handle the wildcard `*` explicitly as a string (not an array element) to prevent string matching errors within Express `cors` middleware logic.
