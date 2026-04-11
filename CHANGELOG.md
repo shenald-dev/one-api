@@ -44,3 +44,7 @@ All notable changes to this project will be documented in this file.
 ## [1.1.9] - 2026-04-09
 ### Changed
 * **[Reliability]:** Safely skip generic error handlers if response headers are already sent, preventing `ERR_HTTP_HEADERS_SENT` application crashes. Zero dead code was pruned.
+
+## [v1.1.10] - 2026-04-11
+### Changed
+* **[Maintainability]:** Refactored complex conditionals in the chat completions route into standalone, testable validation helper functions to improve readability and maintainability. Zero dead code pruned.
