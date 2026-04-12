@@ -146,3 +146,58 @@ test('isValidMessagesArray validation helper', () => {
   assert.strictEqual(isValidMessagesArray(null), false);
   assert.strictEqual(isValidMessagesArray("not an array"), false);
 });
+
+test('CORS configuration restricts origins based on ALLOWED_ORIGINS', async () => {
+  // Clear require cache to reload the app with new env vars
+  delete require.cache[require.resolve('../src/index.js')];
+  process.env.ALLOWED_ORIGINS = 'https://example.com, https://app.example.com';
+  const { app } = require('../src/index.js');
+
+  const res = await request(app)
+    .options('/health')
+    .set('Origin', 'https://example.com')
+    .set('Access-Control-Request-Method', 'GET');
+
+  assert.strictEqual(res.headers['access-control-allow-origin'], 'https://example.com');
+
+  const badRes = await request(app)
+    .options('/health')
+    .set('Origin', 'https://evil.com')
+    .set('Access-Control-Request-Method', 'GET');
+
+  assert.strictEqual(badRes.headers['access-control-allow-origin'], undefined);
+
+  // Cleanup
+  delete process.env.ALLOWED_ORIGINS;
+  delete require.cache[require.resolve('../src/index.js')];
+});
+
+test('CORS defaults to * if ALLOWED_ORIGINS is not set', async () => {
+  delete process.env.ALLOWED_ORIGINS;
+  delete require.cache[require.resolve('../src/index.js')];
+  const { app } = require('../src/index.js');
+
+  const res = await request(app)
+    .options('/health')
+    .set('Origin', 'https://example.com')
+    .set('Access-Control-Request-Method', 'GET');
+
+  assert.strictEqual(res.headers['access-control-allow-origin'], '*');
+  delete require.cache[require.resolve('../src/index.js')];
+});
+
+test('CORS handles wildcard * explicitly', async () => {
+  process.env.ALLOWED_ORIGINS = '*';
+  delete require.cache[require.resolve('../src/index.js')];
+  const { app } = require('../src/index.js');
+
+  const res = await request(app)
+    .options('/health')
+    .set('Origin', 'https://example.com')
+    .set('Access-Control-Request-Method', 'GET');
+
+  assert.strictEqual(res.headers['access-control-allow-origin'], '*');
+
+  delete process.env.ALLOWED_ORIGINS;
+  delete require.cache[require.resolve('../src/index.js')];
+});

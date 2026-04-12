@@ -115,3 +115,11 @@ Multi-clause logic conditionals inside API route handlers decrease readability a
 
 Action:
 Extracted complex boolean conditionals used to validate the `model` and `messages` arrays in `/v1/chat/completions` into standalone `isValidModel` and `isValidMessagesArray` helper functions, and exported them to `tests/api.test.js` to individually verify input boundaries.
+
+## 2024-06-28 — Hardened CORS configuration parsing for wildcards
+
+Learning:
+When parsing CORS origin configurations dynamically via an environment variable, explicitly checking for a wildcard `*` is necessary before attempting to map strings. The default fallback behavior should allow `origin: '*'` if `ALLOWED_ORIGINS` is missing, but explicitly restrict paths if specific origins are supplied to prevent excessive permissibility in production deployments.
+
+Action:
+Modified the CORS middleware implementation in `src/index.js` to correctly handle `process.env.ALLOWED_ORIGINS` according to documented rules. Added `corsOptions` with dynamic configuration based on the presence of comma-separated origin values, and fallback to `'*'` if left unconfigured.

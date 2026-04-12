@@ -44,3 +44,4 @@ All notable changes to this project will be documented in this file.
 ## [1.1.9] - 2026-04-09
 ### Changed
 * **[Reliability]:** Safely skip generic error handlers if response headers are already sent, preventing `ERR_HTTP_HEADERS_SENT` application crashes. Zero dead code was pruned.
+* **Security:** Hardened CORS configuration to properly enforce ALLOWED_ORIGINS restrictions.
