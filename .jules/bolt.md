@@ -115,3 +115,6 @@ Multi-clause logic conditionals inside API route handlers decrease readability a
 
 Action:
 Extracted complex boolean conditionals used to validate the `model` and `messages` arrays in `/v1/chat/completions` into standalone `isValidModel` and `isValidMessagesArray` helper functions, and exported them to `tests/api.test.js` to individually verify input boundaries.
+2024-04-12 — Dynamic CORS Configuration
+Learning: Overly permissive default CORS (`*`) poses security risks by allowing unauthorized cross-origin requests.
+Action: Implemented dynamic CORS configuration via the `ALLOWED_ORIGINS` environment variable, defaulting to `*` for backward compatibility, to securely restrict access when needed.
