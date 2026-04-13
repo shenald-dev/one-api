@@ -22,8 +22,15 @@ const app = express();
 // Disable ETag generation for highly dynamic JSON APIs to save CPU cycles
 app.set('etag', false);
 
+function getCorsOrigin(envValue) {
+  if (!envValue) return '*';
+  const origins = envValue.split(',').map(s => s.trim()).filter(Boolean);
+  if (origins.includes('*')) return '*';
+  return origins.length > 0 ? origins : '*';
+}
+
 app.use(helmet());
-app.use(cors());
+app.use(cors({ origin: getCorsOrigin(process.env.ALLOWED_ORIGINS) }));
 // Compress all responses to reduce bandwidth and latency
 app.use(compression());
 // Set a larger JSON limit since LLM contexts can be quite large
@@ -223,4 +230,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { main, app, heavyComputation, isValidModel, isValidMessagesArray, isValidMessage };
+module.exports = { main, app, heavyComputation, isValidModel, isValidMessagesArray, isValidMessage, getCorsOrigin };
