@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js --server",
     "dev": "nodemon src/index.js --server",
-    "test": "node tests/test.js && node tests/api.test.js && node tests/api_robustness.test.js && node tests/heavy_computation.test.js",
+    "test": "node tests/test.js && node tests/api.test.js && node tests/api_robustness.test.js && node tests/heavy_computation.test.js && node tests/cors.test.js",
     "benchmark": "node benchmarks/run.js",
     "docker:build": "docker build -t shenald/one-api .",
     "docker:run": "docker run -p 3000:3000 shenald/one-api"
