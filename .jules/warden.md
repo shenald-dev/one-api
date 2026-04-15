@@ -62,3 +62,9 @@ Observation / Pruned:
 Assessed JULES/BOLT's optimization refactoring multi-clause conditionals into standalone helper functions (`isValidModel`, `isValidMessagesArray`, `isValidMessage`) in `/v1/chat/completions`. This improves readability and unit testing logic boundaries. Tests passed successfully. Zero dead code or unused files found.
 Alignment / Deferred:
 Appended release notes. Version bumped to 1.1.10.
+
+2026-04-15 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed repository state. Discovered nodemon as an unused dev dependency via depcheck. Removed it using npm uninstall nodemon and pruned the dev script from package.json.
+Alignment / Deferred:
+Removed references to npm run dev in README.md. Appended release notes to CHANGELOG.md. Version bumped to 1.1.11.

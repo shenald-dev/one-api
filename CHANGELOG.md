@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.11] - 2026-04-15
+### Changed
+* **[Lifecycle]:** Assessed repository state. Removed unused dev dependency `nodemon` and pruned the `dev` script from `package.json`. Safely bumped `dotenv` dependency patch version. Removed references to `npm run dev` in `README.md`. Version bumped to 1.1.11.
+
 ## [v1.1.7] - 2026-04-03
 ### Changed
 * **[Lifecycle]:** Safely bumped `minimatch` and `path-to-regexp` minor/patch versions. Verified baseline tests pass. Zero dead code was pruned as the codebase remains highly optimized following previous improvements.

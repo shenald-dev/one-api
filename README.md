@@ -107,9 +107,6 @@ No database, no migrations. JSON file storage. Just run.
 # Install deps
 npm install
 
-# Run dev with hot reload
-npm run dev
-
 # Test
 npm test
 
