@@ -118,3 +118,7 @@ Extracted complex boolean conditionals used to validate the `model` and `message
 2026-04-15 — Dynamic CORS Configuration
 Learning: Express cors middleware interprets origin: ['*'] as an exact string match for an asterisk, preventing wildcard functionality.
 Action: Ensure * is extracted from parsed environment lists and passed directly as origin: '*' when configuring CORS.
+
+2026-04-16 — Prevent redundant iteration in benchmark runner
+Learning: The benchmark runner script `benchmarks/run.js` was duplicating iteration and performance reporting logic already present in the target exported functions (e.g., `main`), leading to redundant execution and inaccurate outer timing results.
+Action: Simplified `benchmarks/run.js` to purely invoke the exported function and delegate iteration and measurement to the target script.

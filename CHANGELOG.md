@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.12] - 2026-04-16
+### Changed
+* **[Developer Experience]:** Fixed `benchmarks/run.js` to delegate iteration and reporting to the target benchmark functions, avoiding redundant execution and inaccurate timing results.
+
 ## [v1.1.7] - 2026-04-03
 ### Changed
 * **[Lifecycle]:** Safely bumped `minimatch` and `path-to-regexp` minor/patch versions. Verified baseline tests pass. Zero dead code was pruned as the codebase remains highly optimized following previous improvements.
