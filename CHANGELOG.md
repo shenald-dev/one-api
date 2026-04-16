@@ -52,3 +52,7 @@ All notable changes to this project will be documented in this file.
 ## [1.1.11] - 2026-04-10
 ### Changed
 * **[Lifecycle]:** Safely bumped patch version of `dotenv` dependency and verified survival. No regressions found, zero dead code pruned.
+
+## [1.1.12] - 2026-04-16
+### Changed
+* **[Security]:** Fixed CORS middleware configuration to correctly handle wildcard (*) origins when parsed from the ALLOWED_ORIGINS environment variable. Zero dead code was pruned.
