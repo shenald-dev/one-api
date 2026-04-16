@@ -40,3 +40,24 @@ test('CORS handles wildcard in ALLOWED_ORIGINS correctly', async () => {
     .set('Origin', 'http://trusted.com');
   assert.strictEqual(res1.headers['access-control-allow-origin'], '*');
 });
+
+test('CORS filters out empty origins and handles whitespace', async () => {
+  delete require.cache[require.resolve('../src/index.js')];
+  process.env.ALLOWED_ORIGINS = 'http://trusted.com, , http://also-trusted.com,  ';
+  const { app } = require('../src/index.js');
+
+  const res1 = await request(app)
+    .options('/health')
+    .set('Origin', 'http://trusted.com');
+  assert.strictEqual(res1.headers['access-control-allow-origin'], 'http://trusted.com');
+
+  const res2 = await request(app)
+    .options('/health')
+    .set('Origin', 'http://also-trusted.com');
+  assert.strictEqual(res2.headers['access-control-allow-origin'], 'http://also-trusted.com');
+
+  const res3 = await request(app)
+    .options('/health')
+    .set('Origin', 'http://evil.com');
+  assert.strictEqual(res3.headers['access-control-allow-origin'], undefined);
+});
