@@ -78,6 +78,9 @@ Environment variables in `.env`:
 # Port
 PORT=3000
 
+# CORS Allowed Origins (comma-separated). Unset = CORS disabled.
+ALLOWED_ORIGINS=http://localhost:3000,https://my-app.com
+
 # Add any provider keys you need
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-...
