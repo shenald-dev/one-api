@@ -78,6 +78,10 @@ Environment variables in `.env`:
 # Port
 PORT=3000
 
+# Optional CORS configuration (defaults to '*').
+# Comma-separated list of origins (e.g., http://localhost:3000, https://myapp.com) or a single wildcard (*)
+ALLOWED_ORIGINS=*
+
 # Add any provider keys you need
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-...
