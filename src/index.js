@@ -34,6 +34,7 @@ if (process.env.ALLOWED_ORIGINS) {
   }
 }
 app.use(cors(corsOptions));
+
 // Compress all responses to reduce bandwidth and latency
 app.use(compression());
 // Set a larger JSON limit since LLM contexts can be quite large
