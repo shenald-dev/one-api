@@ -34,3 +34,15 @@ test('CORS handles wildcard in ALLOWED_ORIGINS', async () => {
   const res = await request(app).get('/health').set('Origin', 'http://baz.com');
   assert.strictEqual(res.headers['access-control-allow-origin'], '*');
 });
+
+test('CORS handles empty and whitespace-only ALLOWED_ORIGINS', async () => {
+  process.env.ALLOWED_ORIGINS = '   , ,,  ';
+  delete require.cache[require.resolve('../src/index.js')];
+  const { app } = require('../src/index.js');
+
+  const res = await request(app).get('/health').set('Origin', 'http://foo.com');
+  // It should parse to an empty array and therefore allow NO origins (since '*' is not in an empty array)
+  // Actually, wait, let's verify what express cors middleware does with an empty array.
+  // When origin: [] is passed to cors, it blocks all origins.
+  assert.strictEqual(res.headers['access-control-allow-origin'], undefined);
+});

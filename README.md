@@ -78,6 +78,12 @@ Environment variables in `.env`:
 # Port
 PORT=3000
 
+# Security
+# Set a comma-separated list of allowed origins for CORS. Defaults to '*' (all origins) if unset.
+# Examples: "http://localhost:3000, https://myapp.com" or "*"
+# Note: If set to an empty string or whitespace-only, ALL origins will be blocked.
+ALLOWED_ORIGINS=*
+
 # Add any provider keys you need
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-...
