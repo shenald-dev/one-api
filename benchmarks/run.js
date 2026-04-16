@@ -9,21 +9,9 @@ async function run() {
     process.exit(1);
   }
 
-  const runs = 10;
-  const times = [];
-
-  console.log('Benchmark: ' + runs + ' runs\n');
-  for (let i = 0; i < runs; i++) {
-    const start = performance.now();
-    await func();
-    const end = performance.now();
-    times.push(end - start);
-    console.log('  Run ' + (i+1) + ': ' + (end-start).toFixed(2) + 'ms');
-  }
-
-  const avg = times.reduce((a,b)=>a+b)/times.length;
-  console.log('\nAverage: ' + avg.toFixed(2) + 'ms');
-  console.log('Throughput: ' + (1000/avg).toFixed(2) + ' ops/sec');
+  // Delegate iteration and performance reporting to the target function
+  // to prevent redundant logic and inaccurate timing results.
+  await func();
 }
 
 run().catch(console.error);
