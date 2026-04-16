@@ -48,3 +48,7 @@ All notable changes to this project will be documented in this file.
 ## [1.1.10] - 2026-04-09
 ### Changed
 * **[Maintainability]:** Extracted complex boolean conditionals used to validate the API payloads into standalone helper functions, improving readability and testability. Zero dead code was pruned.
+
+## [1.1.11] - 2026-04-10
+### Changed
+* **[Lifecycle]:** Safely bumped patch version of `dotenv` dependency and verified survival. No regressions found, zero dead code pruned.
