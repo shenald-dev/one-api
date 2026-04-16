@@ -26,7 +26,7 @@ app.use(helmet());
 
 let corsOptions = { origin: '*' };
 if (process.env.ALLOWED_ORIGINS) {
-  const origins = process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim());
+  const origins = process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim()).filter(Boolean);
   if (origins.includes('*')) {
     corsOptions.origin = '*';
   } else {
