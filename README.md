@@ -131,3 +131,16 @@ Built by a vibe coder who got tired of rewriting integrations.
 If it's useful, star it ⭐ — if not, open an issue and tell me why.
 
 **Keep it simple.** 🧘
+
+---
+
+## 🔒 Security
+
+By default, the API Gateway enables permissive CORS (`*`).
+To restrict CORS access to specific hostnames, set the `ALLOWED_ORIGINS` environment variable as a comma-separated list:
+
+```bash
+ALLOWED_ORIGINS=https://your-domain.com,https://app.your-domain.com
+```
+
+If `ALLOWED_ORIGINS` is unset or set to `*`, CORS defaults back to the wildcard configuration.
