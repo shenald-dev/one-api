@@ -25,12 +25,12 @@ app.set('etag', false);
 app.use(helmet());
 
 let corsOptions = { origin: '*' };
-if (process.env.ALLOWED_ORIGINS !== undefined) {
+if (process.env.ALLOWED_ORIGINS) {
   const origins = process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean);
   if (origins.includes('*')) {
-    corsOptions = { origin: '*' };
+    corsOptions.origin = '*';
   } else {
-    corsOptions = { origin: origins };
+    corsOptions.origin = origins;
   }
 }
 app.use(cors(corsOptions));

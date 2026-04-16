@@ -115,11 +115,6 @@ Multi-clause logic conditionals inside API route handlers decrease readability a
 
 Action:
 Extracted complex boolean conditionals used to validate the `model` and `messages` arrays in `/v1/chat/completions` into standalone `isValidModel` and `isValidMessagesArray` helper functions, and exported them to `tests/api.test.js` to individually verify input boundaries.
-
-## 2026-04-10 — Restrict Unbounded CORS Configuration
-
-Learning:
-An unrestricted, default CORS configuration (`app.use(cors())`) allows any origin to make cross-origin requests. In an API Gateway, this exposes the service to potential unauthorized use from malicious origins unless properly controlled.
-
-Action:
-Replaced the default CORS middleware configuration in `src/index.js` to restrict origins based on the `ALLOWED_ORIGINS` environment variable. It parses a comma-separated list of origins and falls back to a wildcard `*` only if `ALLOWED_ORIGINS` is completely unset, while properly supporting explicit wildcard entries.
+2026-04-15 — Dynamic CORS Configuration
+Learning: Express cors middleware interprets origin: ['*'] as an exact string match for an asterisk, preventing wildcard functionality.
+Action: Ensure * is extracted from parsed environment lists and passed directly as origin: '*' when configuring CORS.
