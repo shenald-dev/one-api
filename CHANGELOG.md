@@ -56,3 +56,7 @@ All notable changes to this project will be documented in this file.
 ## [1.1.11] - 2026-04-10
 ### Changed
 * **[Lifecycle]:** Safely bumped patch version of `dotenv` dependency and verified survival. No regressions found, zero dead code pruned.
+
+## [1.1.14] - 2026-04-17
+### Changed
+* **[Lifecycle]:** Pruned unused `performance` import in `benchmarks/run.js` following the iteration execution delegation optimization.
