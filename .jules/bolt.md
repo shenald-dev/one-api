@@ -122,3 +122,11 @@ Action: Ensure * is extracted from parsed environment lists and passed directly 
 2026-04-16 — Prevent redundant iteration in benchmark runner
 Learning: The benchmark runner script `benchmarks/run.js` was duplicating iteration and performance reporting logic already present in the target exported functions (e.g., `main`), leading to redundant execution and inaccurate outer timing results.
 Action: Simplified `benchmarks/run.js` to purely invoke the exported function and delegate iteration and measurement to the target script.
+
+## $(date +%Y-%m-%d) — Optimize Module Mocking in Tests
+
+Learning:
+In `tests/test.js`, the mock module loader (`Module.prototype.require`) was allocating a new array `['express', 'cors', 'helmet', 'dotenv', 'compression']` and performing an O(n) `.includes()` lookup on *every single module require*. In hot paths like module loading, this causes unnecessary allocations and CPU overhead.
+
+Action:
+Extracted the array into a persistent `Set` named `MOCKED_MODULES` outside the hook, transforming the lookup into an O(1) operation (`MOCKED_MODULES.has(name)`) and completely eliminating the repeated memory allocations on every require call.
