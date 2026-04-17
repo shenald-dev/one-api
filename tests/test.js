@@ -1,6 +1,9 @@
 // Mock missing dependencies to allow src/index.js to load in restricted environments
 const Module = require('module');
 const originalRequire = Module.prototype.require;
+
+// Use a Set to provide O(1) lookup performance and avoid repeated array allocations
+// on every single `require` call in the mock module loader hook.
 const MOCKED_MODULES = new Set(['express', 'cors', 'helmet', 'dotenv', 'compression']);
 Module.prototype.require = function(name) {
   if (MOCKED_MODULES.has(name)) {
