@@ -138,3 +138,7 @@ High-frequency, simple endpoints like `/health` that don't require request bodie
 
 Action:
 Moved the `/health` endpoint definition in `src/index.js` to be placed before `compression` and `express.json` middleware declarations. This avoids redundant parsing and compression overhead for simple pings, maximizing throughput.
+
+$(date +%Y-%m-%d) — Optimize API Route Handler Allocations
+Learning: Repeatedly allocating identical static objects and arrays inside a high-traffic API route handler creates unnecessary garbage collection pressure and CPU overhead.
+Action: Extracted static mock objects (`choices` and `usage`) into frozen constants outside the `/v1/chat/completions` route handler in `src/index.js` to eliminate redundant allocations on every request.

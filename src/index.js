@@ -71,6 +71,23 @@ function isValidMessage(msg) {
   return !!(msg && typeof msg === 'object' && !Array.isArray(msg) && msg.role && typeof msg.role === 'string' && typeof msg.content === 'string');
 }
 
+const MOCK_CHOICES = Object.freeze([
+  {
+    index: 0,
+    message: {
+      role: 'assistant',
+      content: 'This is a mock response from the unified API.'
+    },
+    finish_reason: 'stop'
+  }
+]);
+
+const MOCK_USAGE = Object.freeze({
+  prompt_tokens: 10,
+  completion_tokens: 10,
+  total_tokens: 20
+});
+
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body || {};
   if (!isValidModel(model)) {
@@ -95,21 +112,8 @@ app.post('/v1/chat/completions', (req, res) => {
     object: 'chat.completion',
     created: Math.floor(Date.now() / 1000),
     model: model,
-    choices: [
-      {
-        index: 0,
-        message: {
-          role: 'assistant',
-          content: 'This is a mock response from the unified API.'
-        },
-        finish_reason: 'stop'
-      }
-    ],
-    usage: {
-      prompt_tokens: 10,
-      completion_tokens: 10,
-      total_tokens: 20
-    }
+    choices: MOCK_CHOICES,
+    usage: MOCK_USAGE
   });
 });
 

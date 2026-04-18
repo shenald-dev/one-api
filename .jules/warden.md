@@ -86,3 +86,9 @@ Observation / Pruned:
 Assessed BOLT's optimization extracting the inline mock module array to a persistent `Set` (`MOCKED_MODULES`) in `tests/test.js`. This successfully optimizes O(1) module lookups during tests. Tests verified and zero dead code found.
 Alignment / Deferred:
 Appended release notes. Version bumped to 1.1.15.
+
+2026-04-18 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed repository state. Identified that the `/v1/chat/completions` route handler was repeatedly allocating identical arrays and objects for the `choices` and `usage` properties of the mock response on every request. This caused unnecessary garbage collection pressure and CPU overhead on a hot path.
+Alignment / Deferred:
+Extracted `MOCK_CHOICES` and `MOCK_USAGE` into static, frozen constants outside of the route handler to eliminate redundant allocations. Appended release notes. Version bumped to 1.1.16.
