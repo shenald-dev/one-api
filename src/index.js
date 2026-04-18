@@ -35,6 +35,8 @@ if (process.env.ALLOWED_ORIGINS) {
 }
 app.use(cors(corsOptions));
 
+// Fast-path for health checks: placed above global middleware (express.json, compression)
+// to avoid unnecessary payload parsing and compression overhead.
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
