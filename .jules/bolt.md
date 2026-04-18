@@ -130,3 +130,11 @@ In `tests/test.js`, the mock module loader (`Module.prototype.require`) was allo
 
 Action:
 Extracted the array into a persistent `Set` named `MOCKED_MODULES` outside the hook, transforming the lookup into an O(1) operation (`MOCKED_MODULES.has(name)`) and completely eliminating the repeated memory allocations on every require call.
+
+## 2026-04-18 — Optimize Health Check Endpoint
+
+Learning:
+High-frequency, simple endpoints like `/health` that don't require request bodies or response compression incur unnecessary CPU and latency overhead when placed below heavy global middleware like `express.json` and `compression`.
+
+Action:
+Moved the `/health` endpoint definition in `src/index.js` to be placed before `compression` and `express.json` middleware declarations. This avoids redundant parsing and compression overhead for simple pings, maximizing throughput.

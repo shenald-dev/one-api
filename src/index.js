@@ -35,6 +35,10 @@ if (process.env.ALLOWED_ORIGINS) {
 }
 app.use(cors(corsOptions));
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Compress all responses to reduce bandwidth and latency
 app.use(compression());
 // Set a larger JSON limit since LLM contexts can be quite large
@@ -107,10 +111,6 @@ app.post('/v1/chat/completions', (req, res) => {
       total_tokens: 20
     }
   });
-});
-
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
 });
 
 // 404 handler — return JSON for unknown routes
