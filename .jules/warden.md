@@ -80,3 +80,9 @@ Observation / Pruned:
 Assessed BOLT's benchmark redundant iteration fix. The `benchmarks/run.js` script was found to contain an unused `performance` import from `perf_hooks` after delegating logic to the target script. This dead code was identified and pruned.
 Alignment / Deferred:
 Appended release notes. Version bumped to 1.1.14.
+
+2026-04-18 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed BOLT's optimization extracting the inline mock module array to a persistent `Set` (`MOCKED_MODULES`) in `tests/test.js`. This successfully optimizes O(1) module lookups during tests. Tests verified and zero dead code found.
+Alignment / Deferred:
+Appended release notes. Version bumped to 1.1.15.

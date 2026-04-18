@@ -60,3 +60,7 @@ All notable changes to this project will be documented in this file.
 ## [1.1.14] - 2026-04-17
 ### Changed
 * **[Lifecycle]:** Pruned unused `performance` import in `benchmarks/run.js` following the iteration execution delegation optimization.
+
+## [1.1.15] - 2026-04-18
+### Changed
+* **[Performance]:** Optimized test module mock loading in `tests/test.js` by utilizing a persistent `Set` for O(1) lookup performance.
