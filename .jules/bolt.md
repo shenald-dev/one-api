@@ -138,3 +138,11 @@ High-frequency, simple endpoints like `/health` that don't require request bodie
 
 Action:
 Moved the `/health` endpoint definition in `src/index.js` to be placed before `compression` and `express.json` middleware declarations. This avoids redundant parsing and compression overhead for simple pings, maximizing throughput.
+
+## 2026-04-19 — Optimize Static Object Allocation
+
+Learning:
+The `/v1/chat/completions` endpoint was previously allocating the exact same static mock response structures (`choices` and `usage` blocks) internally on every incoming API request. In a high-traffic gateway or mock server, re-allocating static, unchanging objects for every request puts unnecessary pressure on the V8 Garbage Collector and wastes CPU cycles traversing object literals.
+
+Action:
+Extracted the repeated `choices` and `usage` data structures out of the `app.post` route handler, placed them in module-scoped constants (`MOCK_CHOICES`, `MOCK_USAGE`), and deeply applied `Object.freeze()` to them. This ensures these constant payload fragments are allocated exactly once at startup, enforcing immutability and preventing repeated memory allocations during high-throughput benchmarks.
