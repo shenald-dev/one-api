@@ -86,3 +86,9 @@ Observation / Pruned:
 Assessed BOLT's optimization extracting the inline mock module array to a persistent `Set` (`MOCKED_MODULES`) in `tests/test.js`. This successfully optimizes O(1) module lookups during tests. Tests verified and zero dead code found.
 Alignment / Deferred:
 Appended release notes. Version bumped to 1.1.15.
+
+2026-04-19 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed BOLT's optimization moving the `/health` endpoint above heavy global middlewares (`express.json()` and `compression()`). This successfully prevents redundant parsing and compression overhead for simple health checks. Tests verified. Checked for unused dependencies and dead code. Zero dead code or unused files found.
+Alignment / Deferred:
+Appended release notes. Version bumped to 1.1.16.

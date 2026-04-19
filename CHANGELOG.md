@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.16] - 2026-04-19
+### Changed
+* **[Performance]:** Moved the `/health` endpoint above heavy global middlewares (`express.json()` and `compression()`) to avoid redundant parsing overhead, reducing CPU usage and latency for simple health checks. Zero dead code was pruned.
+
 ## [1.1.12] - 2026-04-16
 ### Changed
 * **[Developer Experience]:** Fixed `benchmarks/run.js` to delegate iteration and reporting to the target benchmark functions, avoiding redundant execution and inaccurate timing results.
