@@ -2,9 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.16] - 2026-04-19
+### Changed
+* **[Performance]:** Moved the `/health` endpoint above heavy global middlewares (`express.json()` and `compression()`) to avoid redundant parsing overhead, reducing CPU usage and latency for simple health checks. Zero dead code was pruned.
+
 ## [1.1.12] - 2026-04-16
 ### Changed
 * **[Developer Experience]:** Fixed `benchmarks/run.js` to delegate iteration and reporting to the target benchmark functions, avoiding redundant execution and inaccurate timing results.
+
+## [1.1.11] - 2026-04-10
+### Changed
+* **[Lifecycle]:** Safely bu
+... (truncated)
+
+## [1.1.10] - 2026-04-09
+### Changed
+* **[Maintainability]:** Extracted complex boolean conditionals used to validate the API payloads into standalone helper functions, improving readability and testability. Zero dead code was pruned.
+
+## [1.1.9] - 2026-04-09
+### Changed
+* **[Reliability]:** Safely skip generic error handlers if response headers are already sent, preventing `ERR_HTTP_HEADERS_SENT` application crashes. Zero dead code was pruned.
+
+## [1.1.8] - 2026-04-03
+* **Dependencies:** Safely bumped patch version of `dotenv` dependency and verified survival. No regressions found, zero dead code pruned.
 
 ## [v1.1.7] - 2026-04-03
 ### Changed
@@ -20,51 +40,4 @@ All notable changes to this project will be documented in this file.
 
 ## [v1.1.4] - 2026-04-02
 ### Changed
-* **[Reliability]:** Added `server.closeIdleConnections()` and `server.closeAllConnections()` to the Express server shutdown sequence to speed up process termination by explicitly severing inactive keep-alive connections rather than waiting for them to naturally time out. No dead code pruned.
-
-## [v1.1.3] - 2026-04-01
-### Changed
-* **[Performance]:** Replaced traditional `for` loop with a `for...of` loop in the `/v1/chat/completions` API payload validation to improve V8 execution speed and code readability.
-
-## [v1.1.2] - 2026-03-31
-### Changed
-* **[Lifecycle]:** Verified JULES/BOLT's optimization replacing `.has()` and `.get()` with a single `.get()` in `heavyComputation`. No dead code found to prune. Bumped patch version for release.
-
-## [v1.1.1] - 2026-03-30
-### Changed
-* **[Performance]:** Optimized cache Map lookups in `heavyComputation` by combining `.has()` and `.get()` into a single `.get()` call with an `undefined` check, reducing hash lookup overhead.
-
-
-## [v1.1.0] - 2024-06-21
-### Added
-* **[Performance]:** Added response compression middleware (gzip/deflate) to reduce bandwidth and latency.
-
-### Fixed
-* **[QA]:** Added `compression` mock to `tests/test.js` to ensure the module loads properly in restricted environments.
-
-## [1.1.8] - 2026-04-03
-* **Dependencies:** Safely bumped patch version of `dotenv` dependency and verified survival. No regressions found, zero dead code pruned.
-
-## [1.1.9] - 2026-04-09
-### Changed
-* **[Reliability]:** Safely skip generic error handlers if response headers are already sent, preventing `ERR_HTTP_HEADERS_SENT` application crashes. Zero dead code was pruned.
-
-## [1.1.10] - 2026-04-09
-### Changed
-* **[Maintainability]:** Extracted complex boolean conditionals used to validate the API payloads into standalone helper functions, improving readability and testability. Zero dead code was pruned.
-
-## [1.1.11] - 2026-04-10
-### Changed
-* **[Lifecycle]:** Safely bumped patch version of `dotenv` dependency and verified survival. No regressions found, zero dead code pruned.
-
-## [1.1.14] - 2026-04-17
-### Changed
-* **[Lifecycle]:** Pruned unused `performance` import in `benchmarks/run.js` following the iteration execution delegation optimization.
-
-## [1.1.16] - 2026-04-18
-### Changed
-* **[Performance]:** Extracted static mock objects (`choices` and `usage`) into frozen constants outside the `/v1/chat/completions` route handler to prevent unnecessary allocations on every request.
-
-## [1.1.15] - 2026-04-18
-### Changed
-* **[Performance]:** Optimized test module mock loading in `tests/test.js` by utilizing a persistent `Set` for O(1) lookup performance.
+* **[Reliability]:** Added `server.closeIdleConnections()` and `server.closeAllConnections()`
