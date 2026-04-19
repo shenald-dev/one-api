@@ -71,6 +71,10 @@ function isValidMessage(msg) {
   return !!(msg && typeof msg === 'object' && !Array.isArray(msg) && msg.role && typeof msg.role === 'string' && typeof msg.content === 'string');
 }
 
+/**
+ * Static mock choices payload for unified API responses.
+ * Extracted and frozen to prevent GC pressure and allocations on the hot path.
+ */
 const MOCK_CHOICES = Object.freeze([
   {
     index: 0,
@@ -82,6 +86,10 @@ const MOCK_CHOICES = Object.freeze([
   }
 ]);
 
+/**
+ * Static mock token usage payload for unified API responses.
+ * Extracted and frozen to prevent GC pressure and allocations on the hot path.
+ */
 const MOCK_USAGE = Object.freeze({
   prompt_tokens: 10,
   completion_tokens: 10,
