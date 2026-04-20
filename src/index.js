@@ -35,8 +35,9 @@ if (process.env.ALLOWED_ORIGINS) {
 }
 app.use(cors(corsOptions));
 
+const HEALTH_RESPONSE = Object.freeze({ status: 'ok' });
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.status(200).json(HEALTH_RESPONSE);
 });
 
 // Compress all responses to reduce bandwidth and latency
@@ -44,16 +45,19 @@ app.use(compression());
 // Set a larger JSON limit since LLM contexts can be quite large
 app.use(express.json({ limit: '10mb' }));
 
+const ERROR_INVALID_JSON = Object.freeze({ error: 'Invalid JSON payload' });
+const ERROR_PAYLOAD_TOO_LARGE = Object.freeze({ error: 'Payload too large' });
+
 // Handle invalid JSON gracefully
 app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
   }
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json({ error: 'Invalid JSON payload' });
+    return res.status(400).json(ERROR_INVALID_JSON);
   }
   if (err.type === 'entity.too.large') {
-    return res.status(413).json({ error: 'Payload too large' });
+    return res.status(413).json(ERROR_PAYLOAD_TOO_LARGE);
   }
   next(err);
 });
@@ -89,21 +93,26 @@ const MOCK_USAGE = Object.freeze({
   total_tokens: 20
 });
 
+const ERROR_MISSING_MODEL = Object.freeze({ error: 'Missing or invalid model' });
+const ERROR_MISSING_MESSAGES = Object.freeze({ error: 'Missing or invalid messages' });
+const ERROR_TOO_MANY_MESSAGES = Object.freeze({ error: 'Too many messages' });
+const ERROR_MALFORMED_MESSAGE = Object.freeze({ error: 'Malformed message object' });
+
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body || {};
   if (!isValidModel(model)) {
-    return res.status(400).json({ error: 'Missing or invalid model' });
+    return res.status(400).json(ERROR_MISSING_MODEL);
   }
   if (!isValidMessagesArray(messages)) {
-    return res.status(400).json({ error: 'Missing or invalid messages' });
+    return res.status(400).json(ERROR_MISSING_MESSAGES);
   }
   if (messages.length > 1000) {
-    return res.status(400).json({ error: 'Too many messages' });
+    return res.status(400).json(ERROR_TOO_MANY_MESSAGES);
   }
 
   for (const msg of messages) {
     if (!isValidMessage(msg)) {
-      return res.status(400).json({ error: 'Malformed message object' });
+      return res.status(400).json(ERROR_MALFORMED_MESSAGE);
     }
   }
 
@@ -123,13 +132,15 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not found', path: req.path });
 });
 
+const ERROR_INTERNAL_SERVER = Object.freeze({ error: 'Internal server error' });
+
 // Generic error handler — never leak stack traces
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   if (res.headersSent) {
     return next(err);
   }
-  res.status(500).json({ error: 'Internal server error' });
+  res.status(500).json(ERROR_INTERNAL_SERVER);
 });
 
 const computationCache = new Map();
