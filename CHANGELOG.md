@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.17] - 2026-04-20
+### Changed
+* **[Performance]:** Extracted static mock response objects (`MOCK_CHOICES` and `MOCK_USAGE`) into frozen module-level constants to avoid redundant memory allocations and garbage collection pressure on every `/v1/chat/completions` request. Zero dead code was pruned.
+
 ## [1.1.16] - 2026-04-19
 ### Changed
 * **[Performance]:** Moved the `/health` endpoint above heavy global middlewares (`express.json()` and `compression()`) to avoid redundant parsing overhead, reducing CPU usage and latency for simple health checks. Zero dead code was pruned.
