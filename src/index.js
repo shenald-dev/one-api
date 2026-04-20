@@ -35,6 +35,7 @@ if (process.env.ALLOWED_ORIGINS) {
 }
 app.use(cors(corsOptions));
 
+// Frozen response constants to avoid V8 allocations on every request
 const HEALTH_RESPONSE = Object.freeze({ status: 'ok' });
 app.get('/health', (req, res) => {
   res.status(200).json(HEALTH_RESPONSE);
