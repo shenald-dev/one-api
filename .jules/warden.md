@@ -34,5 +34,50 @@ Began continuous upgrades. Safely bumped `dotenv` dependency to version `17.4.0`
 
 2026-04-03 — Assessment & Lifecycle
 Observation / Pruned:
-Assessed JULES/BOLT's optimization disabling Express ETag generation. This prevents computing unnecessary MD5 hashes for purely 
-... (truncated)
+Assessed JULES/BOLT's optimization disabling Express ETag generation. This pre
+
+// ... 1375 characters truncated (middle section) ...
+
+ notes. Version bumped to 1.1.9.
+
+2026-04-09 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed JULES/BOLT's optimization refactoring multi-clause conditionals into standalone helper functions (`isValidModel`, `isValidMessagesArray`, `isValidMessage`) in `/v1/chat/completions`. This improves readability and unit testing logic boundaries. Tests passed successfully. Zero dead code or unused files found.
+Alignment / Deferred:
+Appended release notes. Version bumped to 1.1.10.
+
+2026-04-10 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed repository state. No functional regressions found. Verified baseline functionality via tests. Zero dead code identified and pruned. Updated minor/patch dependency dotenv.
+Alignment / Deferred:
+Updated dependencies. Appended release notes. Version bumped to 1.1.11.
+
+2026-04-16 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed BOLT's optimization fixing redundant iteration in `benchmarks/run.js`. The benchmark script now cleanly delegates execution to the target functions, improving accurate timing results without duplicate logic. Tests pass, zero dead code or unused files found.
+Alignment / Deferred:
+Appended release notes. Version bumped to 1.1.12.
+
+2026-04-17 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed BOLT's benchmark redundant iteration fix. The `benchmarks/run.js` script was found to contain an unused `performance` import from `perf_hooks` after delegating logic to the target script. This dead code was identified and pruned.
+Alignment / Deferred:
+Appended release notes. Version bumped to 1.1.14.
+
+2026-04-18 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed BOLT's optimization extracting the inline mock module array to a persistent `Set` (`MOCKED_MODULES`) in `tests/test.js`. This successfully optimizes O(1) module lookups during tests. Tests verified and zero dead code found.
+Alignment / Deferred:
+Appended release notes. Version bumped to 1.1.15.
+
+2026-04-19 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed BOLT's optimization moving the `/health` endpoint above heavy global middlewares (`express.json()` and `compression()`). This successfully prevents redundant parsing and compression overhead for simple health checks. Tests verified. Checked for unused dependencies and dead code. Zero dead code or unused files found.
+Alignment / Deferred:
+Appended release notes. Version bumped to 1.1.16.
+
+2026-04-20 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed BOLT's optimization extracting the static `MOCK_CHOICES` and `MOCK_USAGE` objects out of the `/v1/chat/completions` route handler as frozen module-level constants. This successfully prevents redundant object allocation and garbage collection pressure on every request. Checked for unused dependencies and dead code using `npx depcheck` and `npx find-unused-exports`. Zero dead code or unused files found.
+Alignment / Deferred:
+Appended release notes. Version bumped to 1.1.17.
