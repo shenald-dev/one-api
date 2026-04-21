@@ -146,3 +146,11 @@ The `/v1/chat/completions` endpoint was previously allocating the exact same sta
 
 Action:
 Extracted the repeated `choices` and `usage` data structures out of the `app.post` route handler, placed them in module-scoped constants (`MOCK_CHOICES`, `MOCK_USAGE`), and deeply applied `Object.freeze()` to them. This ensures these constant payload fragments are allocated exactly once at startup, enforcing immutability and preventing repeated memory allocations during high-throughput benchmarks.
+
+## 2026-04-21 — Optimize API Response Serialization
+
+Learning:
+Using Express's `res.json()` adds considerable overhead when serving static JSON payloads (such as error states and health checks) due to internal formatting, type checking, and content-type resolution. Similarly, for highly dynamic endpoints, directly utilizing `JSON.stringify()` combined with `res.send()` provides significantly faster throughput.
+
+Action:
+Replaced `.json()` calls across `src/index.js` with direct `.send(Buffer)` for precomputed, immutable error and health objects to skip serialization entirely. For the dynamically generated completions response, replaced `.json()` with manual `JSON.stringify()` and explicit `res.send()`. Also optimized timestamp generation by switching from `Math.floor()` to `Math.trunc()`. These changes notably improve overall gateway throughput and latency in benchmarks.
