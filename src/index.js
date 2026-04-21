@@ -127,6 +127,7 @@ app.post('/v1/chat/completions', (req, res) => {
   const payload = JSON.stringify({
     id: `chatcmpl-${crypto.randomUUID()}`,
     object: 'chat.completion',
+    // Math.trunc is marginally faster than Math.floor for positive numbers
     created: Math.trunc(Date.now() / 1000),
     model: model,
     choices: MOCK_CHOICES,
