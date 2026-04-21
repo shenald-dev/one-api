@@ -35,9 +35,10 @@ if (process.env.ALLOWED_ORIGINS) {
 }
 app.use(cors(corsOptions));
 
-const HEALTH_RESPONSE = Object.freeze({ status: 'ok' });
+const HEALTH_RESPONSE = Buffer.from(JSON.stringify({ status: 'ok' }));
 app.get('/health', (req, res) => {
-  res.status(200).json(HEALTH_RESPONSE);
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.status(200).send(HEALTH_RESPONSE);
 });
 
 // Compress all responses to reduce bandwidth and latency
@@ -45,8 +46,8 @@ app.use(compression());
 // Set a larger JSON limit since LLM contexts can be quite large
 app.use(express.json({ limit: '10mb' }));
 
-const ERROR_INVALID_JSON = Object.freeze({ error: 'Invalid JSON payload' });
-const ERROR_PAYLOAD_TOO_LARGE = Object.freeze({ error: 'Payload too large' });
+const ERROR_INVALID_JSON = Buffer.from(JSON.stringify({ error: 'Invalid JSON payload' }));
+const ERROR_PAYLOAD_TOO_LARGE = Buffer.from(JSON.stringify({ error: 'Payload too large' }));
 
 // Handle invalid JSON gracefully
 app.use((err, req, res, next) => {
@@ -54,10 +55,12 @@ app.use((err, req, res, next) => {
     return next(err);
   }
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json(ERROR_INVALID_JSON);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(400).send(ERROR_INVALID_JSON);
   }
   if (err.type === 'entity.too.large') {
-    return res.status(413).json(ERROR_PAYLOAD_TOO_LARGE);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(413).send(ERROR_PAYLOAD_TOO_LARGE);
   }
   next(err);
 });
@@ -93,46 +96,53 @@ const MOCK_USAGE = Object.freeze({
   total_tokens: 20
 });
 
-const ERROR_MISSING_MODEL = Object.freeze({ error: 'Missing or invalid model' });
-const ERROR_MISSING_MESSAGES = Object.freeze({ error: 'Missing or invalid messages' });
-const ERROR_TOO_MANY_MESSAGES = Object.freeze({ error: 'Too many messages' });
-const ERROR_MALFORMED_MESSAGE = Object.freeze({ error: 'Malformed message object' });
+const ERROR_MISSING_MODEL = Buffer.from(JSON.stringify({ error: 'Missing or invalid model' }));
+const ERROR_MISSING_MESSAGES = Buffer.from(JSON.stringify({ error: 'Missing or invalid messages' }));
+const ERROR_TOO_MANY_MESSAGES = Buffer.from(JSON.stringify({ error: 'Too many messages' }));
+const ERROR_MALFORMED_MESSAGE = Buffer.from(JSON.stringify({ error: 'Malformed message object' }));
 
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body || {};
   if (!isValidModel(model)) {
-    return res.status(400).json(ERROR_MISSING_MODEL);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(400).send(ERROR_MISSING_MODEL);
   }
   if (!isValidMessagesArray(messages)) {
-    return res.status(400).json(ERROR_MISSING_MESSAGES);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(400).send(ERROR_MISSING_MESSAGES);
   }
   if (messages.length > 1000) {
-    return res.status(400).json(ERROR_TOO_MANY_MESSAGES);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(400).send(ERROR_TOO_MANY_MESSAGES);
   }
 
   for (const msg of messages) {
     if (!isValidMessage(msg)) {
-      return res.status(400).json(ERROR_MALFORMED_MESSAGE);
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      return res.status(400).send(ERROR_MALFORMED_MESSAGE);
     }
   }
 
   // Mock unified response
-  res.json({
+  const payload = JSON.stringify({
     id: `chatcmpl-${crypto.randomUUID()}`,
     object: 'chat.completion',
-    created: Math.floor(Date.now() / 1000),
+    created: Math.trunc(Date.now() / 1000),
     model: model,
     choices: MOCK_CHOICES,
     usage: MOCK_USAGE
   });
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.status(200).send(payload);
 });
 
 // 404 handler — return JSON for unknown routes
 app.use((req, res) => {
-  res.status(404).json({ error: 'Not found', path: req.path });
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.status(404).send(JSON.stringify({ error: 'Not found', path: req.path }));
 });
 
-const ERROR_INTERNAL_SERVER = Object.freeze({ error: 'Internal server error' });
+const ERROR_INTERNAL_SERVER = Buffer.from(JSON.stringify({ error: 'Internal server error' }));
 
 // Generic error handler — never leak stack traces
 app.use((err, req, res, next) => {
@@ -140,7 +150,8 @@ app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
   }
-  res.status(500).json(ERROR_INTERNAL_SERVER);
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.status(500).send(ERROR_INTERNAL_SERVER);
 });
 
 const computationCache = new Map();
