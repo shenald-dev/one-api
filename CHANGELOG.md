@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [1.1.20] - 2026-04-22
 ### Changed
 * **[Performance]:** Replaced full object `JSON.stringify()` calls with faster template literal string interpolation for dynamic JSON API responses, drastically improving serialization throughput for chat completions by pre-stringifying static payload blocks.
-
+* **[Performance]:** Verified BOLT's optimization extracting static error and health response objects into frozen module-level constants. Zero dead code pruned.
 
 ## [1.1.19] - 2026-04-21
 ### Changed
