@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.20] - 2026-04-22
+### Changed
+* **[Performance]:** Replaced full object `JSON.stringify()` calls with faster template literal string interpolation for dynamic JSON API responses, drastically improving serialization throughput for chat completions by pre-stringifying static payload blocks.
+
+
 ## [1.1.19] - 2026-04-21
 ### Changed
 * **[Performance]:** Extracted static error responses into frozen module-level constants to prevent redundant memory allocations and garbage collection pressure across API routes. Zero dead code pruned.

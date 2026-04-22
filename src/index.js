@@ -96,6 +96,9 @@ const MOCK_USAGE = Object.freeze({
   total_tokens: 20
 });
 
+const MOCK_CHOICES_JSON = JSON.stringify(MOCK_CHOICES);
+const MOCK_USAGE_JSON = JSON.stringify(MOCK_USAGE);
+
 const ERROR_MISSING_MODEL = Buffer.from(JSON.stringify({ error: 'Missing or invalid model' }));
 const ERROR_MISSING_MESSAGES = Buffer.from(JSON.stringify({ error: 'Missing or invalid messages' }));
 const ERROR_TOO_MANY_MESSAGES = Buffer.from(JSON.stringify({ error: 'Too many messages' }));
@@ -124,14 +127,7 @@ app.post('/v1/chat/completions', (req, res) => {
   }
 
   // Mock unified response
-  const payload = JSON.stringify({
-    id: `chatcmpl-${crypto.randomUUID()}`,
-    object: 'chat.completion',
-    created: Math.trunc(Date.now() / 1000),
-    model: model,
-    choices: MOCK_CHOICES,
-    usage: MOCK_USAGE
-  });
+  const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.trunc(Date.now() / 1000)},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.status(200).send(payload);
 });
