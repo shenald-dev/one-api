@@ -146,3 +146,18 @@ test('isValidMessagesArray validation helper', () => {
   assert.strictEqual(isValidMessagesArray(null), false);
   assert.strictEqual(isValidMessagesArray("not an array"), false);
 });
+
+test('POST /v1/chat/completions securely escapes dynamic template literal variables to prevent JSON injection', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4" } injected " payload',
+      messages: [{ role: 'user', content: 'Hello!' }]
+    });
+
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.body.model, 'gpt-4" } injected " payload', 'The model string should be correctly parsed back, preserving the quotes and special characters.');
+
+  // Since we use a real JSON parser on res.body (via supertest), getting here without a parse error
+  // proves the output from our string template was strictly valid JSON.
+});
