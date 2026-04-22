@@ -154,3 +154,6 @@ Using Express's `res.json()` adds considerable overhead when serving static JSON
 
 Action:
 Replaced `.json()` calls across `src/index.js` with direct `.send(Buffer)` for precomputed, immutable error and health objects to skip serialization entirely. For the dynamically generated completions response, replaced `.json()` with manual `JSON.stringify()` and explicit `res.send()`. Also optimized timestamp generation by switching from `Math.floor()` to `Math.trunc()`. These changes notably improve overall gateway throughput and latency in benchmarks.
+2026-04-22 — Pre-stringified static JSON mock structures
+Learning: For highly dynamic JSON API responses containing large static structures, using full-object JSON.stringify() causes significant serialization overhead. Pre-stringifying the static parts and using template literal interpolation for the dynamic fields reduces serialization overhead and improves throughput.
+Action: Pre-stringify large static mock structures during module initialization and assemble the final JSON dynamically using string interpolation instead of `JSON.stringify`.
