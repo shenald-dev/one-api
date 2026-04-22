@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.21] - 2026-04-22
+### Changed
+* **[Performance]:** Pre-stringified static JSON mock structures to reduce serialization overhead during API responses. Zero dead code pruned.
 ## [1.1.20] - 2026-04-22
 ### Changed
 * **[Performance]:** Verified BOLT's optimization extracting static error and health response objects into frozen module-level constants. Zero dead code pruned.
