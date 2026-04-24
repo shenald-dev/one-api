@@ -146,3 +146,10 @@ test('isValidMessagesArray validation helper', () => {
   assert.strictEqual(isValidMessagesArray(null), false);
   assert.strictEqual(isValidMessagesArray("not an array"), false);
 });
+
+test('404 handler returns proper JSON and does not leak path', async () => {
+  const res = await request(app).get('/some-unknown-path');
+  assert.strictEqual(res.status, 404);
+  assert.strictEqual(res.headers['content-type'], 'application/json; charset=utf-8');
+  assert.deepStrictEqual(res.body, { error: 'Not found' });
+});

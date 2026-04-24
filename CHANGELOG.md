@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.22] - 2026-04-24
+### Changed
+* **[Performance & Security]:** Extracted duplicate Content-Type header assignments into a single global middleware, reducing repeated calls. Mitigated potential XSS risk in 404 handler by removing reflected `req.path` and optimized it by replacing dynamic serialization with a precomputed, static Buffer.
+
 ## [1.1.21] - 2026-04-22
 ### Changed
 * **[Performance]:** Pre-stringified static JSON mock structures to reduce serialization overhead during API responses. Zero dead code pruned.

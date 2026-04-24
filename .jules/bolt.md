@@ -157,3 +157,11 @@ Replaced `.json()` calls across `src/index.js` with direct `.send(Buffer)` for p
 2026-04-22 — Pre-stringified static JSON mock structures
 Learning: For highly dynamic JSON API responses containing large static structures, using full-object JSON.stringify() causes significant serialization overhead. Pre-stringifying the static parts and using template literal interpolation for the dynamic fields reduces serialization overhead and improves throughput.
 Action: Pre-stringify large static mock structures during module initialization and assemble the final JSON dynamically using string interpolation instead of `JSON.stringify`.
+
+## 2026-04-24 — Abstract Content-Type and Fix 404 XSS Risk
+
+Learning:
+Setting `res.setHeader('Content-Type', 'application/json; charset=utf-8')` individually in every route handler and error path creates redundant, duplicated code and leaves room for bugs if missed. Additionally, reflecting the requested `req.path` back in the JSON body of a 404 handler without sanitization creates a potential vector for Cross-Site Scripting (XSS) if the client misinterprets the Content-Type.
+
+Action:
+Extracted the `Content-Type` header assignment into a global middleware placed before all routes but after security middleware (helmet/cors) in `src/index.js`. Optimized the 404 handler to return a frozen, precomputed Buffer `ERROR_NOT_FOUND` rather than a dynamic string, and explicitly removed `req.path` from the body to mitigate XSS vulnerabilities and improve throughput.
