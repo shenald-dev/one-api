@@ -72,15 +72,15 @@ app.use((err, req, res, next) => {
 
 // API endpoints
 function isValidModel(model) {
-  return !!(model && typeof model === 'string' && model.trim());
+  return typeof model === 'string' && model.trim() !== '';
 }
 
 function isValidMessagesArray(messages) {
-  return !!(messages && Array.isArray(messages) && messages.length > 0);
+  return Array.isArray(messages) && messages.length > 0;
 }
 
 function isValidMessage(msg) {
-  return !!(msg && typeof msg === 'object' && !Array.isArray(msg) && msg.role && typeof msg.role === 'string' && typeof msg.content === 'string');
+  return msg != null && typeof msg.role === 'string' && msg.role !== '' && typeof msg.content === 'string';
 }
 
 

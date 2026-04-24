@@ -123,7 +123,7 @@ Action: Ensure * is extracted from parsed environment lists and passed directly 
 Learning: The benchmark runner script `benchmarks/run.js` was duplicating iteration and performance reporting logic already present in the target exported functions (e.g., `main`), leading to redundant execution and inaccurate outer timing results.
 Action: Simplified `benchmarks/run.js` to purely invoke the exported function and delegate iteration and measurement to the target script.
 
-## $(date +%Y-%m-%d) — Optimize Module Mocking in Tests
+## 2026-04-24 — Optimize Module Mocking in Tests
 
 Learning:
 In `tests/test.js`, the mock module loader (`Module.prototype.require`) was allocating a new array `['express', 'cors', 'helmet', 'dotenv', 'compression']` and performing an O(n) `.includes()` lookup on *every single module require*. In hot paths like module loading, this causes unnecessary allocations and CPU overhead.
@@ -165,3 +165,10 @@ Setting `res.setHeader('Content-Type', 'application/json; charset=utf-8')` indiv
 
 Action:
 Extracted the `Content-Type` header assignment into a global middleware placed before all routes but after security middleware (helmet/cors) in `src/index.js`. Optimized the 404 handler to return a frozen, precomputed Buffer `ERROR_NOT_FOUND` rather than a dynamic string, and explicitly removed `req.path` from the body to mitigate XSS vulnerabilities and improve throughput.
+## 2026-04-24 — Optimize Validation Function Checks
+
+Learning:
+In highly trafficked functions such as `isValidModel`, `isValidMessagesArray`, and `isValidMessage` called repeatedly within request paths (and notably inside `for` loops validating arrays of objects), redundant object coercions (`!!`), array checks (`!Array.isArray(msg)` when testing object validity), and indirect checks (`msg.trim()` reliance for boolean logic rather than explicit string length checks) produce measurable CPU cycle and garbage collection overhead. Using explicit equality operators (e.g. `msg != null`, `!== ''`) offers a substantial speedup over indirect truthy evaluation via object coercion.
+
+Action:
+Optimized validation helper logic in `src/index.js` to strictly rely on explicit type checks and avoid double negations (`!!`). Simplified truthiness evaluations into direct equality checks (`trim() !== ''` instead of `!!trim()`).

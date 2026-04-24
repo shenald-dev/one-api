@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.23] - 2026-04-24
+### Performance
+- Optimized validation functions (`isValidModel`, `isValidMessagesArray`, `isValidMessage`) to use faster, explicit type and equality checks instead of object coercions. This improves throughput during payload validation loops.
+
 ## [1.1.22] - 2026-04-24
 ### Changed
 * **[Performance & Security]:** Extracted duplicate Content-Type header assignments into a single global middleware, reducing repeated calls. Mitigated potential XSS risk in 404 handler by removing reflected `req.path` and optimized it by replacing dynamic serialization with a precomputed, static Buffer.
