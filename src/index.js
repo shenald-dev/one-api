@@ -35,9 +35,14 @@ if (process.env.ALLOWED_ORIGINS) {
 }
 app.use(cors(corsOptions));
 
+// Set global JSON Content-Type for all responses to reduce redundant setHeader calls
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
 const HEALTH_RESPONSE = Buffer.from(JSON.stringify({ status: 'ok' }));
 app.get('/health', (req, res) => {
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.status(200).send(HEALTH_RESPONSE);
 });
 
@@ -106,35 +111,31 @@ const ERROR_MALFORMED_MESSAGE = Buffer.from(JSON.stringify({ error: 'Malformed m
 app.post('/v1/chat/completions', (req, res) => {
   const { model, messages } = req.body || {};
   if (!isValidModel(model)) {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.status(400).send(ERROR_MISSING_MODEL);
   }
   if (!isValidMessagesArray(messages)) {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.status(400).send(ERROR_MISSING_MESSAGES);
   }
   if (messages.length > 1000) {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.status(400).send(ERROR_TOO_MANY_MESSAGES);
   }
 
   for (const msg of messages) {
     if (!isValidMessage(msg)) {
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
       return res.status(400).send(ERROR_MALFORMED_MESSAGE);
     }
   }
 
   // Mock unified response
   const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.trunc(Date.now() / 1000)},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.status(200).send(payload);
 });
 
+const ERROR_NOT_FOUND = Buffer.from(JSON.stringify({ error: 'Not found' }));
+
 // 404 handler — return JSON for unknown routes
 app.use((req, res) => {
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.status(404).send(JSON.stringify({ error: 'Not found', path: req.path }));
+  res.status(404).send(ERROR_NOT_FOUND);
 });
 
 const ERROR_INTERNAL_SERVER = Buffer.from(JSON.stringify({ error: 'Internal server error' }));
