@@ -172,3 +172,6 @@ In highly trafficked functions such as `isValidModel`, `isValidMessagesArray`, a
 
 Action:
 Optimized validation helper logic in `src/index.js` to strictly rely on explicit type checks and avoid double negations (`!!`). Simplified truthiness evaluations into direct equality checks (`trim() !== ''` instead of `!!trim()`).
+2026-04-25 — DoS Mitigation via Route-Specific Parsing
+Learning: Global `express.json()` middleware forces the application to buffer and parse request bodies even for unknown or non-existent routes, exposing a Denial of Service (DoS) vulnerability via large payloads to 404 endpoints.
+Action: Apply `express.json()` strictly as route-specific middleware to the exact endpoints that require body parsing, and ensure dependent JSON error handlers are positioned correctly after those specific route definitions in the middleware chain.

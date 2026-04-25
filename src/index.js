@@ -48,27 +48,9 @@ app.get('/health', (req, res) => {
 
 // Compress all responses to reduce bandwidth and latency
 app.use(compression());
-// Set a larger JSON limit since LLM contexts can be quite large
-app.use(express.json({ limit: '10mb' }));
 
 const ERROR_INVALID_JSON = Buffer.from(JSON.stringify({ error: 'Invalid JSON payload' }));
 const ERROR_PAYLOAD_TOO_LARGE = Buffer.from(JSON.stringify({ error: 'Payload too large' }));
-
-// Handle invalid JSON gracefully
-app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    return res.status(400).send(ERROR_INVALID_JSON);
-  }
-  if (err.type === 'entity.too.large') {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    return res.status(413).send(ERROR_PAYLOAD_TOO_LARGE);
-  }
-  next(err);
-});
 
 // API endpoints
 function isValidModel(model) {
@@ -108,7 +90,10 @@ const ERROR_MISSING_MESSAGES = Buffer.from(JSON.stringify({ error: 'Missing or i
 const ERROR_TOO_MANY_MESSAGES = Buffer.from(JSON.stringify({ error: 'Too many messages' }));
 const ERROR_MALFORMED_MESSAGE = Buffer.from(JSON.stringify({ error: 'Malformed message object' }));
 
-app.post('/v1/chat/completions', (req, res) => {
+// Set a larger JSON limit since LLM contexts can be quite large
+const jsonParser = express.json({ limit: '10mb' });
+
+app.post('/v1/chat/completions', jsonParser, (req, res) => {
   const { model, messages } = req.body || {};
   if (!isValidModel(model)) {
     return res.status(400).send(ERROR_MISSING_MODEL);
@@ -129,6 +114,22 @@ app.post('/v1/chat/completions', (req, res) => {
   // Mock unified response
   const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.trunc(Date.now() / 1000)},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
   res.status(200).send(payload);
+});
+
+// Handle invalid JSON gracefully
+app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(400).send(ERROR_INVALID_JSON);
+  }
+  if (err.type === 'entity.too.large') {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(413).send(ERROR_PAYLOAD_TOO_LARGE);
+  }
+  next(err);
 });
 
 const ERROR_NOT_FOUND = Buffer.from(JSON.stringify({ error: 'Not found' }));
