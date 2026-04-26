@@ -22,6 +22,12 @@ const app = express();
 // Disable ETag generation for highly dynamic JSON APIs to save CPU cycles
 app.set('etag', false);
 
+const HEALTH_RESPONSE = Buffer.from(JSON.stringify({ status: 'ok' }));
+app.get('/health', (req, res) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.status(200).send(HEALTH_RESPONSE);
+});
+
 app.use(helmet());
 
 let corsOptions = { origin: '*' };
@@ -41,10 +47,6 @@ app.use((req, res, next) => {
   next();
 });
 
-const HEALTH_RESPONSE = Buffer.from(JSON.stringify({ status: 'ok' }));
-app.get('/health', (req, res) => {
-  res.status(200).send(HEALTH_RESPONSE);
-});
 
 // Compress all responses to reduce bandwidth and latency
 app.use(compression());

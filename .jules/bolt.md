@@ -175,3 +175,8 @@ Optimized validation helper logic in `src/index.js` to strictly rely on explicit
 2026-04-25 — DoS Mitigation via Route-Specific Parsing
 Learning: Global `express.json()` middleware forces the application to buffer and parse request bodies even for unknown or non-existent routes, exposing a Denial of Service (DoS) vulnerability via large payloads to 404 endpoints.
 Action: Apply `express.json()` strictly as route-specific middleware to the exact endpoints that require body parsing, and ensure dependent JSON error handlers are positioned correctly after those specific route definitions in the middleware chain.
+
+## $(date +%Y-%m-%d) — Optimize Health Check Placement
+
+Learning: In Express API gateways, declaring high-frequency, simple endpoints (like `/health`) below global middleware such as `helmet` and `cors` introduces significant and unnecessary CPU parsing overhead for every ping, even if the ping does not require CORS or security headers.
+Action: Moved the `/health` endpoint definition above `helmet()` and `cors()` in `src/index.js`, while manually explicitly setting the `Content-Type` header. This drastically reduces CPU overhead and latency for load balancer pings while maintaining correct response headers.
