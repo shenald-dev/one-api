@@ -23,6 +23,7 @@ const app = express();
 app.set('etag', false);
 
 const HEALTH_RESPONSE = Buffer.from(JSON.stringify({ status: 'ok' }));
+// Placed above helmet and cors to bypass unnecessary middleware overhead for high-frequency pings
 app.get('/health', (req, res) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.status(200).send(HEALTH_RESPONSE);
