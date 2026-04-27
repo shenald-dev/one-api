@@ -53,3 +53,15 @@ test('JSON error handler safely skips without crashing if headers are already se
   // The fact that it gets here without an UncaughtException (ERR_HTTP_HEADERS_SENT) means it passed
   assert.ok(true);
 });
+
+test('POST /v1/chat/completions handles extremely large model names gracefully', async () => {
+  const largeModel = 'a'.repeat(10000);
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: largeModel,
+      messages: [{ role: 'user', content: 'test' }]
+    });
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.error, 'Missing or invalid model');
+});

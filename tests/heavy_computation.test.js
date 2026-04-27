@@ -61,3 +61,8 @@ test('heavyComputation implements LRU eviction', () => {
   // but we can at least assert that it didn't crash.
   assert.ok(time1 < 1.0, 'Refreshed item 1 should be near-instant');
 });
+
+test('heavyComputation handles null correctly', () => {
+  const result = heavyComputation(null);
+  assert.strictEqual(result, 0);
+});
