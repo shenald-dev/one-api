@@ -154,17 +154,28 @@ app.use((err, req, res, next) => {
 });
 
 const computationCache = new Map();
+let lastIterations = null;
+let lastResult = null;
 
 /**
  * Performs a heavy mathematical computation.
  * Optimized with memoization for repeated calls with identical parameters.
  */
 function heavyComputation(iterations) {
+  // L1 Cache: Fast path for repeated consecutive calls
+  if (iterations === lastIterations) {
+    return lastResult;
+  }
+
   const cachedVal = computationCache.get(iterations);
   if (cachedVal !== undefined) {
     // Refresh LRU by deleting and re-inserting
     computationCache.delete(iterations);
     computationCache.set(iterations, cachedVal);
+
+    // Update L1 cache
+    lastIterations = iterations;
+    lastResult = cachedVal;
     return cachedVal;
   }
 
@@ -180,6 +191,10 @@ function heavyComputation(iterations) {
   }
 
   computationCache.set(iterations, sum);
+
+  // Update L1 cache
+  lastIterations = iterations;
+  lastResult = sum;
   return sum;
 }
 
