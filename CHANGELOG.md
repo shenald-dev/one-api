@@ -1,3 +1,7 @@
+## v1.1.25 - 2026-04-27
+### Changed
+- **Performance:** Moved the `/health` endpoint above `helmet()` and `cors()` middlewares, saving significant CPU cycle overhead on load balancer pings by skipping unnecessary security header injections and CORS processing for this specific endpoint. No dead code pruned.
+
 ## v1.1.24 - 2026-04-25
 ### Changed
 - **Security/Performance:** Modified the `express.json()` middleware to act as a route-specific middleware on `/v1/chat/completions` rather than globally. This prevents unnecessary JSON parsing for non-existent endpoints (like 404 routes), mitigating potential CPU exhaustion DoS vectors from large arbitrary payloads.
