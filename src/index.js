@@ -56,7 +56,7 @@ const ERROR_PAYLOAD_TOO_LARGE = Buffer.from(JSON.stringify({ error: 'Payload too
 
 // API endpoints
 function isValidModel(model) {
-  return typeof model === 'string' && model.trim() !== '';
+  return typeof model === 'string' && model.length > 0 && model.length < 1000 && model.trim() !== '';
 }
 
 function isValidMessagesArray(messages) {
@@ -154,8 +154,8 @@ app.use((err, req, res, next) => {
 });
 
 const computationCache = new Map();
-let lastIterations = null;
-let lastResult = null;
+let lastIterations = undefined;
+let lastResult = undefined;
 
 /**
  * Performs a heavy mathematical computation.
