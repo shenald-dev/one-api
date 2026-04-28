@@ -138,3 +138,9 @@ Observation / Pruned:
 Assessed BOLT's optimization moving the `/health` endpoint above `helmet()` and `cors()` middlewares, while manually setting `Content-Type`. This effectively prevents parsing and middleware overhead for frequent health check pings without compromising the expected response headers. Also bumped minor/patch versions via `npm update`. No dead code or unused files found, as previous optimizations have pruned effectively.
 Alignment / Deferred:
 Appended release notes for performance patch. Version bumped to 1.1.25.
+
+2026-04-28 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed JULES/BOLT's optimization adding an L1 cache to `heavyComputation`. Discovered a silent regression where initializing the cache variables with `undefined` caused false cache hits when the function was legitimately called with `undefined`. Fixed the regression by initializing the cache with a unique `Symbol('UNINITIALIZED')`. Ran tests to ensure no further issues. Checked for dead code and found none.
+Alignment / Deferred:
+Updated `CHANGELOG.md` with the fix details. Version bumped to 1.1.26.
