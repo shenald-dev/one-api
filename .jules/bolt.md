@@ -188,3 +188,11 @@ In highly trafficked functions like `heavyComputation` that rely on an LRU map c
 
 Action:
 Added an L1 cache using module-scoped variables (`lastIterations` and `lastResult`) to `heavyComputation` in `src/index.js`. This avoids redundant Map lookups and mutations for consecutive identical calls, transforming a hot path from an (1)$ Map operation to a much faster strict equality check.
+
+## 2026-04-28 — Optimize L1 Cache Initialization
+
+Learning:
+When implementing L1 caches or memoization using outer-scope variables, initializing the cache keys with `undefined` causes false cache hits when `undefined` is a valid function argument.
+
+Action:
+Initialized L1 cache keys with a unique `Symbol('uninitialized')` rather than `undefined` to prevent false hits for valid arguments, fixing the incorrect cache behavior in `heavyComputation`.

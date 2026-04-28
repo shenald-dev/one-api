@@ -66,3 +66,8 @@ test('heavyComputation handles null correctly', () => {
   const result = heavyComputation(null);
   assert.strictEqual(result, 0);
 });
+
+test('heavyComputation handles undefined correctly', () => {
+  const result = heavyComputation(undefined);
+  assert.strictEqual(result, 0);
+});

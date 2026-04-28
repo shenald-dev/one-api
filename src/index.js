@@ -154,7 +154,7 @@ app.use((err, req, res, next) => {
 });
 
 const computationCache = new Map();
-let lastIterations = undefined;
+let lastIterations = Symbol('uninitialized');
 let lastResult = undefined;
 
 /**
