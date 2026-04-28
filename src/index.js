@@ -154,6 +154,7 @@ app.use((err, req, res, next) => {
 });
 
 const computationCache = new Map();
+// Use a unique Symbol as sentinel to prevent false cache hits if undefined is passed as a valid argument
 let lastIterations = Symbol('uninitialized');
 let lastResult = undefined;
 
