@@ -1,3 +1,7 @@
+## [1.1.26] - 2026-04-28
+### Changed
+* **[Reliability]:** Fixed an issue in `heavyComputation` where the L1 cache was incorrectly returning false cache hits when `undefined` was passed as a parameter. The cache is now properly initialized with a unique `Symbol`. Zero dead code pruned.
+
 ## v1.1.25 - 2026-04-27
 ### Changed
 - **Performance:** Moved the `/health` endpoint above `helmet()` and `cors()` middlewares, saving significant CPU cycle overhead on load balancer pings by skipping unnecessary security header injections and CORS processing for this specific endpoint. No dead code pruned.
