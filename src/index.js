@@ -154,6 +154,9 @@ app.use((err, req, res, next) => {
 });
 
 const computationCache = new Map();
+// Use a unique Symbol rather than undefined to initialize the L1 cache.
+// This prevents false cache hits when the function is legitimately
+// called with `undefined` as a parameter.
 let lastIterations = Symbol('UNINITIALIZED');
 let lastResult = undefined;
 
