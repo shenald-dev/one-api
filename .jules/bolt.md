@@ -196,3 +196,11 @@ In highly trafficked endpoints like `/v1/chat/completions`, destructuring proper
 
 Action:
 Replaced the object destructuring and `|| {}` fallback with direct property access after an explicit check of `req.body`. Replaced the `for...of` loop with a classic `for` loop caching the `messages.length` in a local variable `messagesLen` before the loop. This reduces garbage collection pressure and significantly improves execution speed on hot paths.
+
+2026-04-30 — Handle Express body-parser Client Errors
+Learning: In Express.js applications using `body-parser` or `express.json()`, failing to explicitly handle specific 4xx client errors (such as `charset.unsupported`, `encoding.unsupported`, and `request.aborted`) causes them to fall through to the global error handler, resulting in 500 Internal Server Error responses and log spam, presenting a minor DoS risk.
+Action: Updated the global error handler in `src/index.js` to explicitly intercept these error `.type` properties and return proper 415 or 400 JSON responses.
+
+2026-04-30 — Avoid Modifying Express Router Internals in Tests
+Learning: When writing isolated unit tests using `supertest`, attempting to mutate `app._router.stack` to dynamically inject routes before global error handlers fails because `app._router` is lazily initialized and can be undefined at module load time.
+Action: Test error handlers by constructing an isolated `mockApp` using `express()` that mirrors the production routing logic rather than mutating the internals of the exported `app`.
