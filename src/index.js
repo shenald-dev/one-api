@@ -96,7 +96,9 @@ const ERROR_MALFORMED_MESSAGE = Buffer.from(JSON.stringify({ error: 'Malformed m
 const jsonParser = express.json({ limit: '10mb' });
 
 app.post('/v1/chat/completions', jsonParser, (req, res) => {
-  const { model, messages } = req.body || {};
+  const body = req.body;
+  const model = body ? body.model : undefined;
+  const messages = body ? body.messages : undefined;
   if (!isValidModel(model)) {
     return res.status(400).send(ERROR_MISSING_MODEL);
   }
@@ -107,8 +109,9 @@ app.post('/v1/chat/completions', jsonParser, (req, res) => {
     return res.status(400).send(ERROR_TOO_MANY_MESSAGES);
   }
 
-  for (const msg of messages) {
-    if (!isValidMessage(msg)) {
+  const messagesLen = messages.length;
+  for (let i = 0; i < messagesLen; i++) {
+    if (!isValidMessage(messages[i])) {
       return res.status(400).send(ERROR_MALFORMED_MESSAGE);
     }
   }
@@ -117,6 +120,9 @@ app.post('/v1/chat/completions', jsonParser, (req, res) => {
   const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.trunc(Date.now() / 1000)},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
   res.status(200).send(payload);
 });
+
+const ERROR_UNSUPPORTED_MEDIA_TYPE = Buffer.from(JSON.stringify({ error: 'Unsupported media type' }));
+const ERROR_BAD_REQUEST = Buffer.from(JSON.stringify({ error: 'Bad request' }));
 
 // Handle invalid JSON gracefully
 app.use((err, req, res, next) => {
@@ -130,6 +136,14 @@ app.use((err, req, res, next) => {
   if (err.type === 'entity.too.large') {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.status(413).send(ERROR_PAYLOAD_TOO_LARGE);
+  }
+  if (err.type === 'charset.unsupported' || err.type === 'encoding.unsupported') {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(415).send(ERROR_UNSUPPORTED_MEDIA_TYPE);
+  }
+  if (err.type === 'request.aborted') {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(400).send(ERROR_BAD_REQUEST);
   }
   next(err);
 });
