@@ -121,6 +121,9 @@ app.post('/v1/chat/completions', jsonParser, (req, res) => {
   res.status(200).send(payload);
 });
 
+const ERROR_UNSUPPORTED_MEDIA_TYPE = Buffer.from(JSON.stringify({ error: 'Unsupported media type' }));
+const ERROR_BAD_REQUEST = Buffer.from(JSON.stringify({ error: 'Bad request' }));
+
 // Handle invalid JSON gracefully
 app.use((err, req, res, next) => {
   if (res.headersSent) {
@@ -133,6 +136,14 @@ app.use((err, req, res, next) => {
   if (err.type === 'entity.too.large') {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.status(413).send(ERROR_PAYLOAD_TOO_LARGE);
+  }
+  if (err.type === 'charset.unsupported' || err.type === 'encoding.unsupported') {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(415).send(ERROR_UNSUPPORTED_MEDIA_TYPE);
+  }
+  if (err.type === 'request.aborted') {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(400).send(ERROR_BAD_REQUEST);
   }
   next(err);
 });
