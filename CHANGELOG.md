@@ -1,3 +1,7 @@
+## [1.1.27] - 2026-04-29
+### Changed
+- Optimized `/v1/chat/completions` parsing and validation loops.
+
 ## [1.1.26] - 2026-04-28
 ### Changed
 * **[Reliability]:** Fixed an issue in `heavyComputation` where the L1 cache was incorrectly returning false cache hits when `undefined` was passed as a parameter. The cache is now properly initialized with a unique `Symbol`. Zero dead code pruned.
