@@ -96,7 +96,9 @@ const ERROR_MALFORMED_MESSAGE = Buffer.from(JSON.stringify({ error: 'Malformed m
 const jsonParser = express.json({ limit: '10mb' });
 
 app.post('/v1/chat/completions', jsonParser, (req, res) => {
-  const { model, messages } = req.body || {};
+  const body = req.body;
+  const model = body ? body.model : undefined;
+  const messages = body ? body.messages : undefined;
   if (!isValidModel(model)) {
     return res.status(400).send(ERROR_MISSING_MODEL);
   }
@@ -107,8 +109,9 @@ app.post('/v1/chat/completions', jsonParser, (req, res) => {
     return res.status(400).send(ERROR_TOO_MANY_MESSAGES);
   }
 
-  for (const msg of messages) {
-    if (!isValidMessage(msg)) {
+  const messagesLen = messages.length;
+  for (let i = 0; i < messagesLen; i++) {
+    if (!isValidMessage(messages[i])) {
       return res.status(400).send(ERROR_MALFORMED_MESSAGE);
     }
   }

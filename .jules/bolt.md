@@ -176,7 +176,7 @@ Optimized validation helper logic in `src/index.js` to strictly rely on explicit
 Learning: Global `express.json()` middleware forces the application to buffer and parse request bodies even for unknown or non-existent routes, exposing a Denial of Service (DoS) vulnerability via large payloads to 404 endpoints.
 Action: Apply `express.json()` strictly as route-specific middleware to the exact endpoints that require body parsing, and ensure dependent JSON error handlers are positioned correctly after those specific route definitions in the middleware chain.
 
-## $(date +%Y-%m-%d) — Optimize Health Check Placement
+## 2026-04-29 — Optimize Health Check Placement
 
 Learning: In Express API gateways, declaring high-frequency, simple endpoints (like `/health`) below global middleware such as `helmet` and `cors` introduces significant and unnecessary CPU parsing overhead for every ping, even if the ping does not require CORS or security headers.
 Action: Moved the `/health` endpoint definition above `helmet()` and `cors()` in `src/index.js`, while manually explicitly setting the `Content-Type` header. This drastically reduces CPU overhead and latency for load balancer pings while maintaining correct response headers.
@@ -188,3 +188,11 @@ In highly trafficked functions like `heavyComputation` that rely on an LRU map c
 
 Action:
 Added an L1 cache using module-scoped variables (`lastIterations` and `lastResult`) to `heavyComputation` in `src/index.js`. This avoids redundant Map lookups and mutations for consecutive identical calls, transforming a hot path from an (1)$ Map operation to a much faster strict equality check.
+
+## 2026-04-29 — Optimize Hot Path Iteration and Destructuring
+
+Learning:
+In highly trafficked endpoints like `/v1/chat/completions`, destructuring properties directly from potentially undefined objects (e.g., `const { model, messages } = req.body || {}`) creates unnecessary object allocations for the fallback `{}` and is slower than explicitly checking for the object's existence and accessing properties directly. Additionally, using `for...of` loops incurs iterator allocation and traversal overhead compared to classic `for` loops with a cached array length, especially for large arrays like `messages`.
+
+Action:
+Replaced the object destructuring and `|| {}` fallback with direct property access after an explicit check of `req.body`. Replaced the `for...of` loop with a classic `for` loop caching the `messages.length` in a local variable `messagesLen` before the loop. This reduces garbage collection pressure and significantly improves execution speed on hot paths.
