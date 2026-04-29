@@ -109,6 +109,7 @@ app.post('/v1/chat/completions', jsonParser, (req, res) => {
     return res.status(400).send(ERROR_TOO_MANY_MESSAGES);
   }
 
+  // Use a classic for loop with cached length instead of for...of to avoid iterator allocation overhead in the hot path
   const messagesLen = messages.length;
   for (let i = 0; i < messagesLen; i++) {
     if (!isValidMessage(messages[i])) {
