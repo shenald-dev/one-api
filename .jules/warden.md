@@ -155,3 +155,9 @@ Observation / Pruned:
 Assessed repository state following previous optimizations. Since no new functional or architectural changes were introduced by the prior agent run, no new release cut or version bump is warranted. Maintained semantic integrity by preserving the existing v1.1.26 state. Zero dead code identified and pruned.
 Alignment / Deferred:
 Release deferred. Repository state verified and stable.
+
+2026-04-30 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed JULES/BOLT's optimization gracefully handling Express body-parser 4xx client errors (charset.unsupported, encoding.unsupported, request.aborted) by intercepting them and returning explicit 415 or 400 JSON responses. This prevents unhandled errors from falling through to the global error handler and causing 500 Internal Server Error log spam. Precomputed standard JSON buffers were used to avoid repetitive allocation. Ran tests and robustness scripts to verify correct validation edge cases pass. Zero unused files or exports were identified for pruning.
+Alignment / Deferred:
+Appended release notes for error handling patch. Version bumped to 1.1.28.

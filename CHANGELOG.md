@@ -1,3 +1,7 @@
+## [1.1.28] - 2026-04-30
+### Changed
+* **[Reliability & Security]:** Gracefully handle Express body-parser 4xx client errors (`charset.unsupported`, `encoding.unsupported`, `request.aborted`) by returning explicit 415 or 400 JSON responses instead of falling through to the generic 500 error handler. Precomputed standard JSON responses to optimize error paths. Zero dead code pruned.
+
 ## [1.1.27] - 2026-04-29
 ### Changed
 - Optimized `/v1/chat/completions` parsing and validation loops.
