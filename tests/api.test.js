@@ -7,6 +7,7 @@ test('GET /health returns 200', async () => {
   const res = await request(app).get('/health');
   assert.strictEqual(res.status, 200);
   assert.deepStrictEqual(res.body, { status: 'ok' });
+  assert.strictEqual(res.headers['x-powered-by'], undefined);
 });
 
 test('POST /v1/chat/completions works with valid data', async () => {

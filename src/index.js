@@ -21,6 +21,7 @@ process.on('unhandledRejection', (reason, promise) => {
 const app = express();
 // Disable ETag generation for highly dynamic JSON APIs to save CPU cycles
 app.set('etag', false);
+app.disable('x-powered-by');
 
 const HEALTH_RESPONSE = Buffer.from(JSON.stringify({ status: 'ok' }));
 app.get('/health', (req, res) => {

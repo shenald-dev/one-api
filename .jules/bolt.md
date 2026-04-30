@@ -204,3 +204,7 @@ Action: Updated the global error handler in `src/index.js` to explicitly interce
 2026-04-30 — Avoid Modifying Express Router Internals in Tests
 Learning: When writing isolated unit tests using `supertest`, attempting to mutate `app._router.stack` to dynamically inject routes before global error handlers fails because `app._router` is lazily initialized and can be undefined at module load time.
 Action: Test error handlers by constructing an isolated `mockApp` using `express()` that mirrors the production routing logic rather than mutating the internals of the exported `app`.
+
+2026-04-30 — Prevent X-Powered-By Header Leak on Unprotected Endpoints
+Learning: When using Express, disabling the `x-powered-by` header using `app.disable('x-powered-by')` at the application level prevents the framework from automatically setting the header. Endpoints declared above global security middlewares like `helmet()` (which normally strips this header) will inadvertently leak this header if it is not explicitly disabled globally. Disabling it also saves a small amount of CPU overhead across all requests.
+Action: Add `app.disable('x-powered-by')` near application initialization in `src/index.js` to guarantee the header is never generated, protecting routes that intentionally bypass global middleware for performance reasons.
