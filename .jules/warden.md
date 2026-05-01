@@ -161,3 +161,8 @@ Observation / Pruned:
 Assessed JULES/BOLT's optimization gracefully handling Express body-parser 4xx client errors (charset.unsupported, encoding.unsupported, request.aborted) by intercepting them and returning explicit 415 or 400 JSON responses. This prevents unhandled errors from falling through to the global error handler and causing 500 Internal Server Error log spam. Precomputed standard JSON buffers were used to avoid repetitive allocation. Ran tests and robustness scripts to verify correct validation edge cases pass. Zero unused files or exports were identified for pruning.
 Alignment / Deferred:
 Appended release notes for error handling patch. Version bumped to 1.1.28.
+2026-05-01 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed JULES/BOLT's optimization fixing X-Powered-By header leak on bypassed endpoints. By globally disabling the 'x-powered-by' header via app.disable('x-powered-by'), endpoints like /health that are defined before global security middlewares (helmet) are protected from leaking the framework identifier. The change successfully improves security while saving CPU overhead. Ran tests and verified robustness. Zero dead code identified.
+Alignment / Deferred:
+Appended release notes for the security fix. Version bumped to 1.1.29.
