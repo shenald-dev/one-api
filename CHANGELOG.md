@@ -1,3 +1,7 @@
+## [1.1.29] - 2026-05-01
+### Changed
+* **[Security & Performance]:** Fixed an issue where high-frequency endpoints bypassing global middlewares leaked the `X-Powered-By` framework identifier. Globally disabled the header during application initialization, successfully mitigating the leak and saving CPU overhead across all requests. Zero dead code was pruned.
+
 ## [1.1.28] - 2026-04-30
 ### Changed
 * **[Reliability & Security]:** Gracefully handle Express body-parser 4xx client errors (`charset.unsupported`, `encoding.unsupported`, `request.aborted`) by returning explicit 415 or 400 JSON responses instead of falling through to the generic 500 error handler. Precomputed standard JSON responses to optimize error paths. Zero dead code pruned.
