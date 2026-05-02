@@ -208,3 +208,11 @@ Action: Test error handlers by constructing an isolated `mockApp` using `express
 2026-04-30 — Prevent X-Powered-By Header Leak on Unprotected Endpoints
 Learning: When using Express, disabling the `x-powered-by` header using `app.disable('x-powered-by')` at the application level prevents the framework from automatically setting the header. Endpoints declared above global security middlewares like `helmet()` (which normally strips this header) will inadvertently leak this header if it is not explicitly disabled globally. Disabling it also saves a small amount of CPU overhead across all requests.
 Action: Add `app.disable('x-powered-by')` near application initialization in `src/index.js` to guarantee the header is never generated, protecting routes that intentionally bypass global middleware for performance reasons.
+
+## 2026-05-02 — Optimize CORS Preflight Caching
+
+Learning:
+In Express applications handling cross-origin traffic, failing to explicitly configure the `cors` middleware with a high `maxAge` instructs browsers to not cache preflight `OPTIONS` requests, significantly increasing redundant network traffic, API latency, and backend CPU overhead.
+
+Action:
+Configured the `cors` middleware in `src/index.js` with a high `maxAge` (e.g., `maxAge: 86400`) to instruct browsers to cache preflight `OPTIONS` requests, mitigating the overhead.
