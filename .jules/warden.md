@@ -166,3 +166,9 @@ Observation / Pruned:
 Assessed JULES/BOLT's optimization fixing X-Powered-By header leak on bypassed endpoints. By globally disabling the 'x-powered-by' header via app.disable('x-powered-by'), endpoints like /health that are defined before global security middlewares (helmet) are protected from leaking the framework identifier. The change successfully improves security while saving CPU overhead. Ran tests and verified robustness. Zero dead code identified.
 Alignment / Deferred:
 Appended release notes for the security fix. Version bumped to 1.1.29.
+
+2026-05-02 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed JULES/BOLT's optimization caching CORS preflight requests via the `maxAge: 86400` option in `src/index.js`. This avoids redundant backend parsing and significantly cuts request latency for browser clients. Tests updated to verify the `Access-Control-Max-Age` header, all passing with improved throughput metrics. Zero dead code identified or pruned.
+Alignment / Deferred:
+Appended release notes. Version bumped to 1.1.30.

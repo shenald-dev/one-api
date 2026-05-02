@@ -31,7 +31,7 @@ app.get('/health', (req, res) => {
 
 app.use(helmet());
 
-let corsOptions = { origin: '*' };
+let corsOptions = { origin: '*', maxAge: 86400 };
 if (process.env.ALLOWED_ORIGINS) {
   const origins = process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean);
   if (origins.includes('*')) {
