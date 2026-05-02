@@ -12,6 +12,7 @@ test('CORS defaults to * when ALLOWED_ORIGINS is not set', async () => {
     .set('Origin', 'http://example.com');
 
   assert.strictEqual(res.headers['access-control-allow-origin'], '*');
+  assert.strictEqual(res.headers['access-control-max-age'], '86400');
 });
 
 test('CORS restricts to specific origins when ALLOWED_ORIGINS is set', async () => {
@@ -24,6 +25,7 @@ test('CORS restricts to specific origins when ALLOWED_ORIGINS is set', async () 
     .set('Origin', 'https://bar.com');
 
   assert.strictEqual(res1.headers['access-control-allow-origin'], 'https://bar.com');
+  assert.strictEqual(res1.headers['access-control-max-age'], '86400');
 
   const res2 = await request(app)
     .options('/health')
@@ -42,4 +44,5 @@ test('CORS allows * when ALLOWED_ORIGINS contains *', async () => {
     .set('Origin', 'http://hacker.com');
 
   assert.strictEqual(res.headers['access-control-allow-origin'], '*');
+  assert.strictEqual(res.headers['access-control-max-age'], '86400');
 });
