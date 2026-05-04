@@ -38,6 +38,8 @@ if (process.env.ALLOWED_ORIGINS) {
     corsOptions.origin = origins;
   }
 }
+// cors must precede helmet to allow OPTIONS preflight requests to short-circuit
+// without incurring unnecessary security header processing overhead.
 app.use(cors(corsOptions));
 
 app.use(helmet());
