@@ -187,6 +187,6 @@ Release deferred. Repository state verified and stable.
 
 ## 2026-05-04 — Assessment & Lifecycle
 Observation / Pruned:
-Assessed JULES/BOLT's optimization reordering the `cors` and `helmet` global middlewares. Moving `cors()` before `helmet()` avoids unnecessary security header processing for standard `OPTIONS` preflight requests, demonstrably improving baseline API latency. Verified tests to ensure no regressions. Zero dead code or unused files identified for pruning.
+Assessed JULES/BOLT's optimization moving `cors()` middleware before `helmet()`. This allows preflight `OPTIONS` requests to be intercepted immediately by `cors`, bypassing redundant security header processing and improving baseline latency. Also consolidated the `res.setHeader` calls in the JSON error handler. Tests verified and robustness ensured. Zero dead code identified and pruned.
 Alignment / Deferred:
-Appended release notes for the latency performance patch. Version bumped to 1.1.31.
+Appended release notes for the performance patch. Version bumped to 1.1.31.

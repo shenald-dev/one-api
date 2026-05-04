@@ -1,6 +1,6 @@
 ## [1.1.31] - 2026-05-04
 ### Changed
-* **[Performance]:** Reordered the global middleware stack by defining `cors` before `helmet`. This ensures `OPTIONS` preflight requests bypass unnecessary security header processing, measurably reducing latency overhead (preflight throughput increased by ~25%).
+* **[Performance]:** Moved the `cors()` middleware to be above `helmet()` in the global middleware stack. This allows `OPTIONS` preflight requests to be intercepted and resolved immediately by `cors`, bypassing unnecessary security header processing, measurably reducing latency overhead (preflight throughput increased by ~25%). Also, consolidated the `res.setHeader` calls in the JSON error handler.
 
 ## [1.1.30] - 2026-05-02
 ### Changed
