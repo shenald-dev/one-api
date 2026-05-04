@@ -29,8 +29,6 @@ app.get('/health', (req, res) => {
   res.status(200).send(HEALTH_RESPONSE);
 });
 
-app.use(helmet());
-
 let corsOptions = { origin: '*', maxAge: 86400 };
 if (process.env.ALLOWED_ORIGINS) {
   const origins = process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean);
@@ -41,6 +39,8 @@ if (process.env.ALLOWED_ORIGINS) {
   }
 }
 app.use(cors(corsOptions));
+
+app.use(helmet());
 
 // Set global JSON Content-Type for all responses to reduce redundant setHeader calls
 app.use((req, res, next) => {
@@ -130,20 +130,20 @@ app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
   }
+
+  // Set Content-Type here to avoid setting it multiple times
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.status(400).send(ERROR_INVALID_JSON);
   }
   if (err.type === 'entity.too.large') {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.status(413).send(ERROR_PAYLOAD_TOO_LARGE);
   }
   if (err.type === 'charset.unsupported' || err.type === 'encoding.unsupported') {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.status(415).send(ERROR_UNSUPPORTED_MEDIA_TYPE);
   }
   if (err.type === 'request.aborted') {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.status(400).send(ERROR_BAD_REQUEST);
   }
   next(err);
