@@ -1,3 +1,7 @@
+## [1.1.31] - 2026-05-04
+### Changed
+* **[Performance]:** Reordered the global middleware stack by defining `cors` before `helmet`. This ensures `OPTIONS` preflight requests bypass unnecessary security header processing, measurably reducing latency overhead.
+
 ## [1.1.30] - 2026-05-02
 ### Changed
 * **[Performance]:** Configured `cors` middleware with a high `maxAge` (86400) to instruct browsers to cache preflight `OPTIONS` requests, reducing redundant network traffic, API latency, and backend CPU overhead.

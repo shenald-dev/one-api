@@ -29,8 +29,6 @@ app.get('/health', (req, res) => {
   res.status(200).send(HEALTH_RESPONSE);
 });
 
-app.use(helmet());
-
 let corsOptions = { origin: '*', maxAge: 86400 };
 if (process.env.ALLOWED_ORIGINS) {
   const origins = process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean);
@@ -41,6 +39,8 @@ if (process.env.ALLOWED_ORIGINS) {
   }
 }
 app.use(cors(corsOptions));
+
+app.use(helmet());
 
 // Set global JSON Content-Type for all responses to reduce redundant setHeader calls
 app.use((req, res, next) => {

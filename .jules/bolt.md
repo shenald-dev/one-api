@@ -216,3 +216,11 @@ In Express applications handling cross-origin traffic, failing to explicitly con
 
 Action:
 Configured the `cors` middleware in `src/index.js` with a high `maxAge` (e.g., `maxAge: 86400`) to instruct browsers to cache preflight `OPTIONS` requests, mitigating the overhead.
+
+## 2026-05-04 — Optimize Preflight Middleware Latency
+
+Learning:
+In Express applications handling cross-origin traffic, preflight `OPTIONS` requests do not require or benefit from security header injection by `helmet()`. Placing `helmet()` before `cors()` forces unnecessary middleware execution for every preflight, introducing measurable latency overhead.
+
+Action:
+Reordered the global middleware stack in `src/index.js` to define `cors()` before `helmet()`. This ensures preflight requests are intercepted and responded to immediately by the `cors` middleware, bypassing `helmet()` entirely and noticeably improving API baseline latency.
