@@ -87,6 +87,7 @@ const MOCK_USAGE = Object.freeze({
 });
 const MOCK_CHOICES_JSON = JSON.stringify(MOCK_CHOICES);
 const MOCK_USAGE_JSON = JSON.stringify(MOCK_USAGE);
+const STATIC_SUFFIX = `,"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
 
 const ERROR_MISSING_MODEL = Buffer.from(JSON.stringify({ error: 'Missing or invalid model' }));
 const ERROR_MISSING_MESSAGES = Buffer.from(JSON.stringify({ error: 'Missing or invalid messages' }));
@@ -118,7 +119,7 @@ app.post('/v1/chat/completions', jsonParser, (req, res) => {
   }
 
   // Mock unified response
-  const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.trunc(Date.now() / 1000)},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
+  const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.trunc(Date.now() / 1000)},"model":${JSON.stringify(model)}${STATIC_SUFFIX}`;
   res.status(200).send(payload);
 });
 
