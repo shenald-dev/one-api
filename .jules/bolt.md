@@ -224,3 +224,11 @@ In Express applications handling cross-origin traffic, placing the `cors()` midd
 
 Action:
 Moved the `cors()` middleware before `helmet()` in the global middleware stack. This allows `OPTIONS` preflight requests to be intercepted and resolved immediately by `cors`, bypassing unnecessary security header processing and improving baseline latency. Consolidated the `res.setHeader` calls in the JSON error handler into a single global setter.
+
+## 2026-05-05 — Optimize JSON serialization in completion payload
+
+Learning:
+Constructing a highly dynamic JSON API response (like LLM completions) by repeatedly using `JSON.stringify()` or concatenating large static JSON objects incurs measurable CPU overhead.
+
+Action:
+Precompute and stringify the static parts of the JSON object at the module level (e.g., `STATIC_SUFFIX`), and then cleanly interpolate them using template literals for the dynamic properties on every request. This preserves readability while maximizing V8's optimization of the static string parts.

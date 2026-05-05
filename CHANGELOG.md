@@ -1,3 +1,8 @@
+## [1.1.32] - 2026-05-05
+
+### Performance
+- Precomputed static JSON suffix and utilized template literal interpolation in `/v1/chat/completions` to reduce payload generation overhead, improving throughput.
+
 ## [1.1.31] - 2026-05-04
 ### Changed
 * **[Performance]:** Moved the `cors()` middleware to be above `helmet()` in the global middleware stack. This allows `OPTIONS` preflight requests to be intercepted and resolved immediately by `cors`, bypassing unnecessary security header processing. Also, consolidated the `res.setHeader` calls in the JSON error handler.
