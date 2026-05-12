@@ -50,7 +50,7 @@ app.use((req, res, next) => {
 
 
 // Compress all responses to reduce bandwidth and latency
-app.use(compression());
+const compressMiddleware = compression();
 
 const ERROR_INVALID_JSON = Buffer.from(JSON.stringify({ error: 'Invalid JSON payload' }));
 const ERROR_PAYLOAD_TOO_LARGE = Buffer.from(JSON.stringify({ error: 'Payload too large' }));
@@ -96,7 +96,7 @@ const ERROR_MALFORMED_MESSAGE = Buffer.from(JSON.stringify({ error: 'Malformed m
 // Set a larger JSON limit since LLM contexts can be quite large
 const jsonParser = express.json({ limit: '10mb' });
 
-app.post('/v1/chat/completions', jsonParser, (req, res) => {
+app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   const body = req.body;
   const model = body ? body.model : undefined;
   const messages = body ? body.messages : undefined;
