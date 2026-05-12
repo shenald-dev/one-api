@@ -1,3 +1,7 @@
+## [1.1.32] - 2026-05-12
+### Changed
+* **[Performance]:** Converted `compression()` from a global middleware to a route-specific middleware on the `/v1/chat/completions` endpoint. This prevents unhandled routes (404s) and lightweight responses from incurring unnecessary CPU overhead and memory allocation for compression.
+
 ## [1.1.31] - 2026-05-04
 ### Changed
 * **[Performance]:** Moved the `cors()` middleware to be above `helmet()` in the global middleware stack. This allows `OPTIONS` preflight requests to be intercepted and resolved immediately by `cors`, bypassing unnecessary security header processing. Also, consolidated the `res.setHeader` calls in the JSON error handler.

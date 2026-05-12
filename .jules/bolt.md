@@ -224,3 +224,9 @@ In Express applications handling cross-origin traffic, placing the `cors()` midd
 
 Action:
 Moved the `cors()` middleware before `helmet()` in the global middleware stack. This allows `OPTIONS` preflight requests to be intercepted and resolved immediately by `cors`, bypassing unnecessary security header processing and improving baseline latency. Consolidated the `res.setHeader` calls in the JSON error handler into a single global setter.
+
+## 2026-05-12 — Compression Middleware Overhead
+Learning:
+Global `compression()` middleware introduces significant CPU and memory allocation overhead on unhandled routes (404s) and lightweight responses.
+Action:
+Always apply `compression()` as a route-specific middleware only to endpoints that return large payloads.
