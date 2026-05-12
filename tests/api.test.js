@@ -154,3 +154,28 @@ test('404 handler returns proper JSON and does not leak path', async () => {
   assert.strictEqual(res.headers['content-type'], 'application/json; charset=utf-8');
   assert.deepStrictEqual(res.body, { error: 'Not found' });
 });
+
+test('GET /health is not compressed', async () => {
+  const res = await request(app)
+    .get('/health')
+    .set('Accept-Encoding', 'gzip, deflate, br');
+
+  // Since compression is route-specific to /v1/chat/completions, /health should not be compressed
+  // and will not have the 'Vary' header added by the compression middleware
+  assert.strictEqual(res.headers.vary, undefined);
+  assert.strictEqual(res.headers['content-encoding'], undefined);
+});
+
+test('POST /v1/chat/completions triggers compression middleware', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .set('Accept-Encoding', 'gzip, deflate, br')
+    .send({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: 'Hello!' }]
+    });
+
+  // Even if the payload is too small to actually compress (threshold 1kb),
+  // the compression middleware will always append 'Accept-Encoding' to the Vary header.
+  assert.ok(res.headers.vary && res.headers.vary.includes('Accept-Encoding'));
+});
