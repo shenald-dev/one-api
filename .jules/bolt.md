@@ -230,3 +230,10 @@ Learning:
 Global `compression()` middleware introduces significant CPU and memory allocation overhead on unhandled routes (404s) and lightweight responses.
 Action:
 Always apply `compression()` as a route-specific middleware only to endpoints that return large payloads.
+## $(date +%Y-%m-%d) — Optimize API Response Payload Generation
+
+Learning:
+In hot paths generating dynamic JSON structures, extracting large static blocks of pre-stringified JSON and appending them as a single concatenated string (or at the end of a template literal) eliminates significant template evaluation overhead. Additionally, \`Math.floor(Date.now() / 1000)\` is measurably faster than \`Math.trunc\` in modern V8.
+
+Action:
+Always audit template literals in hot loops for static segments that can be pre-combined. Prefer \`Math.floor\` for positive floating-point truncation in tight V8 paths.

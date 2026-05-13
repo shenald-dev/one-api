@@ -1,3 +1,8 @@
+## [1.1.33] - 2026-05-13
+### Performance
+- Optimized JSON API payload generation by extracting static postfix string to reduce template literal interpolation overhead.
+- Replaced `Math.trunc` with `Math.floor` in hot loop timestamp creation.
+
 ## [1.1.32] - 2026-05-12
 ### Changed
 * **[Performance]:** Converted `compression()` from a global middleware to a route-specific middleware on the `/v1/chat/completions` endpoint. This prevents unhandled routes (404s) and lightweight responses from incurring unnecessary CPU overhead and memory allocation for compression.
