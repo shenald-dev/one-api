@@ -230,3 +230,10 @@ Learning:
 Global `compression()` middleware introduces significant CPU and memory allocation overhead on unhandled routes (404s) and lightweight responses.
 Action:
 Always apply `compression()` as a route-specific middleware only to endpoints that return large payloads.
+## $(date +%Y-%m-%d) — Support Multimodal Message Content
+
+Learning:
+To support OpenAI multimodal compatibility, message validation logic (e.g., `isValidMessage`) must allow the `content` field to be either a string or an array (`Array.isArray`), as multimodal requests use an array of text/image objects.
+
+Action:
+Updated `isValidMessage` in `src/index.js` to accept `Array.isArray(msg.content)` in addition to string types, fixing a correctness bug that would have rejected valid vision/multimodal requests.
