@@ -1,3 +1,7 @@
+## [1.1.33] - 2026-05-14
+### Changed
+* **[Compatibility]:** Updated `isValidMessage` validation logic to support multimodal requests by allowing the `content` field to be an array.
+
 ## [1.1.32] - 2026-05-12
 ### Changed
 * **[Performance]:** Converted `compression()` from a global middleware to a route-specific middleware on the `/v1/chat/completions` endpoint. This prevents unhandled routes (404s) and lightweight responses from incurring unnecessary CPU overhead and memory allocation for compression.
