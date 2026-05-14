@@ -1,3 +1,7 @@
+## [1.1.33] - 2026-05-14
+### Changed
+* **[Feature]:** Updated API validation in `isValidMessage` to allow `msg.content` to be either a string or an array. This correctly supports OpenAI multimodal chat completion requests (e.g., text and image arrays) without returning a 400 Bad Request error. Zero dead code pruned.
+
 ## [1.1.32] - 2026-05-12
 ### Changed
 * **[Performance]:** Converted `compression()` from a global middleware to a route-specific middleware on the `/v1/chat/completions` endpoint. This prevents unhandled routes (404s) and lightweight responses from incurring unnecessary CPU overhead and memory allocation for compression.
