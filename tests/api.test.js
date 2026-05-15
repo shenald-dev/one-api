@@ -126,6 +126,7 @@ test('POST /v1/chat/completions fails with more than 1000 messages', async () =>
 test('isValidMessage validation helper', () => {
   const { isValidMessage } = require('../src/index.js');
   assert.strictEqual(isValidMessage({ role: 'user', content: 'hello' }), true);
+  assert.strictEqual(isValidMessage({ role: 'user', content: [{ type: 'text', text: 'hello' }] }), true);
   assert.strictEqual(isValidMessage(null), false);
   assert.strictEqual(isValidMessage([]), false);
   assert.strictEqual(isValidMessage({ role: 'user' }), false);
