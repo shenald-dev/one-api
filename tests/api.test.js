@@ -129,6 +129,7 @@ test('isValidMessage validation helper', () => {
   assert.strictEqual(isValidMessage(null), false);
   assert.strictEqual(isValidMessage([]), false);
   assert.strictEqual(isValidMessage({ role: 'user' }), false);
+  assert.strictEqual(isValidMessage({ role: 'user', content: [{ type: 'text', text: 'hello' }] }), true);
 });
 
 test('isValidModel validation helper', () => {
