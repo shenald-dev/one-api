@@ -127,6 +127,8 @@ test('isValidMessage validation helper', () => {
   const { isValidMessage } = require('../src/index.js');
   assert.strictEqual(isValidMessage({ role: 'user', content: 'hello' }), true);
   assert.strictEqual(isValidMessage({ role: 'user', content: [{ type: 'text', text: 'hello' }] }), true);
+  assert.strictEqual(isValidMessage({ role: 'user', content: [{ text: 'hello' }] }), false);
+  assert.strictEqual(isValidMessage({ role: 'user', content: ['hello'] }), false);
   assert.strictEqual(isValidMessage(null), false);
   assert.strictEqual(isValidMessage([]), false);
   assert.strictEqual(isValidMessage({ role: 'user' }), false);

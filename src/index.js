@@ -65,7 +65,17 @@ function isValidMessagesArray(messages) {
 }
 
 function isValidMessage(msg) {
-  return msg != null && typeof msg.role === 'string' && msg.role !== '' && (typeof msg.content === 'string' || Array.isArray(msg.content));
+  if (msg == null || typeof msg.role !== 'string' || msg.role === '') return false;
+  if (typeof msg.content === 'string') return true;
+  if (Array.isArray(msg.content)) {
+    const len = msg.content.length;
+    for (let i = 0; i < len; i++) {
+      const item = msg.content[i];
+      if (item == null || typeof item !== 'object' || typeof item.type !== 'string') return false;
+    }
+    return true;
+  }
+  return false;
 }
 
 
