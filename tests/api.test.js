@@ -31,7 +31,7 @@ test('POST /v1/chat/completions works with multimodal data', async () => {
     .post('/v1/chat/completions')
     .send({
       model: 'gpt-4',
-      messages: [{ role: 'user', content: [{ type: 'text', text: 'Hello!' }] }]
+      messages: [{ role: 'user', content: [{ type: 'text', data: 'Hello!' }] }]
     });
 
   assert.strictEqual(res.status, 200);
@@ -141,8 +141,9 @@ test('POST /v1/chat/completions fails with more than 1000 messages', async () =>
 test('isValidMessage validation helper', () => {
   const { isValidMessage } = require('../src/index.js');
   assert.strictEqual(isValidMessage({ role: 'user', content: 'hello' }), true);
-  assert.strictEqual(isValidMessage({ role: 'user', content: [{ type: 'text', text: 'hello' }] }), true);
+  assert.strictEqual(isValidMessage({ role: 'user', content: [{ type: 'text', data: 'hello' }] }), true);
   assert.strictEqual(isValidMessage({ role: 'user', content: [{ text: 'hello' }] }), false);
+  assert.strictEqual(isValidMessage({ role: 'user', content: [{ type: 'text' }] }), false);
   assert.strictEqual(isValidMessage({ role: 'user', content: ['hello'] }), false);
   assert.strictEqual(isValidMessage(null), false);
   assert.strictEqual(isValidMessage([]), false);

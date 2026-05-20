@@ -71,7 +71,7 @@ function isValidMessage(msg) {
     const len = msg.content.length;
     for (let i = 0; i < len; i++) {
       const item = msg.content[i];
-      if (item == null || typeof item !== 'object' || typeof item.type !== 'string') return false;
+      if (item == null || typeof item !== 'object' || typeof item.type !== 'string' || item.data === undefined) return false;
     }
     return true;
   }
