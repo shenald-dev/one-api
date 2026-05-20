@@ -26,6 +26,21 @@ test('POST /v1/chat/completions works with valid data', async () => {
   assert.strictEqual(res.body.choices[0].message.content, 'This is a mock response from the unified API.');
 });
 
+test('POST /v1/chat/completions works with multimodal data', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: [{ type: 'text', text: 'Hello!' }] }]
+    });
+
+  assert.strictEqual(res.status, 200);
+  assert.ok(res.body.id.startsWith('chatcmpl-'));
+  assert.ok(res.body.id.length > 20);
+  assert.strictEqual(res.body.object, 'chat.completion');
+  assert.strictEqual(res.body.model, 'gpt-4');
+});
+
 test('POST /v1/chat/completions fails without model', async () => {
   const res = await request(app)
     .post('/v1/chat/completions')
@@ -126,6 +141,7 @@ test('POST /v1/chat/completions fails with more than 1000 messages', async () =>
 test('isValidMessage validation helper', () => {
   const { isValidMessage } = require('../src/index.js');
   assert.strictEqual(isValidMessage({ role: 'user', content: 'hello' }), true);
+  assert.strictEqual(isValidMessage({ role: 'user', content: [{ type: 'text', text: 'hello' }] }), true);
   assert.strictEqual(isValidMessage(null), false);
   assert.strictEqual(isValidMessage([]), false);
   assert.strictEqual(isValidMessage({ role: 'user' }), false);
