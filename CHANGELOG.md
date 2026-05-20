@@ -1,3 +1,7 @@
+## [1.1.33] - 2026-05-16
+### Changed
+* **[Lifecycle]:** Safely bumped dependencies via npm update. Verified baseline tests pass. Zero dead code was pruned.
+
 ## [1.1.32] - 2026-05-12
 ### Changed
 * **[Performance]:** Converted `compression()` from a global middleware to a route-specific middleware on the `/v1/chat/completions` endpoint. This prevents unhandled routes (404s) and lightweight responses from incurring unnecessary CPU overhead and memory allocation for compression.
