@@ -237,3 +237,10 @@ In hot paths generating dynamic JSON structures, extracting large static blocks 
 
 Action:
 Always audit template literals in hot loops for static segments that can be pre-combined. Prefer \`Math.floor\` for positive floating-point truncation in tight V8 paths.
+## $(date +%Y-%m-%d) — Support Multimodal Message Content
+
+Learning:
+To support OpenAI multimodal compatibility, message validation logic (e.g., `isValidMessage`) must allow the `content` field to be either a string or an array (`Array.isArray`), as multimodal requests use an array of text/image objects.
+
+Action:
+Updated `isValidMessage` in `src/index.js` to accept `Array.isArray(msg.content)` in addition to string types, fixing a correctness bug that would have rejected valid vision/multimodal requests.
