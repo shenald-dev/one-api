@@ -1,3 +1,7 @@
+## [1.1.34] - 2026-05-16
+### Changed
+* **[Lifecycle]:** Safely bumped dependencies via npm update. Verified baseline tests pass. Zero dead code was pruned.
+
 ## [1.1.33] - 2026-05-14
 ### Changed
 * **[Compatibility]:** Updated `isValidMessage` validation logic to support multimodal requests by allowing the `content` field to be an array.
