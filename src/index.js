@@ -65,7 +65,7 @@ function isValidMessagesArray(messages) {
 }
 
 function isValidMessage(msg) {
-  return msg != null && typeof msg.role === 'string' && msg.role !== '' && (typeof msg.content === 'string' || Array.isArray(msg.content));
+  return msg != null && typeof msg.role === 'string' && msg.role !== '' && (typeof msg.content === 'string' || (Array.isArray(msg.content) && msg.content.length > 0));
 }
 
 

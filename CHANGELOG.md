@@ -4,7 +4,7 @@
 
 ## [1.1.33] - 2026-05-14
 ### Changed
-* **[Compatibility]:** Updated `isValidMessage` validation logic to support multimodal requests by allowing the `content` field to be an array.
+* **[Compatibility]:** Updated `isValidMessage` validation logic to support multimodal requests by allowing the `content` field to be an array, specifically reinforcing that empty array payloads are correctly rejected.
 
 ## [1.1.32] - 2026-05-12
 ### Changed
