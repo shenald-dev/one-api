@@ -69,6 +69,7 @@ function isValidMessage(msg) {
   if (typeof msg.content === 'string') return true;
   if (Array.isArray(msg.content)) {
     const len = msg.content.length;
+    if (len === 0) return false;
     for (let i = 0; i < len; i++) {
       const item = msg.content[i];
       if (item == null || typeof item !== 'object' || typeof item.type !== 'string' || item.data === undefined) return false;
