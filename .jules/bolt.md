@@ -230,7 +230,6 @@ Learning:
 Global `compression()` middleware introduces significant CPU and memory allocation overhead on unhandled routes (404s) and lightweight responses.
 Action:
 Always apply `compression()` as a route-specific middleware only to endpoints that return large payloads.
-
 ## 2026-05-14 — Support Multimodal Requests
 
 Learning:

@@ -118,7 +118,7 @@ app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   }
 
   // Mock unified response
-  const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.trunc(Date.now() / 1000)},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
+  const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.floor(Date.now() / 1000)},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
   res.status(200).send(payload);
 });
 
