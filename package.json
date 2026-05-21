@@ -1,6 +1,6 @@
 {
   "name": "one-api",
-  "version": "1.1.33",
+  "version": "1.1.34",
   "description": "One API to rule them all. Unified gateway for 20+ LLM providers. OpenAI-compatible, single binary, zero config.",
   "main": "src/index.js",
   "scripts": {
