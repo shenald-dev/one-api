@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 ## 2026-05-16
 - Added multimodal support by allowing message content to be an array.
+=======
+## [1.1.33] - 2026-05-16
+### Changed
+* **[Lifecycle]:** Safely bumped dependencies via npm update. Verified baseline tests pass. Zero dead code was pruned.
+>>>>>>> origin/master
 
 ## [1.1.32] - 2026-05-12
 ### Changed
