@@ -1,7 +1,14 @@
-# one-api
+<div align="center">
+  <img src="assets/logo.png" alt="one-api Logo" width="250" />
+  
+  <br/>
 
-> **One API to rule them all.**  
-> Unify OpenAI, Anthropic, Google, DeepSeek, and more behind a single endpoint.
+  <h1>🌌 one-api</h1>
+  <p><b>Universal Edge LLM Gateway</b></p>
+  <i>One API to rule them all. Unify OpenAI, Anthropic, Google, DeepSeek, and more behind a single endpoint.</i>
+
+  <br/>
+</div>
 
 ---
 
