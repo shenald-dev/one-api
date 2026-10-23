@@ -52,8 +52,12 @@ app.use((req, res, next) => {
 // Compress all responses to reduce bandwidth and latency
 const compressMiddleware = compression();
 
-const ERROR_INVALID_JSON = Buffer.from(JSON.stringify({ error: 'Invalid JSON payload' }));
-const ERROR_PAYLOAD_TOO_LARGE = Buffer.from(JSON.stringify({ error: 'Payload too large' }));
+function createErrorBuffer(message) {
+  return Buffer.from(JSON.stringify({ error: message }));
+}
+
+const ERROR_INVALID_JSON = createErrorBuffer('Invalid JSON payload');
+const ERROR_PAYLOAD_TOO_LARGE = createErrorBuffer('Payload too large');
 
 // API endpoints
 function isValidModel(model) {
@@ -88,10 +92,10 @@ const MOCK_USAGE = Object.freeze({
 const MOCK_CHOICES_JSON = JSON.stringify(MOCK_CHOICES);
 const MOCK_USAGE_JSON = JSON.stringify(MOCK_USAGE);
 
-const ERROR_MISSING_MODEL = Buffer.from(JSON.stringify({ error: 'Missing or invalid model' }));
-const ERROR_MISSING_MESSAGES = Buffer.from(JSON.stringify({ error: 'Missing or invalid messages' }));
-const ERROR_TOO_MANY_MESSAGES = Buffer.from(JSON.stringify({ error: 'Too many messages' }));
-const ERROR_MALFORMED_MESSAGE = Buffer.from(JSON.stringify({ error: 'Malformed message object' }));
+const ERROR_MISSING_MODEL = createErrorBuffer('Missing or invalid model');
+const ERROR_MISSING_MESSAGES = createErrorBuffer('Missing or invalid messages');
+const ERROR_TOO_MANY_MESSAGES = createErrorBuffer('Too many messages');
+const ERROR_MALFORMED_MESSAGE = createErrorBuffer('Malformed message object');
 
 // Set a larger JSON limit since LLM contexts can be quite large
 const jsonParser = express.json({ limit: '10mb' });
@@ -122,8 +126,8 @@ app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   res.status(200).send(payload);
 });
 
-const ERROR_UNSUPPORTED_MEDIA_TYPE = Buffer.from(JSON.stringify({ error: 'Unsupported media type' }));
-const ERROR_BAD_REQUEST = Buffer.from(JSON.stringify({ error: 'Bad request' }));
+const ERROR_UNSUPPORTED_MEDIA_TYPE = createErrorBuffer('Unsupported media type');
+const ERROR_BAD_REQUEST = createErrorBuffer('Bad request');
 
 // Handle invalid JSON gracefully
 app.use((err, req, res, next) => {
@@ -149,14 +153,14 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-const ERROR_NOT_FOUND = Buffer.from(JSON.stringify({ error: 'Not found' }));
+const ERROR_NOT_FOUND = createErrorBuffer('Not found');
 
 // 404 handler — return JSON for unknown routes
 app.use((req, res) => {
   res.status(404).send(ERROR_NOT_FOUND);
 });
 
-const ERROR_INTERNAL_SERVER = Buffer.from(JSON.stringify({ error: 'Internal server error' }));
+const ERROR_INTERNAL_SERVER = createErrorBuffer('Internal server error');
 
 // Generic error handler — never leak stack traces
 app.use((err, req, res, next) => {
