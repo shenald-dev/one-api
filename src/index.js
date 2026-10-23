@@ -96,6 +96,12 @@ const ERROR_MALFORMED_MESSAGE = Buffer.from(JSON.stringify({ error: 'Malformed m
 // Set a larger JSON limit since LLM contexts can be quite large
 const jsonParser = express.json({ limit: '10mb' });
 
+let requestIdCounter = 0;
+let cachedTimestamp = Math.floor(Date.now() / 1000);
+setInterval(() => {
+  cachedTimestamp = Math.floor(Date.now() / 1000);
+}, 1000).unref();
+
 app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   const body = req.body;
   const model = body ? body.model : undefined;
@@ -118,12 +124,20 @@ app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   }
 
   // Mock unified response
-  const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.floor(Date.now() / 1000)},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
+  const payload = `{"id":"chatcmpl-${requestIdCounter++}","object":"chat.completion","created":${cachedTimestamp},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
   res.status(200).send(payload);
 });
 
 const ERROR_UNSUPPORTED_MEDIA_TYPE = Buffer.from(JSON.stringify({ error: 'Unsupported media type' }));
 const ERROR_BAD_REQUEST = Buffer.from(JSON.stringify({ error: 'Bad request' }));
+
+app.get('/trigger-error', (req, res, next) => {
+  if (process.env.NODE_ENV === 'test') {
+    next(new Error('Mock internal failure'));
+  } else {
+    next();
+  }
+});
 
 // Handle invalid JSON gracefully
 app.use((err, req, res, next) => {

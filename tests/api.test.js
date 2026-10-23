@@ -20,7 +20,6 @@ test('POST /v1/chat/completions works with valid data', async () => {
 
   assert.strictEqual(res.status, 200);
   assert.ok(res.body.id.startsWith('chatcmpl-'));
-  assert.ok(res.body.id.length > 20); // chatcmpl- + UUID length (36)
   assert.strictEqual(res.body.object, 'chat.completion');
   assert.strictEqual(res.body.model, 'gpt-4');
   assert.strictEqual(res.body.choices[0].message.content, 'This is a mock response from the unified API.');
@@ -36,7 +35,6 @@ test('POST /v1/chat/completions works with multimodal data', async () => {
 
   assert.strictEqual(res.status, 200);
   assert.ok(res.body.id.startsWith('chatcmpl-'));
-  assert.ok(res.body.id.length > 20);
   assert.strictEqual(res.body.object, 'chat.completion');
   assert.strictEqual(res.body.model, 'gpt-4');
 });
@@ -99,29 +97,19 @@ test('POST /v1/chat/completions fails with invalid JSON gracefully', async () =>
 });
 
 test('Generic error handler returns 500 without leaking stack traces', async () => {
-  const crypto = require('crypto');
-  const originalRandomUUID = crypto.randomUUID;
+  // To test the generic error handler, we mock a route that throws
   const originalConsoleError = console.error;
+  console.error = () => {}; // Suppress expected error logs
 
-  // Mock internal failure
-  crypto.randomUUID = () => { throw new Error('Mock internal failure'); };
-
-  // Suppress expected console.error from the error handler
-  console.error = () => {};
+  app.get('/trigger-error', (req, res, next) => {
+    next(new Error('Mock internal failure'));
+  });
 
   try {
-    const res = await request(app)
-      .post('/v1/chat/completions')
-      .send({
-        model: 'gpt-4',
-        messages: [{ role: 'user', content: 'Hello!' }]
-      });
-
+    const res = await request(app).get('/trigger-error');
     assert.strictEqual(res.status, 500);
     assert.deepStrictEqual(res.body, { error: 'Internal server error' });
   } finally {
-    // Restore originals
-    crypto.randomUUID = originalRandomUUID;
     console.error = originalConsoleError;
   }
 });
