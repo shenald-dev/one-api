@@ -26,6 +26,27 @@ test('POST /v1/chat/completions works with valid data', async () => {
   assert.strictEqual(res.body.choices[0].message.content, 'This is a mock response from the unified API.');
 });
 
+test('POST /v1/chat/completions works with multiple messages', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: 'Hello!' },
+        { role: 'assistant', content: 'Hi! How can I help you today?' },
+        { role: 'user', content: 'I need some help.' }
+      ]
+    });
+
+  assert.strictEqual(res.status, 200);
+  assert.ok(res.body.id.startsWith('chatcmpl-'));
+  assert.ok(res.body.id.length > 20);
+  assert.strictEqual(res.body.object, 'chat.completion');
+  assert.strictEqual(res.body.model, 'gpt-4');
+  assert.strictEqual(res.body.choices[0].message.content, 'This is a mock response from the unified API.');
+});
+
 test('POST /v1/chat/completions works with multimodal data', async () => {
   const res = await request(app)
     .post('/v1/chat/completions')
