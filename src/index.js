@@ -102,6 +102,14 @@ setInterval(() => {
   cachedTimestamp = Math.floor(Date.now() / 1000);
 }, 1000).unref();
 
+app.get('/trigger-error', (req, res, next) => {
+  if (process.env.NODE_ENV === 'test') {
+    next(new Error('Mock internal failure'));
+  } else {
+    next();
+  }
+});
+
 app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   const body = req.body;
   const model = body ? body.model : undefined;
@@ -130,14 +138,6 @@ app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
 
 const ERROR_UNSUPPORTED_MEDIA_TYPE = Buffer.from(JSON.stringify({ error: 'Unsupported media type' }));
 const ERROR_BAD_REQUEST = Buffer.from(JSON.stringify({ error: 'Bad request' }));
-
-app.get('/trigger-error', (req, res, next) => {
-  if (process.env.NODE_ENV === 'test') {
-    next(new Error('Mock internal failure'));
-  } else {
-    next();
-  }
-});
 
 // Handle invalid JSON gracefully
 app.use((err, req, res, next) => {

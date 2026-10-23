@@ -101,10 +101,6 @@ test('Generic error handler returns 500 without leaking stack traces', async () 
   const originalConsoleError = console.error;
   console.error = () => {}; // Suppress expected error logs
 
-  app.get('/trigger-error', (req, res, next) => {
-    next(new Error('Mock internal failure'));
-  });
-
   try {
     const res = await request(app).get('/trigger-error');
     assert.strictEqual(res.status, 500);
