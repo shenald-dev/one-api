@@ -29,7 +29,7 @@ app.get('/health', (req, res) => {
   res.status(200).send(HEALTH_RESPONSE);
 });
 
-let corsOptions = { origin: '*', maxAge: 86400 };
+let corsOptions = { origin: false, maxAge: 86400 };
 if (process.env.ALLOWED_ORIGINS) {
   const origins = process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean);
   if (origins.includes('*')) {

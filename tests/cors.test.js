@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert');
 const request = require('supertest');
 
-test('CORS defaults to * when ALLOWED_ORIGINS is not set', async () => {
+test('CORS defaults to false when ALLOWED_ORIGINS is not set', async () => {
   delete require.cache[require.resolve('../src/index.js')];
   delete process.env.ALLOWED_ORIGINS;
   const { app } = require('../src/index.js');
@@ -11,8 +11,7 @@ test('CORS defaults to * when ALLOWED_ORIGINS is not set', async () => {
     .options('/health')
     .set('Origin', 'http://example.com');
 
-  assert.strictEqual(res.headers['access-control-allow-origin'], '*');
-  assert.strictEqual(res.headers['access-control-max-age'], '86400');
+  assert.strictEqual(res.headers['access-control-allow-origin'], undefined);
 });
 
 test('CORS restricts to specific origins when ALLOWED_ORIGINS is set', async () => {
