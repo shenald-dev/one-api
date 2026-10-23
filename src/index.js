@@ -160,7 +160,7 @@ const ERROR_INTERNAL_SERVER = Buffer.from(JSON.stringify({ error: 'Internal serv
 
 // Generic error handler — never leak stack traces
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
+  console.error('Unhandled error:', err.message || 'An unexpected error occurred');
   if (res.headersSent) {
     return next(err);
   }
