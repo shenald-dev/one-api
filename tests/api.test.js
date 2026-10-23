@@ -154,6 +154,7 @@ test('isValidModel validation helper', () => {
   assert.strictEqual(isValidModel('   '), false);
   assert.strictEqual(isValidModel(null), false);
   assert.strictEqual(isValidModel(123), false);
+  assert.strictEqual(isValidModel({}), false);
 });
 
 test('isValidMessagesArray validation helper', () => {
