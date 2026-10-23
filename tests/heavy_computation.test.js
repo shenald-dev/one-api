@@ -66,3 +66,8 @@ test('heavyComputation handles null correctly', () => {
   const result = heavyComputation(null);
   assert.strictEqual(result, 0);
 });
+
+test('heavyComputation handles negative iterations correctly', () => {
+  const result = heavyComputation(-1);
+  assert.strictEqual(result, 0);
+});
