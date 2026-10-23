@@ -1,3 +1,18 @@
+## [1.1.34] - 2026-10-24
+### Security
+* **[DoS Mitigation]:** Reduced `express.json` payload limit from 10mb to 1mb to prevent memory exhaustion and Denial of Service attacks (#129).
+* **[CORS Hardening]:** Fixed insecure permissive CORS default by defaulting `corsOptions.origin` to `false` when `ALLOWED_ORIGINS` is not defined (#127).
+* **[Information Leakage]:** Masked raw error objects in generic error handler logging to prevent leaking internal stack traces and paths (#124).
+
+### Changed & Code Health
+* **[Refactoring]:** Extracted repetitive error buffer instantiation into `createErrorBuffer(message)` utility function (#128).
+* **[Clean Syntax]:** Refactored request body property extraction with object destructuring in `src/index.js` (#131).
+
+### Testing
+* Added multi-turn conversation test suite in `/v1/chat/completions` (#132).
+* Added edge case test for `heavyComputation` with negative iterations (#122).
+* Added test assertions for non-string model values and invalid message object schemas (#125, #126).
+
 ## [1.1.33] - 2026-05-16
 ### Changed
 * **[Lifecycle]:** Safely bumped dependencies via npm update. Verified baseline tests pass. Zero dead code was pruned.
