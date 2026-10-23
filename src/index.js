@@ -97,8 +97,8 @@ const ERROR_MISSING_MESSAGES = createErrorBuffer('Missing or invalid messages');
 const ERROR_TOO_MANY_MESSAGES = createErrorBuffer('Too many messages');
 const ERROR_MALFORMED_MESSAGE = createErrorBuffer('Malformed message object');
 
-// Set a larger JSON limit since LLM contexts can be quite large
-const jsonParser = express.json({ limit: '10mb' });
+// Set a smaller JSON limit to prevent DoS via massive payloads
+const jsonParser = express.json({ limit: '1mb' });
 
 app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   const body = req.body;
