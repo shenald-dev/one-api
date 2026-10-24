@@ -102,7 +102,8 @@ const jsonParser = express.json({ limit: '1mb' });
 
 app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   const body = req.body;
-  const { model, messages } = body || {};
+  const model = body ? body.model : undefined;
+  const messages = body ? body.messages : undefined;
   if (!isValidModel(model)) {
     return res.status(400).send(ERROR_MISSING_MODEL);
   }
@@ -121,7 +122,7 @@ app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   }
 
   // Mock unified response
-  const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.floor(Date.now() / 1000)},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
+  const payload = `{"id":"chatcmpl-${crypto.randomUUID()}","object":"chat.completion","created":${Math.trunc(Date.now() / 1000)},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
   res.status(200).send(payload);
 });
 
