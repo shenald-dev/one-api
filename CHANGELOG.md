@@ -1,3 +1,7 @@
+## [1.1.35] - 2026-10-24
+### Changed
+* **[Performance]:** Optimized hot-path property access in `/v1/chat/completions` and switched to `Math.trunc` for timestamp serialization to improve throughput.
+
 ## [1.1.34] - 2026-10-24
 ### Security
 * **[DoS Mitigation]:** Reduced `express.json` payload limit from 10mb to 1mb to prevent memory exhaustion and Denial of Service attacks (#129).
