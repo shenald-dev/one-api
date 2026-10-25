@@ -1,3 +1,7 @@
+## [Unreleased]
+### Changed
+* **[Lifecycle]:** Audited recent BOLT optimizations (hot-path property access and timestamp serialization). Ran `depcheck` and `find-unused-exports` confirming zero entropy. Verified tests passing, no patch/minor updates required.
+
 ## [1.1.35] - 2026-10-24
 ### Changed
 * **[Performance]:** Optimized hot-path property access in `/v1/chat/completions` and switched to `Math.trunc` for timestamp serialization to improve throughput.
