@@ -156,3 +156,6 @@
 ## [1.1.15] - 2026-04-18
 ### Changed
 * **[Performance]:** Optimized test module mock loading in `tests/test.js` by utilizing a persistent `Set` for O(1) lookup performance.
+
+## [Unreleased]
+**[Optimized]:** Conditionally apply compression middleware to improve throughput when disabled, while preserving default enabled behavior.
