@@ -237,3 +237,7 @@ To support OpenAI multimodal compatibility, message validation logic (e.g., `isV
 
 Action:
 Updated `isValidMessage` in `src/index.js` to accept `Array.isArray(msg.content)` in addition to string types, fixing a correctness bug that would have rejected valid vision/multimodal requests.
+
+## 2026-10-26 — Avoid manual inlining of validation functions
+- **Learning:** Manually inlining small validation functions (like `isValidMessage`) inside a hot loop is an unnecessary micro-optimization that reduces code clarity and maintainability, since V8 engines typically handle inlining of small, hot functions automatically.
+- **Action:** Prioritize optimizations that do not sacrifice readability, such as conditionally wrapping and bypassing middlewares when inactive, rather than manual function inlining.

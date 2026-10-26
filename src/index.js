@@ -50,7 +50,9 @@ app.use((req, res, next) => {
 
 
 // Compress all responses to reduce bandwidth and latency
-const compressMiddleware = compression();
+let isCompressionEnabled = process.env.ENABLE_COMPRESSION !== 'false';
+const baseCompress = compression();
+const compressMiddleware = (req, res, next) => isCompressionEnabled ? baseCompress(req, res, next) : next();
 
 function createErrorBuffer(message) {
   return Buffer.from(JSON.stringify({ error: message }));
