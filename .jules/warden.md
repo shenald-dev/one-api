@@ -225,3 +225,9 @@ Appended release notes and bumped versions for safe dependency updates and perfo
 - **QA & Veto Actions:** Audited BOLT's recent hot-path optimizations (`/v1/chat/completions`). No regressions found. Baseline test suite passed.
 - **Entropy Pruned:** Verified via `npx depcheck` and `npx find-unused-exports`. Zero dead code identified (0 lines deleted).
 - **Deferred / Blocked:** No safe patch/minor dependencies to update. Release deferred.
+
+## 2026-10-26 — Assessment & Lifecycle
+Observation / Pruned:
+Assessed BOLT's optimization conditionally applying `compression()` middleware based on `process.env.ENABLE_COMPRESSION !== 'false'`. This properly maintains the default enabled behavior while avoiding overhead entirely when compression is explicitly disabled. Verified tests pass and zero unused dependencies via `npx depcheck` and `npx find-unused-exports`.
+Alignment / Deferred:
+Appended release notes. Release deferred.
