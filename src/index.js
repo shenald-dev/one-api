@@ -63,7 +63,7 @@ const ERROR_PAYLOAD_TOO_LARGE = createErrorBuffer('Payload too large');
 
 // API endpoints
 function isValidModel(model) {
-  return typeof model === 'string' && model.length > 0 && model.length < 1000 && model.trim() !== '';
+  return typeof model === 'string' && model.length < 1000 && model.trim() !== '';
 }
 
 function isValidMessagesArray(messages) {
