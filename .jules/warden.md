@@ -242,3 +242,5 @@ Observation / Pruned:
 Assessed removing redundant `model.length > 0` condition from `isValidModel` in `src/index.js` to simplify validation without behavior change since `model.trim() !== ''` enforces length > 0.
 Alignment / Deferred:
 Run unit tests, all passed. Ran `depcheck` and `find-unused-exports` confirming zero entropy. Changelog updated.
+
+- Optimized payload mock generator loop in `src/index.js` by avoiding `crypto.randomUUID` in favor of a counter approach and caching `Math.trunc(Date.now() / 1000)` that's used for ID and mock generation.

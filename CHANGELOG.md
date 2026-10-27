@@ -1,6 +1,7 @@
 ## [Unreleased]
 **[Fixed]:** Reduced `express.json` payload limit to `512kb` to prevent Denial of Service attacks via massive payloads.
 **[Optimized]:** Removed redundant `model.length > 0` check in `isValidModel`.
+**[Optimized]:** Replaced crypto.randomUUID with a faster ID generator and cached Date.now() timestamp in the completions route.
 ### Changed
 * **[Lifecycle]:** Audited recent BOLT optimizations (hot-path property access and timestamp serialization). Ran `depcheck` and `find-unused-exports` confirming zero entropy. Verified tests passing, no patch/minor updates required.
 

@@ -141,7 +141,8 @@ test('Generic error handler returns 500 without leaking stack traces', async () 
   const originalConsoleError = console.error;
 
   // Mock internal failure
-  crypto.randomUUID = () => { throw new Error('Mock internal failure'); };
+  const originalDateNow = Date.now;
+  Date.now = () => { throw new Error('Mock internal failure'); };
 
   // Suppress expected console.error from the error handler
   console.error = () => {};
