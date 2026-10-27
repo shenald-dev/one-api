@@ -103,9 +103,7 @@ const ERROR_MALFORMED_MESSAGE = createErrorBuffer('Malformed message object');
 const jsonParser = express.json({ limit: '512kb' });
 
 app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
-  const body = req.body;
-  const model = body ? body.model : undefined;
-  const messages = body ? body.messages : undefined;
+  const { model, messages } = req.body || {};
   if (!isValidModel(model)) {
     return res.status(400).send(ERROR_MISSING_MODEL);
   }
