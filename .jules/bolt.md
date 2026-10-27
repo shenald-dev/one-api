@@ -249,3 +249,11 @@ The default JSON payload limit was set to a larger size to accommodate LLM conte
 
 Action:
 Reduced the `express.json()` payload limit from `1mb` to `512kb` in `src/index.js` to mitigate DoS vectors. Updated tests in `api_robustness.test.js` to send slightly larger payloads to verify that the application correctly rejects them with a `413 Payload Too Large` error.
+
+## $(date +%Y-%m-%d) — Test Cleanup Bug
+
+Learning:
+In `tests/api.test.js`, the `Date.now` function was mocked but the `finally` block incorrectly attempted to restore `crypto.randomUUID` instead of `Date.now`. This kind of cleanup bug poisons the global environment for subsequent tests and can introduce silent flakiness into the test suite.
+
+Action:
+Fixed the cleanup in `tests/api.test.js` to correctly assign `Date.now = originalDateNow` in the `finally` block of the error handler test. Always ensure mocked globals are strictly restored in the corresponding `finally` block.
