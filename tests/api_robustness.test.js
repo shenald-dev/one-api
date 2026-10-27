@@ -62,7 +62,7 @@ test('POST /v1/chat/completions handles aborted requests gracefully', async () =
 });
 
 test('POST /v1/chat/completions handles payload too large gracefully', async () => {
-  const largeString = 'a'.repeat(2 * 1024 * 1024); // 2mb, which is > 1mb limit
+  const largeString = 'a'.repeat(600 * 1024); // 600kb, which is > 512kb limit
   const res = await request(app)
     .post('/v1/chat/completions')
     .send({
