@@ -1,4 +1,6 @@
 ## [Unreleased]
+**[Fixed]:** Corrected a test cleanup bug in `tests/api.test.js` where `Date.now` was mocked but not properly restored, preventing potential flakiness in the test suite.
+
 **[Fixed]:** Reduced `express.json` payload limit to `512kb` to prevent Denial of Service attacks via massive payloads.
 **[Optimized]:** Removed redundant `model.length > 0` check in `isValidModel`.
 **[Optimized]:** Replaced crypto.randomUUID with a faster ID generator and cached Date.now() timestamp in the completions route.
