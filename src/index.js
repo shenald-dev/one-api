@@ -100,7 +100,7 @@ const ERROR_TOO_MANY_MESSAGES = createErrorBuffer('Too many messages');
 const ERROR_MALFORMED_MESSAGE = createErrorBuffer('Malformed message object');
 
 // Set a smaller JSON limit to prevent DoS via massive payloads
-const jsonParser = express.json({ limit: '1mb' });
+const jsonParser = express.json({ limit: '512kb' });
 
 app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   const body = req.body;

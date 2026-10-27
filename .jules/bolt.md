@@ -241,3 +241,11 @@ Updated `isValidMessage` in `src/index.js` to accept `Array.isArray(msg.content)
 ## 2026-10-26 — Avoid manual inlining of validation functions
 - **Learning:** Manually inlining small validation functions (like `isValidMessage`) inside a hot loop is an unnecessary micro-optimization that reduces code clarity and maintainability, since V8 engines typically handle inlining of small, hot functions automatically.
 - **Action:** Prioritize optimizations that do not sacrifice readability, such as conditionally wrapping and bypassing middlewares when inactive, rather than manual function inlining.
+
+## $(date +%Y-%m-%d) — Optimize JSON Payload Limit
+
+Learning:
+The default JSON payload limit was set to a larger size to accommodate LLM contexts, but setting it too high (e.g. 10mb or 1mb) leaves the application vulnerable to Denial of Service via large malicious payloads.
+
+Action:
+Reduced the `express.json()` payload limit from `1mb` to `512kb` in `src/index.js` to mitigate DoS vectors. Updated tests in `api_robustness.test.js` to send slightly larger payloads to verify that the application correctly rejects them with a `413 Payload Too Large` error.

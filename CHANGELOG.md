@@ -1,4 +1,5 @@
 ## [Unreleased]
+**[Fixed]:** Reduced `express.json` payload limit to `512kb` to prevent Denial of Service attacks via massive payloads.
 ### Changed
 * **[Lifecycle]:** Audited recent BOLT optimizations (hot-path property access and timestamp serialization). Ran `depcheck` and `find-unused-exports` confirming zero entropy. Verified tests passing, no patch/minor updates required.
 
@@ -158,4 +159,5 @@
 * **[Performance]:** Optimized test module mock loading in `tests/test.js` by utilizing a persistent `Set` for O(1) lookup performance.
 
 ## [Unreleased]
+**[Fixed]:** Reduced `express.json` payload limit to `512kb` to prevent Denial of Service attacks via massive payloads.
 **[Optimized]:** Conditionally apply compression middleware to improve throughput when disabled, while preserving default enabled behavior.
