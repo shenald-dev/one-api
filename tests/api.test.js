@@ -136,8 +136,6 @@ test('POST /v1/chat/completions fails with invalid JSON gracefully', async () =>
 });
 
 test('Generic error handler returns 500 without leaking stack traces', async () => {
-  const crypto = require('crypto');
-  const originalRandomUUID = crypto.randomUUID;
   const originalConsoleError = console.error;
 
   // Mock internal failure
@@ -159,7 +157,7 @@ test('Generic error handler returns 500 without leaking stack traces', async () 
     assert.deepStrictEqual(res.body, { error: 'Internal server error' });
   } finally {
     // Restore originals
-    crypto.randomUUID = originalRandomUUID;
+    Date.now = originalDateNow;
     console.error = originalConsoleError;
   }
 });

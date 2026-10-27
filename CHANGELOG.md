@@ -163,3 +163,5 @@
 ## [Unreleased]
 **[Fixed]:** Reduced `express.json` payload limit to `512kb` to prevent Denial of Service attacks via massive payloads.
 **[Optimized]:** Conditionally apply compression middleware to improve throughput when disabled, while preserving default enabled behavior.
+**[Fixed]:** Fixed shared state mutation in tests by correctly restoring `Date.now` in `tests/api.test.js`.
+**[Pruned]:** Removed obsolete `crypto.randomUUID` test mock as the application no longer uses it for ID generation.
