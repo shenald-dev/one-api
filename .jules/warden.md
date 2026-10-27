@@ -244,3 +244,8 @@ Alignment / Deferred:
 Run unit tests, all passed. Ran `depcheck` and `find-unused-exports` confirming zero entropy. Changelog updated.
 
 - Optimized payload mock generator loop in `src/index.js` by avoiding `crypto.randomUUID` in favor of a counter approach and caching `Math.trunc(Date.now() / 1000)` that's used for ID and mock generation.
+
+## 2026-10-27 — Assessment & Lifecycle
+- **QA & Veto Actions:** Fixed a subtle regression in test state mutation within `tests/api.test.js` where `Date.now` was left mocked globally in the event of an error.
+- **Entropy Pruned:** Pruned the obsolete `crypto.randomUUID` mock out of `tests/api.test.js` since the codebase migrated to a counter approach. Verified via `npx depcheck` and `npx find-unused-exports`.
+- **Deferred / Blocked:** No safe patch/minor dependencies to update. Release deferred.
