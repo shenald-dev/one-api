@@ -230,7 +230,7 @@ Learning:
 Global `compression()` middleware introduces significant CPU and memory allocation overhead on unhandled routes (404s) and lightweight responses.
 Action:
 Always apply `compression()` as a route-specific middleware only to endpoints that return large payloads.
-## $(date +%Y-%m-%d) — Support Multimodal Message Content
+## 2026-10-27 — Support Multimodal Message Content
 
 Learning:
 To support OpenAI multimodal compatibility, message validation logic (e.g., `isValidMessage`) must allow the `content` field to be either a string or an array (`Array.isArray`), as multimodal requests use an array of text/image objects.
@@ -242,7 +242,7 @@ Updated `isValidMessage` in `src/index.js` to accept `Array.isArray(msg.content)
 - **Learning:** Manually inlining small validation functions (like `isValidMessage`) inside a hot loop is an unnecessary micro-optimization that reduces code clarity and maintainability, since V8 engines typically handle inlining of small, hot functions automatically.
 - **Action:** Prioritize optimizations that do not sacrifice readability, such as conditionally wrapping and bypassing middlewares when inactive, rather than manual function inlining.
 
-## $(date +%Y-%m-%d) — Optimize JSON Payload Limit
+## 2026-10-27 — Optimize JSON Payload Limit
 
 Learning:
 The default JSON payload limit was set to a larger size to accommodate LLM contexts, but setting it too high (e.g. 10mb or 1mb) leaves the application vulnerable to Denial of Service via large malicious payloads.
@@ -250,7 +250,7 @@ The default JSON payload limit was set to a larger size to accommodate LLM conte
 Action:
 Reduced the `express.json()` payload limit from `1mb` to `512kb` in `src/index.js` to mitigate DoS vectors. Updated tests in `api_robustness.test.js` to send slightly larger payloads to verify that the application correctly rejects them with a `413 Payload Too Large` error.
 
-## $(date +%Y-%m-%d) — Test Cleanup Bug
+## 2026-10-27 — Test Cleanup Bug
 
 Learning:
 In `tests/api.test.js`, the `Date.now` function was mocked but the `finally` block incorrectly attempted to restore `crypto.randomUUID` instead of `Date.now`. This kind of cleanup bug poisons the global environment for subsequent tests and can introduce silent flakiness into the test suite.

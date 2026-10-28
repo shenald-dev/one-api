@@ -162,8 +162,10 @@
 ### Changed
 * **[Performance]:** Optimized test module mock loading in `tests/test.js` by utilizing a persistent `Set` for O(1) lookup performance.
 
-## [Unreleased]
-**[Fixed]:** Reduced `express.json` payload limit to `512kb` to prevent Denial of Service attacks via massive payloads.
-**[Optimized]:** Conditionally apply compression middleware to improve throughput when disabled, while preserving default enabled behavior.
-**[Fixed]:** Fixed shared state mutation in tests by correctly restoring `Date.now` in `tests/api.test.js`.
-**[Pruned]:** Removed obsolete `crypto.randomUUID` test mock as the application no longer uses it for ID generation.
+## [1.1.36] - 2026-10-27
+### Changed
+* **[Fixed]:** Reduced `express.json` payload limit to `512kb` to prevent Denial of Service attacks via massive payloads.
+* **[Optimized]:** Conditionally apply compression middleware to improve throughput when disabled, while preserving default enabled behavior.
+* **[Fixed]:** Fixed shared state mutation in tests by correctly restoring `Date.now` in `tests/api.test.js`.
+* **[Pruned]:** Removed obsolete `crypto.randomUUID` test mock as the application no longer uses it for ID generation.
+* **[Lifecycle]:** Safely bumped dependencies `compression`, `express`, and `helmet` to latest minor/patch versions. Deferred major update of `dotenv`. No unused dependencies found.
