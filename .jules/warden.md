@@ -231,13 +231,13 @@ Observation / Pruned:
 Assessed BOLT's optimization conditionally applying `compression()` middleware based on `process.env.ENABLE_COMPRESSION !== 'false'`. This properly maintains the default enabled behavior while avoiding overhead entirely when compression is explicitly disabled. Verified tests pass and zero unused dependencies via `npx depcheck` and `npx find-unused-exports`.
 Alignment / Deferred:
 Appended release notes. Release deferred.
-## $(date +%Y-%m-%d) — Assessment & Lifecycle
+## 2026-10-27 — Assessment & Lifecycle
 Observation / Pruned:
 Assessed BOLT's optimization lowering the `express.json` payload limit to `512kb` to prevent Denial of Service via large payloads. Verified tests pass. Checked for dead code and found none.
 Alignment / Deferred:
 Appended release notes. Version bumped to 1.1.36.
 
-## $(date +%Y-%m-%d) — Assessment & Lifecycle
+## 2026-10-27 — Assessment & Lifecycle
 Observation / Pruned:
 Assessed removing redundant `model.length > 0` condition from `isValidModel` in `src/index.js` to simplify validation without behavior change since `model.trim() !== ''` enforces length > 0.
 Alignment / Deferred:
@@ -249,3 +249,8 @@ Run unit tests, all passed. Ran `depcheck` and `find-unused-exports` confirming 
 - **QA & Veto Actions:** Fixed a subtle regression in test state mutation within `tests/api.test.js` where `Date.now` was left mocked globally in the event of an error.
 - **Entropy Pruned:** Pruned the obsolete `crypto.randomUUID` mock out of `tests/api.test.js` since the codebase migrated to a counter approach. Verified via `npx depcheck` and `npx find-unused-exports`.
 - **Deferred / Blocked:** No safe patch/minor dependencies to update. Release deferred.
+
+## 2026-10-27 — Assessment & Lifecycle (Dependency Update)
+- **QA & Veto Actions:** Audited baseline test suite and execution behavior. No regressions detected.
+- **Entropy Pruned:** Checked codebase using `npx depcheck` and `npx find-unused-exports`. 0 dead lines deleted. Verified no orphaned or leftover scratchpad files.
+- **Deferred / Blocked:** Safely bumped minor/patch versions of direct dependencies (`compression`, `express`, `helmet`). Deferred major update for `dotenv` (v17.4.2 -> v18.0.9) as breaking updates are disallowed by guardrails.
