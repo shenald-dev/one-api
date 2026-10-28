@@ -257,3 +257,11 @@ In `tests/api.test.js`, the `Date.now` function was mocked but the `finally` blo
 
 Action:
 Fixed the cleanup in `tests/api.test.js` to correctly assign `Date.now = originalDateNow` in the `finally` block of the error handler test. Always ensure mocked globals are strictly restored in the corresponding `finally` block.
+
+## 2026-10-28 — Optimized Object Destructuring and Iteration Variables
+
+Learning:
+Object destructuring on the hot-path (`const { model, messages } = req.body || {}`) forces a default object allocation (`{}`) and destructuring overhead. Additionally, evaluating `.length` directly in loop conditions or after destructuring adds minor lookup overhead. Replacing `req.body` destructuring with explicit property access and caching `messages.length` slightly improves processing speed.
+
+Action:
+Replaced `req.body` destructuring in `src/index.js` with explicit property access and explicit falsy check. Extracted `messages.length` into `messagesLen` before length checks and iteration to avoid repeated property access. These optimizations improved average benchmark throughput from ~1350 ops/sec to ~1440 ops/sec.

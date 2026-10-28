@@ -108,18 +108,23 @@ let cachedTimestamp = Math.trunc(Date.now() / 1000);
 let lastTimestampUpdate = Date.now();
 
 app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
-  const { model, messages } = req.body || {};
+  const body = req.body;
+  if (!body) {
+    return res.status(400).send(ERROR_MISSING_MODEL);
+  }
+  const model = body.model;
+  const messages = body.messages;
   if (!isValidModel(model)) {
     return res.status(400).send(ERROR_MISSING_MODEL);
   }
   if (!isValidMessagesArray(messages)) {
     return res.status(400).send(ERROR_MISSING_MESSAGES);
   }
-  if (messages.length > 1000) {
+  const messagesLen = messages.length;
+  if (messagesLen > 1000) {
     return res.status(400).send(ERROR_TOO_MANY_MESSAGES);
   }
 
-  const messagesLen = messages.length;
   for (let i = 0; i < messagesLen; i++) {
     if (!isValidMessage(messages[i])) {
       return res.status(400).send(ERROR_MALFORMED_MESSAGE);
