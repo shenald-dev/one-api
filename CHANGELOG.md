@@ -1,4 +1,10 @@
 ## [Unreleased]
+
+## [1.1.37] - 2026-10-29
+### Changed
+* **[Lifecycle]:** Audited recent BOLT optimization (replacing object destructuring on req.body with explicit property access and caching messages length). Ran `depcheck` and `find-unused-exports` confirming zero entropy. Verified tests passing. Safely bumped minor/patch versions of transitive dependencies.
+
+## [1.1.36] - 2026-10-27
 **[Optimized]:** Reduced request processing overhead by replacing object destructuring on req.body with explicit property access and caching messages length.
 **[Fixed]:** Corrected a test cleanup bug in `tests/api.test.js` where `Date.now` was mocked but not properly restored, preventing potential flakiness in the test suite.
 
