@@ -21,7 +21,7 @@
     "vibe-coder"
   ],
   "author": "shenald.dev",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
     "url": "https://github.com/shenald-dev/one-api.git"

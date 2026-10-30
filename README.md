@@ -11,7 +11,7 @@
   
   [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
   [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://docker.com)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+  [![License: MIT](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 </div>
 
 ---
@@ -45,7 +45,7 @@ Run it once and forget about provider differences. Keys, specific models, differ
 - **100% OpenAI-Compatible**: Your existing code, libraries, and SDKs (like `openai-node` or `langchain`) work completely unchanged. Just swap the `baseURL`.
 - **Lightweight & Fast**: No bloated admin UIs. Features automatic response compression for reduced bandwidth and drastically lower latency.
 - **Streaming Support**: Flawlessly streams Server-Sent Events (SSE) across all supported providers natively.
-- **Free & Open Source**: MIT licensed forever, no hidden SaaS tiers.
+- **Free & Open Source**: GPLv3 licensed forever, no hidden SaaS tiers.
 
 ---
 
