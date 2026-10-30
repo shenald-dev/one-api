@@ -142,8 +142,9 @@ test('Generic error handler returns 500 without leaking stack traces', async () 
   const originalDateNow = Date.now;
   Date.now = () => { throw new Error('Mock internal failure'); };
 
-  // Suppress expected console.error from the error handler
-  console.error = () => {};
+  // Track the logged error
+  let loggedError;
+  console.error = (msg, err) => { loggedError = err; };
 
   try {
     const res = await request(app)
@@ -155,6 +156,8 @@ test('Generic error handler returns 500 without leaking stack traces', async () 
 
     assert.strictEqual(res.status, 500);
     assert.deepStrictEqual(res.body, { error: 'Internal server error' });
+    assert.ok(loggedError instanceof Error);
+    assert.strictEqual(loggedError.message, 'Mock internal failure');
   } finally {
     // Restore originals
     Date.now = originalDateNow;

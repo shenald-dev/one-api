@@ -169,6 +169,10 @@
 ### Changed
 * **[Performance]:** Optimized test module mock loading in `tests/test.js` by utilizing a persistent `Set` for O(1) lookup performance.
 
+## [1.1.38] - 2026-10-30
+### Changed
+* **[Security]:** Fixed generic error handler logging to securely log the full error object internally via `console.error` for debuggability, without leaking the stack traces in HTTP JSON responses.
+
 ## [1.1.36] - 2026-10-27
 ### Changed
 * **[Fixed]:** Reduced `express.json` payload limit to `512kb` to prevent Denial of Service attacks via massive payloads.
