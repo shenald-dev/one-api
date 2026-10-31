@@ -1,4 +1,5 @@
 ## [Unreleased]
+* **[Optimized]:** Set compression middleware threshold to 0 to ensure small JSON responses are always compressed.
 
 ## [1.1.37] - 2026-10-29
 ### Changed
