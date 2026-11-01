@@ -1,12 +1,12 @@
 {
   "name": "one-api",
-  "version": "1.1.38",
-  "description": "One API to rule them all. Unified gateway for 20+ LLM providers. OpenAI-compatible, single binary, zero config.",
+  "version": "2.0.0",
+  "description": "One API to rule them all. Universal Edge LLM Gateway for 20+ providers. OpenAI-compatible, real-time SSE streaming, zero config.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js --server",
     "dev": "nodemon src/index.js --server",
-    "test": "node tests/test.js && node tests/api.test.js && node tests/api_robustness.test.js && node tests/heavy_computation.test.js && node tests/cors.test.js",
+    "test": "node tests/test.js && node tests/api.test.js && node tests/api_robustness.test.js && node tests/heavy_computation.test.js && node tests/cors.test.js && node tests/models.test.js && node tests/streaming.test.js && node tests/cache.test.js && node tests/telemetry.test.js && node tests/auth.test.js && node tests/providers.test.js && node tests/tokenizer.test.js",
     "benchmark": "node benchmarks/run.js",
     "docker:build": "docker build -t shenald/one-api .",
     "docker:run": "docker run -p 3000:3000 shenald/one-api"
@@ -17,6 +17,9 @@
     "openai",
     "anthropic",
     "gemini",
+    "deepseek",
+    "groq",
+    "ollama",
     "unified-api",
     "vibe-coder"
   ],

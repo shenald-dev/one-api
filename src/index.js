@@ -1,11 +1,23 @@
-// one-api
+// one-api — Universal Edge LLM Gateway
 const { performance } = require('perf_hooks');
-const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 require('dotenv').config();
+
+const config = require('./config');
+const authMiddleware = require('./middleware/auth');
+const metrics = require('./middleware/metrics');
+const { clientErrorHandler, notFoundHandler, genericErrorHandler } = require('./middleware/error');
+const { handleHealth, handleDetailedHealth, handleGetMetrics } = require('./routes/telemetry');
+const { handleListModels, handleGetModel } = require('./routes/models');
+const {
+  handleChatCompletions,
+  isValidModel,
+  isValidMessagesArray,
+  isValidMessage
+} = require('./routes/completions');
 
 // Self-healing / Process Management
 process.on('uncaughtException', (err) => {
@@ -19,16 +31,15 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
+
 // Disable ETag generation for highly dynamic JSON APIs to save CPU cycles
 app.set('etag', false);
 app.disable('x-powered-by');
 
-const HEALTH_RESPONSE = Buffer.from(JSON.stringify({ status: 'ok' }));
-app.get('/health', (req, res) => {
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.status(200).send(HEALTH_RESPONSE);
-});
+// Health endpoint registered before security/CORS middlewares for zero-overhead load balancer pings
+app.get('/health', handleHealth);
 
+// Configure CORS
 let corsOptions = { origin: false, maxAge: 86400 };
 if (process.env.ALLOWED_ORIGINS) {
   const origins = process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean);
@@ -42,180 +53,60 @@ app.use(cors(corsOptions));
 
 app.use(helmet());
 
-// Set global JSON Content-Type for all responses to reduce redundant setHeader calls
+// Global JSON Content-Type default
 app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   next();
 });
 
+// Telemetry & metrics collector
+app.use(metrics.middleware());
 
-// Compress all responses to reduce bandwidth and latency
+// Response compression
 const baseCompress = compression({ threshold: 0 });
 const compressMiddleware = (req, res, next) => (process.env.ENABLE_COMPRESSION !== 'false' ? baseCompress(req, res, next) : next());
 
-function createErrorBuffer(message) {
-  return Buffer.from(JSON.stringify({ error: message }));
-}
+// JSON request body parser
+const jsonParser = express.json({ limit: config.maxPayloadSize || '512kb' });
 
-const ERROR_INVALID_JSON = createErrorBuffer('Invalid JSON payload');
-const ERROR_PAYLOAD_TOO_LARGE = createErrorBuffer('Payload too large');
+// Gateway Authentication
+app.use(authMiddleware);
 
-// API endpoints
-function isValidModel(model) {
-  return typeof model === 'string' && model.length < 1000 && model.trim() !== '';
-}
+// Route Handlers
+app.get('/health/detailed', handleDetailedHealth);
+app.get('/v1/metrics', handleGetMetrics);
+app.get('/v1/models', handleListModels);
+app.get('/v1/models/:model', handleGetModel);
+app.post('/v1/chat/completions', jsonParser, compressMiddleware, handleChatCompletions);
 
-function isValidMessagesArray(messages) {
-  return Array.isArray(messages) && messages.length > 0;
-}
+// Error Handlers
+app.use(clientErrorHandler);
+app.use(notFoundHandler);
+app.use(genericErrorHandler);
 
-function isValidMessage(msg) {
-  return msg != null && typeof msg.role === 'string' && msg.role.trim() !== '' && (typeof msg.content === 'string' || Array.isArray(msg.content));
-}
-
-
-const MOCK_CHOICES = Object.freeze([
-  Object.freeze({
-    index: 0,
-    message: Object.freeze({
-      role: 'assistant',
-      content: 'This is a mock response from the unified API.'
-    }),
-    finish_reason: 'stop'
-  })
-]);
-
-const MOCK_USAGE = Object.freeze({
-  prompt_tokens: 10,
-  completion_tokens: 10,
-  total_tokens: 20
-});
-const MOCK_CHOICES_JSON = JSON.stringify(MOCK_CHOICES);
-const MOCK_USAGE_JSON = JSON.stringify(MOCK_USAGE);
-
-const ERROR_MISSING_MODEL = createErrorBuffer('Missing or invalid model');
-const ERROR_MISSING_MESSAGES = createErrorBuffer('Missing or invalid messages');
-const ERROR_TOO_MANY_MESSAGES = createErrorBuffer('Too many messages');
-const ERROR_MALFORMED_MESSAGE = createErrorBuffer('Malformed message object');
-
-// Set a smaller JSON limit to prevent DoS via massive payloads
-const jsonParser = express.json({ limit: '512kb' });
-
-let reqIdCounter = 0;
-const reqIdPrefix = crypto.randomBytes(16).toString('hex');
-
-app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
-  const body = req.body;
-  if (!body) {
-    return res.status(400).send(ERROR_MISSING_MODEL);
-  }
-  const model = body.model;
-  const messages = body.messages;
-  if (!isValidModel(model)) {
-    return res.status(400).send(ERROR_MISSING_MODEL);
-  }
-  if (!isValidMessagesArray(messages)) {
-    return res.status(400).send(ERROR_MISSING_MESSAGES);
-  }
-  const messagesLen = messages.length;
-  if (messagesLen > 1000) {
-    return res.status(400).send(ERROR_TOO_MANY_MESSAGES);
-  }
-
-  for (let i = 0; i < messagesLen; i++) {
-    if (!isValidMessage(messages[i])) {
-      return res.status(400).send(ERROR_MALFORMED_MESSAGE);
-    }
-  }
-
-  // Exact unix timestamp in seconds
-  const now = Date.now();
-  const created = Math.trunc(now / 1000);
-
-  // Fast ID generation with counter overflow protection
-  if (reqIdCounter >= Number.MAX_SAFE_INTEGER) {
-    reqIdCounter = 0;
-  }
-  const id = reqIdPrefix + (reqIdCounter++);
-
-  // Mock unified response
-  const payload = `{"id":"chatcmpl-${id}","object":"chat.completion","created":${created},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
-  res.status(200).send(payload);
-});
-
-const ERROR_UNSUPPORTED_MEDIA_TYPE = createErrorBuffer('Unsupported media type');
-const ERROR_BAD_REQUEST = createErrorBuffer('Bad request');
-
-// Handle invalid JSON gracefully
-app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
-
-  // Set Content-Type here to avoid setting it multiple times
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).send(ERROR_INVALID_JSON);
-  }
-  if (err.type === 'entity.too.large') {
-    return res.status(413).send(ERROR_PAYLOAD_TOO_LARGE);
-  }
-  if (err.type === 'charset.unsupported' || err.type === 'encoding.unsupported') {
-    return res.status(415).send(ERROR_UNSUPPORTED_MEDIA_TYPE);
-  }
-  if (err.type === 'request.aborted') {
-    return res.status(400).send(ERROR_BAD_REQUEST);
-  }
-  next(err);
-});
-
-const ERROR_NOT_FOUND = createErrorBuffer('Not found');
-
-// 404 handler — return JSON for unknown routes
-app.use((req, res) => {
-  res.status(404).send(ERROR_NOT_FOUND);
-});
-
-const ERROR_INTERNAL_SERVER = createErrorBuffer('Internal server error');
-
-// Generic error handler — never leak stack traces
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  if (res.headersSent) {
-    return next(err);
-  }
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.status(500).send(ERROR_INTERNAL_SERVER);
-});
-
+// Heavy Computation Cache & Logic (Benchmark compatibility)
 const computationCache = new Map();
 let lastIterations = Symbol('UNINITIALIZED');
 let lastResult = undefined;
 
 /**
  * Performs a heavy mathematical computation.
- * Optimized with memoization for repeated calls with identical parameters.
+ * Optimized with memoization and LRU eviction.
  */
 function heavyComputation(iterations) {
-  // L1 Cache: Fast path for repeated consecutive calls
   if (iterations === lastIterations) {
     return lastResult;
   }
 
   const cachedVal = computationCache.get(iterations);
   if (cachedVal !== undefined) {
-    // Refresh LRU by deleting and re-inserting
     computationCache.delete(iterations);
     computationCache.set(iterations, cachedVal);
-
-    // Update L1 cache
     lastIterations = iterations;
     lastResult = cachedVal;
     return cachedVal;
   }
 
-  // Prevent memory leak from unbounded cache growth by evicting the oldest entry (LRU)
   if (computationCache.size >= 1000) {
     const oldestKey = computationCache.keys().next().value;
     computationCache.delete(oldestKey);
@@ -227,8 +118,6 @@ function heavyComputation(iterations) {
   }
 
   computationCache.set(iterations, sum);
-
-  // Update L1 cache
   lastIterations = iterations;
   lastResult = sum;
   return sum;
@@ -242,7 +131,6 @@ async function main() {
   console.log('Running ' + runs + ' iterations...');
   for (let i = 0; i < runs; i++) {
     const start = performance.now();
-    // The computation is now memoized, making repeated calls in this loop efficient.
     heavyComputation(iterations);
     const end = performance.now();
     times.push(end - start);
@@ -250,32 +138,35 @@ async function main() {
   }
   console.log('\n');
 
-  const avg = times.reduce((a,b) => a+b) / times.length;
+  const avg = times.reduce((a, b) => a + b) / times.length;
   console.log('Average: ' + avg.toFixed(2) + 'ms');
-  console.log('Throughput: ' + (1000/avg).toFixed(2) + ' ops/sec');
-  return { avg, throughput: 1000/avg };
+  console.log('Throughput: ' + (1000 / avg).toFixed(2) + ' ops/sec');
+  return { avg, throughput: 1000 / avg };
 }
 
 if (require.main === module) {
   if (process.argv.includes('--server')) {
     const PORT = process.env.PORT || 3000;
     const server = app.listen(PORT, () => {
-      console.log(`One API Gateway listening on port ${PORT}`);
+      console.log('\n' + '='.repeat(50));
+      console.log(`🌌 one-api Gateway v2.0.0 listening on port ${PORT}`);
+      console.log(`📡 Endpoints:`);
+      console.log(`   - POST http://localhost:${PORT}/v1/chat/completions`);
+      console.log(`   - GET  http://localhost:${PORT}/v1/models`);
+      console.log(`   - GET  http://localhost:${PORT}/v1/metrics`);
+      console.log(`   - GET  http://localhost:${PORT}/health`);
+      console.log('='.repeat(50) + '\n');
     });
 
-    // Increase timeouts to prevent early disconnections from load balancers or slow clients
-    server.keepAliveTimeout = 65000; // 65 seconds
-    server.headersTimeout = 66000;   // 66 seconds (must be larger than keepAliveTimeout)
+    server.keepAliveTimeout = 65000;
+    server.headersTimeout = 66000;
 
-    // Graceful shutdown logic
     let isShuttingDown = false;
     const shutdown = (signal) => {
       if (isShuttingDown) return;
       isShuttingDown = true;
       console.log(`\nReceived ${signal}. Shutting down gracefully...`);
 
-      // Immediately sever idle keep-alive connections to prevent them from
-      // hanging the graceful shutdown process.
       if (server.closeIdleConnections) {
         server.closeIdleConnections();
       }
@@ -285,7 +176,6 @@ if (require.main === module) {
         process.exit(0);
       });
 
-      // Force shutdown after 10 seconds
       setTimeout(() => {
         console.error('Could not close connections in time, forcefully shutting down');
         if (server.closeAllConnections) {
@@ -298,7 +188,6 @@ if (require.main === module) {
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
   } else {
-    // Default to benchmark if no --server flag
     main()
       .then(r => {
         console.log('Results:', r);
@@ -311,4 +200,11 @@ if (require.main === module) {
   }
 }
 
-module.exports = { main, app, heavyComputation, isValidModel, isValidMessagesArray, isValidMessage };
+module.exports = {
+  main,
+  app,
+  heavyComputation,
+  isValidModel,
+  isValidMessagesArray,
+  isValidMessage
+};

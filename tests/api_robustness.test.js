@@ -34,11 +34,6 @@ test('POST /v1/chat/completions handles unsupported encoding gracefully', async 
 });
 
 test('POST /v1/chat/completions handles aborted requests gracefully', async () => {
-  // Test the error handler explicitly without dealing with express routing internals.
-  // We can inject a route to throw the aborted error, but we need the global error
-  // handler to handle it. Since we can't easily alter the app stack to bypass the 404 handler,
-  // we will construct a mock app and use the exact same logic that we added to index.js.
-  // In a real environment express initialization of the _router might be deferred.
   const mockApp = express();
 
   mockApp.post('/trigger-aborted', (req, res, next) => {
@@ -75,12 +70,10 @@ test('POST /v1/chat/completions handles payload too large gracefully', async () 
 });
 
 test('JSON error handler safely skips without crashing if headers are already sent', async () => {
-  // Inject a route into the existing app just for this test
   app.get('/trigger-headers-sent', (req, res, next) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.write('ok');
 
-    // Simulate an error occurring after headers are sent, specifically a JSON parsing error
     const err = new SyntaxError('Unexpected token');
     err.status = 400;
     err.body = 'bad json';
@@ -89,16 +82,14 @@ test('JSON error handler safely skips without crashing if headers are already se
   });
 
   try {
-    // Suppress console.error output during this expected error delegation
     const originalConsoleError = console.error;
     console.error = () => {};
     await request(app).get('/trigger-headers-sent');
     console.error = originalConsoleError;
   } catch (e) {
-    // Connection is likely aborted since we delegate to default express error handler which destroys the socket
+    // Expected connection abort
   }
 
-  // The fact that it gets here without an UncaughtException (ERR_HTTP_HEADERS_SENT) means it passed
   assert.ok(true);
 });
 
@@ -112,4 +103,24 @@ test('POST /v1/chat/completions handles extremely large model names gracefully',
     });
   assert.strictEqual(res.status, 400);
   assert.strictEqual(res.body.error, 'Missing or invalid model');
+});
+
+test('POST /v1/chat/completions handles request.size.invalid gracefully', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .set('Content-Type', 'application/json')
+    .set('Content-Length', '1')
+    .send('{"a":1}');
+
+  assert.strictEqual(res.status, 400);
+});
+
+test('POST /v1/chat/completions handles entity.parse.failed gracefully', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .set('Content-Type', 'application/json')
+    .send('not json');
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.error, 'Invalid JSON payload');
 });
