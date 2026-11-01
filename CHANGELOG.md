@@ -1,4 +1,5 @@
 ## [Unreleased]
+* **[Fixed]:** Intercept and handle request.size.invalid and entity.parse.failed body-parser errors.
 * **[Optimized]:** Set compression middleware threshold to 0 to ensure small JSON responses are always compressed.
 
 ## [1.1.37] - 2026-10-29

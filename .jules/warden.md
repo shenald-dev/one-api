@@ -274,3 +274,8 @@ Run unit tests, all passed. Ran `depcheck` and `find-unused-exports` confirming 
 - **QA & Veto Actions:** Audited BOLT's optimization configuring the compression middleware with `{ threshold: 0 }`. The change correctly ensures small API payloads are always compressed. Baseline test suite passed with no regressions found.
 - **Entropy Pruned:** Verified via `npx depcheck` and `npx find-unused-exports`. Zero dead code identified (0 lines deleted).
 - **Deferred / Blocked:** No safe patch/minor dependencies to update. Deferred major update of `dotenv`.
+
+## 2026-11-01 — Assessment & Lifecycle
+- **QA & Veto Actions:** Audited BOLT's optimization handling `request.size.invalid` and `entity.parse.failed` body-parser errors in `src/index.js`. No regressions found. Baseline test suite passed.
+- **Entropy Pruned:** Checked codebase using `npx depcheck` and `npx find-unused-exports`. 0 dead lines deleted. Verified no orphaned or leftover scratchpad files.
+- **Deferred / Blocked:** No safe patch/minor dependencies to update. Deferred major update for `dotenv` (v17.4.2 -> v18.0.9) as breaking updates are disallowed by guardrails.
