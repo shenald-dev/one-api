@@ -1,8 +1,16 @@
 ## [Unreleased]
-* **[Fixed]:** Eliminated timestamp drift and clock regression in /v1/chat/completions by computing exact unix timestamps directly from Date.now(), removing stale cached state.
-* **[Hardened]:** Added validation in isValidMessage to reject whitespace-only roles, and added safe counter rollover protection for completion IDs.
-* **[Enhanced]:** Enabled dynamic evaluation of process.env.ENABLE_COMPRESSION in compression middleware, and expanded integration tests for compression, timestamp precision, and message schemas.
-* **[Optimized]:** Set compression middleware threshold to 0 to ensure small JSON responses are always compressed.
+
+## [2.0.0] - 2026-11-01
+### Major Evolution & Architecture Modernization
+* **Universal Multi-Provider Gateway:** Architected a modular provider translation layer supporting OpenAI, Anthropic Claude (\/v1/messages\), Google Gemini (\generateContent\), Ollama (\/api/chat\), DeepSeek, Groq, Mistral, and Together AI with intelligent model-prefix routing.
+* **Native SSE Streaming Engine:** Implemented real-time token streaming (\stream: true\) with cross-provider chunk translation into standard OpenAI \chat.completion.chunk\ Server-Sent Events.
+* **Models Discovery API:** Added \GET /v1/models\ and \GET /v1/models/:model\ returning unified catalogs across all upstream providers for seamless Cursor, LangChain, and OpenWebUI discovery.
+* **In-Memory Semantic Caching:** Integrated high-performance SHA-256 LRU cache with TTL, returning sub-millisecond cached responses with \X-Cache: HIT\ and supporting \X-Cache-Bypass\.
+* **Security & Token-Bucket Rate Limiter:** Added optional \ONE_API_KEY\ Bearer authentication and rolling window rate limiter (\RATE_LIMIT_RPM\) to protect upstream budgets.
+* **Real-Time Telemetry & Observability:** Added \/v1/metrics\ and \/health/detailed\ tracking request throughput, status codes, latency histograms, and token accounting.
+* **Zero-Config Smart Fallback:** Embedded local generator fallback so the gateway runs out-of-the-box with zero mandatory external API keys for offline dev and CI/CD pipelines.
+* **Hot-Path Precision:** Eliminated timestamp drift and clock regression in completions by computing exact unix seconds from \Date.now()\.
+* **Comprehensive Test Suite:** Expanded test suite to 55 tests across 12 test suites covering streaming, models, caching, auth, provider translation, and tokenization.
 
 ## [1.1.37] - 2026-10-29
 ### Changed
