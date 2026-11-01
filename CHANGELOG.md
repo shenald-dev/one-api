@@ -1,4 +1,7 @@
 ## [Unreleased]
+* **[Fixed]:** Eliminated timestamp drift and clock regression in /v1/chat/completions by computing exact unix timestamps directly from Date.now(), removing stale cached state.
+* **[Hardened]:** Added validation in isValidMessage to reject whitespace-only roles, and added safe counter rollover protection for completion IDs.
+* **[Enhanced]:** Enabled dynamic evaluation of process.env.ENABLE_COMPRESSION in compression middleware, and expanded integration tests for compression, timestamp precision, and message schemas.
 * **[Optimized]:** Set compression middleware threshold to 0 to ensure small JSON responses are always compressed.
 
 ## [1.1.37] - 2026-10-29

@@ -50,9 +50,8 @@ app.use((req, res, next) => {
 
 
 // Compress all responses to reduce bandwidth and latency
-let isCompressionEnabled = process.env.ENABLE_COMPRESSION !== 'false';
 const baseCompress = compression({ threshold: 0 });
-const compressMiddleware = (req, res, next) => isCompressionEnabled ? baseCompress(req, res, next) : next();
+const compressMiddleware = (req, res, next) => (process.env.ENABLE_COMPRESSION !== 'false' ? baseCompress(req, res, next) : next());
 
 function createErrorBuffer(message) {
   return Buffer.from(JSON.stringify({ error: message }));
@@ -71,7 +70,7 @@ function isValidMessagesArray(messages) {
 }
 
 function isValidMessage(msg) {
-  return msg != null && typeof msg.role === 'string' && msg.role !== '' && (typeof msg.content === 'string' || Array.isArray(msg.content));
+  return msg != null && typeof msg.role === 'string' && msg.role.trim() !== '' && (typeof msg.content === 'string' || Array.isArray(msg.content));
 }
 
 
@@ -104,8 +103,6 @@ const jsonParser = express.json({ limit: '512kb' });
 
 let reqIdCounter = 0;
 const reqIdPrefix = crypto.randomBytes(16).toString('hex');
-let cachedTimestamp = Math.trunc(Date.now() / 1000);
-let lastTimestampUpdate = Date.now();
 
 app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
   const body = req.body;
@@ -131,18 +128,18 @@ app.post('/v1/chat/completions', jsonParser, compressMiddleware, (req, res) => {
     }
   }
 
-  // Optimization: Fast ID and cached timestamp
+  // Exact unix timestamp in seconds
   const now = Date.now();
-  if (now - lastTimestampUpdate >= 1000) {
-    cachedTimestamp = Math.trunc(now / 1000);
-    lastTimestampUpdate = now;
-  }
+  const created = Math.trunc(now / 1000);
 
-  // Fast ID generation (length > 20 to pass tests)
+  // Fast ID generation with counter overflow protection
+  if (reqIdCounter >= Number.MAX_SAFE_INTEGER) {
+    reqIdCounter = 0;
+  }
   const id = reqIdPrefix + (reqIdCounter++);
 
   // Mock unified response
-  const payload = `{"id":"chatcmpl-${id}","object":"chat.completion","created":${cachedTimestamp},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
+  const payload = `{"id":"chatcmpl-${id}","object":"chat.completion","created":${created},"model":${JSON.stringify(model)},"choices":${MOCK_CHOICES_JSON},"usage":${MOCK_USAGE_JSON}}`;
   res.status(200).send(payload);
 });
 

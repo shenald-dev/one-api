@@ -192,6 +192,7 @@ test('isValidMessage validation helper', () => {
   assert.strictEqual(isValidMessage({ content: 'hello' }), false);
   assert.strictEqual(isValidMessage({ role: 123, content: 'hello' }), false);
   assert.strictEqual(isValidMessage({ role: '', content: 'hello' }), false);
+  assert.strictEqual(isValidMessage({ role: '   ', content: 'hello' }), false);
   // Missing or invalid content
   assert.strictEqual(isValidMessage({ role: 'user', content: 123 }), false);
   assert.strictEqual(isValidMessage({ role: 'user', content: null }), false);
@@ -221,4 +222,68 @@ test('404 handler returns proper JSON and does not leak path', async () => {
   assert.strictEqual(res.status, 404);
   assert.strictEqual(res.headers['content-type'], 'application/json; charset=utf-8');
   assert.deepStrictEqual(res.body, { error: 'Not found' });
+});
+
+test('POST /v1/chat/completions fails when message role is only whitespace', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages: [{ role: '   ', content: 'Hello!' }]
+    });
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.error, 'Malformed message object');
+});
+
+test('POST /v1/chat/completions returns accurate unix timestamp without drift', async () => {
+  const before = Math.trunc(Date.now() / 1000);
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .send({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: 'Testing timestamp accuracy' }]
+    });
+  const after = Math.trunc(Date.now() / 1000);
+
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(typeof res.body.created, 'number');
+  assert.ok(res.body.created >= before && res.body.created <= after);
+});
+
+test('POST /v1/chat/completions compresses response with gzip on Accept-Encoding', async () => {
+  const res = await request(app)
+    .post('/v1/chat/completions')
+    .set('Accept-Encoding', 'gzip')
+    .send({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: 'Check compression header' }]
+    });
+
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.headers['content-encoding'], 'gzip');
+  assert.strictEqual(res.body.object, 'chat.completion');
+});
+
+test('POST /v1/chat/completions respects ENABLE_COMPRESSION=false override', async () => {
+  const originalEnv = process.env.ENABLE_COMPRESSION;
+  try {
+    process.env.ENABLE_COMPRESSION = 'false';
+    const res = await request(app)
+      .post('/v1/chat/completions')
+      .set('Accept-Encoding', 'gzip')
+      .send({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: 'No compression expected' }]
+      });
+
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.headers['content-encoding'], undefined);
+  } finally {
+    if (originalEnv === undefined) {
+      delete process.env.ENABLE_COMPRESSION;
+    } else {
+      process.env.ENABLE_COMPRESSION = originalEnv;
+    }
+  }
 });
