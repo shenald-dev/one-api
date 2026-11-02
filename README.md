@@ -9,6 +9,8 @@
 
   <br/>
   
+  [![Release](https://img.shields.io/github/v/release/shenald-dev/one-api?color=blue)](https://github.com/shenald-dev/one-api/releases/tag/v2.0.0)
+  [![GitHub Stars](https://img.shields.io/github/stars/shenald-dev/one-api?style=social)](https://github.com/shenald-dev/one-api/stargazers)
   [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
   [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://docker.com)
   [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
