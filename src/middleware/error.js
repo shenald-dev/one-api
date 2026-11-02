@@ -16,8 +16,6 @@ function clientErrorHandler(err, req, res, next) {
     return next(err);
   }
 
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     return res.status(400).send(ERROR_INVALID_JSON);
   }
@@ -35,7 +33,6 @@ function clientErrorHandler(err, req, res, next) {
 }
 
 function notFoundHandler(req, res) {
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.status(404).send(ERROR_NOT_FOUND);
 }
 
@@ -44,7 +41,6 @@ function genericErrorHandler(err, req, res, next) {
   if (res.headersSent) {
     return next(err);
   }
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.status(err.status || 500).send(ERROR_INTERNAL_SERVER);
 }
 

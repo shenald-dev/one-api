@@ -265,3 +265,7 @@ Object destructuring on the hot-path (`const { model, messages } = req.body || {
 
 Action:
 Replaced `req.body` destructuring in `src/index.js` with explicit property access and explicit falsy check. Extracted `messages.length` into `messagesLen` before length checks and iteration to avoid repeated property access. These optimizations improved average benchmark throughput from ~1350 ops/sec to ~1440 ops/sec.
+
+## 2026-11-01 — Refactor Error Handler Headers and IP Proxy Trust Security
+- **Learning:** Relying on `req.headers['x-forwarded-for']` directly allows arbitrary IP spoofing by attackers, which can easily bypass rate limiters, because it trusts client-supplied headers without proper proxy configuration. Also, the error handler explicitly set `Content-Type: application/json` headers directly even though the application already uses global middleware `app.use` to do this.
+- **Action:** Updated rate limiting to rely purely on `req.ip` and removed redundant header setting in `src/middleware/error.js`.
