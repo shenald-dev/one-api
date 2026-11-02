@@ -75,7 +75,7 @@ async function handleChatCompletions(req, res, next) {
   }
 
   // Rate Limiting
-  const clientId = req.ip || req.headers['x-forwarded-for'] || 'anonymous';
+  const clientId = req.ip || 'anonymous';
   if (rateLimiter.isRateLimited(clientId)) {
     return res.status(429).send(ERROR_RATE_LIMITED);
   }
