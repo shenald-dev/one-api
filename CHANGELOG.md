@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+**[Pruned]:** Removed unused `nodemon` dev dependency.
+
 ## [2.0.0] - 2026-11-01
 ### Major Evolution & Architecture Modernization
 * **Universal Multi-Provider Gateway:** Architected a modular provider translation layer supporting OpenAI, Anthropic Claude (\/v1/messages\), Google Gemini (\generateContent\), Ollama (\/api/chat\), DeepSeek, Groq, Mistral, and Together AI with intelligent model-prefix routing.
