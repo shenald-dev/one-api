@@ -37,7 +37,6 @@
     "helmet": "^8.3.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14",
     "supertest": "^7.3.1"
   }
 }
