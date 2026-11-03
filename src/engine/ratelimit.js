@@ -18,25 +18,36 @@ class RateLimiter {
       this.clients.set(clientId, timestamps);
     }
 
-    // Filter out timestamps outside the rolling 60-second window
     const windowStart = now - this.windowMs;
-    const validTimestamps = timestamps.filter(t => t > windowStart);
+    let startIndex = 0;
+    while (startIndex < timestamps.length && timestamps[startIndex] <= windowStart) {
+      startIndex++;
+    }
+    if (startIndex > 0) {
+      timestamps.splice(0, startIndex);
+    }
 
-    if (validTimestamps.length >= this.rpm) {
-      this.clients.set(clientId, validTimestamps);
+    if (timestamps.length >= this.rpm) {
       return true;
     }
 
-    validTimestamps.push(now);
-    this.clients.set(clientId, validTimestamps);
+    timestamps.push(now);
     return false;
   }
 
   getRemaining(clientId) {
     if (this.rpm <= 0) return Infinity;
-    const now = Date.now();
-    const timestamps = (this.clients.get(clientId) || []).filter(t => t > now - this.windowMs);
-    return Math.max(0, this.rpm - timestamps.length);
+    const timestamps = this.clients.get(clientId);
+    if (!timestamps) return this.rpm;
+
+    const windowStart = Date.now() - this.windowMs;
+    let validCount = 0;
+    for (let i = timestamps.length - 1; i >= 0; i--) {
+      if (timestamps[i] > windowStart) validCount++;
+      else break;
+    }
+
+    return Math.max(0, this.rpm - validCount);
   }
 
   reset() {
