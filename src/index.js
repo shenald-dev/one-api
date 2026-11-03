@@ -1,4 +1,6 @@
 // one-api — Universal Edge LLM Gateway
+const path = require('path');
+const fs = require('fs');
 const { performance } = require('perf_hooks');
 const express = require('express');
 const cors = require('cors');
@@ -16,8 +18,10 @@ const {
   handleChatCompletions,
   isValidModel,
   isValidMessagesArray,
-  isValidMessage
+  isValidMessage,
+  cache
 } = require('./routes/completions');
+const { handleEmbeddings } = require('./routes/embeddings');
 
 // Self-healing / Process Management
 process.on('uncaughtException', (err) => {
@@ -51,9 +55,11 @@ if (process.env.ALLOWED_ORIGINS) {
 }
 app.use(cors(corsOptions));
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
 
-// Global JSON Content-Type default
+// Global JSON Content-Type default (routes can override e.g. HTML dashboard, SSE)
 app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   next();
@@ -69,6 +75,36 @@ const compressMiddleware = (req, res, next) => (process.env.ENABLE_COMPRESSION !
 // JSON request body parser
 const jsonParser = express.json({ limit: config.maxPayloadSize || '512kb' });
 
+// Dashboard Asset
+const dashboardPath = path.join(__dirname, '../public/index.html');
+const dashboardHtml = fs.existsSync(dashboardPath) ? fs.readFileSync(dashboardPath, 'utf-8') : '';
+
+// Edge Gateway Dashboard Routes (Unauthenticated for browser inspection)
+app.get('/dashboard', (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.status(200).send(dashboardHtml);
+});
+
+app.get('/', (req, res) => {
+  if (req.accepts('html') && !req.accepts('json')) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send(dashboardHtml);
+  }
+  res.status(200).json({
+    gateway: 'one-api',
+    version: '2.1.0',
+    status: 'online',
+    dashboard: '/dashboard',
+    endpoints: {
+      completions: '/v1/chat/completions',
+      embeddings: '/v1/embeddings',
+      models: '/v1/models',
+      metrics: '/v1/metrics',
+      health: '/health'
+    }
+  });
+});
+
 // Gateway Authentication
 app.use(authMiddleware);
 
@@ -78,6 +114,11 @@ app.get('/v1/metrics', handleGetMetrics);
 app.get('/v1/models', handleListModels);
 app.get('/v1/models/:model', handleGetModel);
 app.post('/v1/chat/completions', jsonParser, compressMiddleware, handleChatCompletions);
+app.post('/v1/embeddings', jsonParser, compressMiddleware, handleEmbeddings);
+app.post('/v1/cache/clear', (req, res) => {
+  cache.clear();
+  res.status(200).json({ ok: true, message: 'Response cache cleared' });
+});
 
 // Error Handlers
 app.use(clientErrorHandler);
@@ -149,9 +190,11 @@ if (require.main === module) {
     const PORT = process.env.PORT || 3000;
     const server = app.listen(PORT, () => {
       console.log('\n' + '='.repeat(50));
-      console.log(`🌌 one-api Gateway v2.0.0 listening on port ${PORT}`);
+      console.log(`🌌 one-api Gateway v2.1.0 listening on port ${PORT}`);
       console.log(`📡 Endpoints:`);
+      console.log(`   - Dashboard: http://localhost:${PORT}/dashboard`);
       console.log(`   - POST http://localhost:${PORT}/v1/chat/completions`);
+      console.log(`   - POST http://localhost:${PORT}/v1/embeddings`);
       console.log(`   - GET  http://localhost:${PORT}/v1/models`);
       console.log(`   - GET  http://localhost:${PORT}/v1/metrics`);
       console.log(`   - GET  http://localhost:${PORT}/health`);

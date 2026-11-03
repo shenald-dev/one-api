@@ -1,6 +1,7 @@
 // Health and Telemetry Metrics Handlers
 const metrics = require('../middleware/metrics');
 const registry = require('../providers');
+const { cache } = require('./completions');
 const packageJson = require('../../package.json');
 
 const HEALTH_PAYLOAD = Buffer.from(JSON.stringify({ status: 'ok' }));
@@ -18,6 +19,7 @@ function handleDetailedHealth(req, res) {
     providers: {
       active: registry.getActiveProviders()
     },
+    circuit_breakers: registry.getCircuitBreakerStatus(),
     memory: process.memoryUsage(),
     timestamp: new Date().toISOString()
   });
@@ -29,6 +31,8 @@ function handleGetMetrics(req, res) {
     gateway: 'one-api',
     version: packageJson.version,
     active_providers: registry.getActiveProviders(),
+    circuit_breakers: registry.getCircuitBreakerStatus(),
+    cache: cache.getStats(),
     telemetry: snapshot
   });
 }

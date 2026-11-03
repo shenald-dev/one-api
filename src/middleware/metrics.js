@@ -15,7 +15,8 @@ class MetricsCollector {
     this.tokens = {
       prompt: 0,
       completion: 0,
-      total: 0
+      total: 0,
+      total_cost_usd: 0
     };
   }
 
@@ -47,10 +48,13 @@ class MetricsCollector {
     };
   }
 
-  recordTokens(promptTokens = 0, completionTokens = 0) {
+  recordTokens(promptTokens = 0, completionTokens = 0, costUsd = 0) {
     this.tokens.prompt += promptTokens;
     this.tokens.completion += completionTokens;
     this.tokens.total += promptTokens + completionTokens;
+    if (costUsd > 0) {
+      this.tokens.total_cost_usd = Number((this.tokens.total_cost_usd + costUsd).toFixed(6));
+    }
   }
 
   getSnapshot() {
@@ -73,7 +77,7 @@ class MetricsCollector {
   reset() {
     this.requests = { total: 0, active: 0, success: 0, clientError: 0, serverError: 0 };
     this.latencies = [];
-    this.tokens = { prompt: 0, completion: 0, total: 0 };
+    this.tokens = { prompt: 0, completion: 0, total: 0, total_cost_usd: 0 };
   }
 }
 

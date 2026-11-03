@@ -1,4 +1,4 @@
-// Built-in Zero-Config Local / Fallback Provider
+// Built-in Zero-Config Local / Fallback Provider (With Mock Tool Execution Support)
 const BaseProvider = require('./base');
 const { formatOpenAIChunk } = require('../engine/sse');
 const { estimateMessagesTokens, estimateTextTokens } = require('../engine/tokenizer');
@@ -13,10 +13,35 @@ class MockProvider extends BaseProvider {
   }
 
   async complete(params) {
-    const { model, messages, id = 'mock-' + Date.now() } = params;
-    const content = 'This is a mock response from the unified API.';
+    const { model, messages, tools, tool_choice, id = 'mock-' + Date.now() } = params;
+
+    let content = 'This is a mock response from the unified API.';
+    let tool_calls = undefined;
+    let finish_reason = 'stop';
+
+    // If client required or forced a tool, simulate a mock tool call
+    if (Array.isArray(tools) && tools.length > 0 && (tool_choice === 'required' || (typeof tool_choice === 'object' && tool_choice.type === 'function'))) {
+      const targetTool = typeof tool_choice === 'object' && tool_choice.function?.name
+        ? tools.find((t) => (t.function?.name || t.name) === tool_choice.function.name) || tools[0]
+        : tools[0];
+
+      const fn = targetTool.function || targetTool;
+      tool_calls = [
+        {
+          id: `call_${Math.random().toString(36).substring(2, 10)}`,
+          type: 'function',
+          function: {
+            name: fn.name,
+            arguments: JSON.stringify({ query: 'sample_mock_arg' })
+          }
+        }
+      ];
+      content = null;
+      finish_reason = 'tool_calls';
+    }
+
     const promptTokens = estimateMessagesTokens(messages);
-    const completionTokens = estimateTextTokens(content);
+    const completionTokens = tool_calls ? 20 : estimateTextTokens(content || '');
 
     return {
       id: `chatcmpl-${id}`,
@@ -28,9 +53,10 @@ class MockProvider extends BaseProvider {
           index: 0,
           message: {
             role: 'assistant',
-            content
+            content,
+            ...(tool_calls && { tool_calls })
           },
-          finish_reason: 'stop'
+          finish_reason
         }
       ],
       usage: {

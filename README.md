@@ -4,17 +4,17 @@
   <br/>
 
   <h1>🌌 one-api</h1>
-  <p><b>Universal Edge LLM Gateway — v2.0.0</b></p>
+  <p><b>Universal Edge LLM Gateway — v2.1.0</b></p>
   <i>One API to rule them all. Unify OpenAI, Anthropic, Google Gemini, DeepSeek, Groq, Ollama, and more behind a high-performance OpenAI-compatible endpoint.</i>
 
   <br/>
   
-  [![Release](https://img.shields.io/github/v/release/shenald-dev/one-api?color=blue)](https://github.com/shenald-dev/one-api/releases/tag/v2.0.0)
+  [![Release](https://img.shields.io/github/v/release/shenald-dev/one-api?color=blue)](https://github.com/shenald-dev/one-api/releases/tag/v2.1.0)
   [![GitHub Stars](https://img.shields.io/github/stars/shenald-dev/one-api?style=social)](https://github.com/shenald-dev/one-api/stargazers)
   [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
   [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://docker.com)
   [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-  [![Tests](https://img.shields.io/badge/Tests-55%20Passing-brightgreen.svg)]()
+  [![Tests](https://img.shields.io/badge/Tests-82%20Passing-brightgreen.svg)]()
 </div>
 
 ---
@@ -49,14 +49,19 @@ Swap out your `baseURL` in any OpenAI SDK, LangChain, Cursor, or OpenWebUI appli
 
 ---
 
-## ⚡ Next-Gen v2.0 Features
+## ⚡ Next-Gen v2.1 Features
 
-- **🌐 100% OpenAI-Compatible Interface**: Full fidelity support for `/v1/chat/completions` and `/v1/models`.
+- **🌐 100% OpenAI-Compatible Interface**: Full fidelity support for `/v1/chat/completions`, `/v1/embeddings`, and `/v1/models`.
+- **🛠️ Universal Function Calling & Tool Translation**: Seamless two-way translation for OpenAI `tools` and `tool_choice` schemas with Anthropic Claude (`tools` / `tool_use` / `tool_result`) and Google Gemini (`functionDeclarations` / `functionResponse`).
 - **⚡ Native SSE Streaming**: Real-time token streaming with automatic cross-provider chunk translation (Anthropic `text_delta` and Gemini parts translated on-the-fly to OpenAI `chat.completion.chunk`).
-- **🧠 Intelligent Multi-Provider Router**: Automatic model-prefix routing to Anthropic, Google Gemini, DeepSeek, Groq, Ollama, Mistral, Together, and OpenAI.
+- **🔄 Circuit Breakers & Model Fallback Chains**: Automatic failover (e.g. `claude-3-5-sonnet` -> `gpt-4o` -> `gemini-1.5-pro`) on 429 rate limits, timeouts, or 5xx errors with `X-Fallback-Applied: true` header.
+- **📐 Universal Embeddings Endpoint (`POST /v1/embeddings`)**: Generates vector embeddings using OpenAI, Google Gemini, or zero-config deterministic 1536-dimensional normalized vectors.
+- **🏷️ Virtual Models & Semantic Routing**: Target semantic aliases (`fast`, `smart`, `reasoning`, `code`, `vision`) mapped dynamically to optimal underlying models.
+- **🔑 Multi-Key Load Balancing with Cooldown**: Rotate multiple comma-separated API keys per provider with automatic temporary cooldown on 429/401 errors.
+- **💰 Financial Cost Accounting**: Real-time token pricing calculation returning `X-Token-Cost-USD` headers and aggregating costs in `/v1/metrics`.
+- **🛡️ Prompt Safety & PII Guardrails**: Pre-execution scanning and redaction of exposed API keys, private keys, credit cards, and SSNs.
+- **🖥️ Cyberpunk Edge Gateway Web Dashboard**: Zero-dependency embedded management dashboard at `/dashboard` with live metrics, model playground, provider health status, and cache management.
 - **🚀 In-Memory Semantic Caching**: Configurable LRU cache with TTL. Repeated identical requests hit cache in `< 1ms` with `X-Cache: HIT` header.
-- **🛡️ Master Key Auth & Rate Limiting**: Protect your gateway downstream budgets with `ONE_API_KEY` Bearer authentication and rolling token-bucket rate limiting.
-- **📊 Real-Time Telemetry & Observability**: Dedicated `/v1/metrics` and `/health/detailed` endpoints monitoring active providers, throughput, latency histogram, and token consumption.
 - **🌱 Zero-Config Resilience**: When external keys are not provided, automatically defaults to intelligent local generation so the gateway works out of the box.
 
 ---
@@ -82,18 +87,23 @@ Route seamlessly across all major providers with one schema:
 
 ```mermaid
 graph TD
-    Client["Client App / OpenAI SDK / Cursor / LangChain"] -->|POST /v1/chat/completions| Gateway["one-api Gateway"]
+    Client["Client App / OpenAI SDK / Cursor / LangChain"] -->|REST / SSE / Web| Gateway["one-api Gateway Engine"]
     
     subgraph Gateway ["one-api Gateway Engine"]
-        Auth["Auth & Rate Limiter"] --> Cache{"LRU Cache Check"}
+        Auth["Master Auth & Token Bucket Rate Limiter"] --> Guard["Prompt Safety & PII Guardrails"]
+        Guard --> Cache{"In-Memory LRU Cache"}
         Cache -->|Hit| FastReturn["Sub-ms Cached Response (X-Cache: HIT)"]
-        Cache -->|Miss| Router["Intelligent Model Router"]
+        Cache -->|Miss| Aliases["Virtual Model Aliasing (fast, smart, reasoning)"]
         
-        Router --> P_OpenAI["OpenAI Adapter"]
-        Router --> P_Anthropic["Anthropic Adapter (/v1/messages)"]
-        Router --> P_Gemini["Gemini Adapter (generateContent)"]
+        Aliases --> CB{"Circuit Breaker & Fallback Matrix"}
+        CB --> Router["Intelligent Multi-Provider Router"]
+        
+        Router --> P_OpenAI["OpenAI Adapter (Key Pool)"]
+        Router --> P_Anthropic["Anthropic Adapter (/v1/messages + Tool Translator)"]
+        Router --> P_Gemini["Gemini Adapter (generateContent + Tool Translator)"]
+        Router --> P_Embed["Embeddings Engine (/v1/embeddings)"]
         Router --> P_Ollama["Ollama Local Adapter (/api/chat)"]
-        Router --> P_Mock["Zero-Config Local Fallback"]
+        Router --> P_Mock["Zero-Config Deterministic Local Fallback"]
         
         P_OpenAI --> StreamTrans["SSE & Payload Translator"]
         P_Anthropic --> StreamTrans
@@ -101,10 +111,12 @@ graph TD
         P_Ollama --> StreamTrans
         P_Mock --> StreamTrans
         
-        StreamTrans --> Telemetry["Metrics & Token Accounting"]
+        StreamTrans --> Cost["Financial Valuation ($) & Token Accounting"]
+        Cost --> Telemetry["Telemetry, Circuit Metrics & Dashboard"]
     end
     
     Telemetry --> Client
+    Gateway <--> Dashboard["Edge Management Dashboard (/dashboard)"]
 ```
 
 ---
@@ -192,20 +204,39 @@ curl -N -X POST http://localhost:3000/v1/chat/completions \
 
 `GET /v1/models/:model` — Returns metadata for a specific model ID.
 
-### 3. Telemetry & Observability
+### 3. Embeddings Vectors API
+`POST /v1/embeddings`
+
+Generate dense vector embeddings across text strings for search, classification, or retrieval:
+```bash
+curl -X POST http://localhost:3000/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": "Universal Edge LLM Gateway"
+  }'
+```
+
+### 4. Edge Gateway Web Dashboard
+Access the cybernetic management dashboard directly in your browser:
+- `http://localhost:3000/dashboard` or `http://localhost:3000/`
+- Real-time telemetry, live SSE playground, provider circuit health, and cache purge controls.
+
+### 5. Telemetry & Observability
 - `GET /health` — Fast-path status ping (`{"status":"ok"}`) for load balancers.
-- `GET /health/detailed` — System uptime, node memory breakdown, active providers.
+- `GET /health/detailed` — System uptime, node memory breakdown, active providers, and circuit breaker health.
 - `GET /v1/metrics` — Comprehensive performance telemetry:
 ```json
 {
   "gateway": "one-api",
-  "version": "2.0.0",
-  "active_providers": ["anthropic", "openai"],
+  "version": "2.1.0",
+  "active_providers": ["anthropic", "openai", "gemini"],
+  "circuit_breakers": { "anthropic": { "state": "CLOSED", "failures": 0 } },
   "telemetry": {
     "uptime_seconds": 3600,
     "requests": { "total": 1250, "active": 2, "success": 1245, "clientError": 5, "serverError": 0 },
     "latency": { "avg_ms": 142.3, "samples": 500 },
-    "tokens": { "prompt": 14200, "completion": 28400, "total": 42600 }
+    "tokens": { "prompt": 14200, "completion": 28400, "total": 42600, "total_cost_usd": 0.084 }
   }
 }
 ```

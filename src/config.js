@@ -58,6 +58,18 @@ const config = {
     together: {
       apiKey: process.env.TOGETHER_API_KEY || '',
       baseUrl: (process.env.TOGETHER_BASE_URL || 'https://api.together.xyz/v1').replace(/\/+$/, '')
+    },
+    xai: {
+      apiKey: process.env.XAI_API_KEY || '',
+      baseUrl: (process.env.XAI_BASE_URL || 'https://api.x.ai/v1').replace(/\/+$/, '')
+    },
+    perplexity: {
+      apiKey: process.env.PERPLEXITY_API_KEY || '',
+      baseUrl: (process.env.PERPLEXITY_BASE_URL || 'https://api.perplexity.ai').replace(/\/+$/, '')
+    },
+    cohere: {
+      apiKey: process.env.COHERE_API_KEY || '',
+      baseUrl: (process.env.COHERE_BASE_URL || 'https://api.cohere.ai/v1').replace(/\/+$/, '')
     }
   }
 };

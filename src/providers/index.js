@@ -5,6 +5,8 @@ const AnthropicProvider = require('./anthropic');
 const GeminiProvider = require('./gemini');
 const OllamaProvider = require('./ollama');
 const MockProvider = require('./mock');
+const aliasRegistry = require('../engine/aliases');
+const { circuitBreaker } = require('../engine/resilience');
 
 class ProviderRegistry {
   constructor() {
@@ -23,14 +25,18 @@ class ProviderRegistry {
     this.providers.set('groq', new OpenAIProvider('groq', config.providers.groq));
     this.providers.set('mistral', new OpenAIProvider('mistral', config.providers.mistral));
     this.providers.set('together', new OpenAIProvider('together', config.providers.together));
+    this.providers.set('xai', new OpenAIProvider('xai', config.providers.xai));
+    this.providers.set('perplexity', new OpenAIProvider('perplexity', config.providers.perplexity));
     this.providers.set('mock', this.fallbackProvider);
   }
 
-  resolveProvider(model) {
-    if (!model || typeof model !== 'string') {
+  resolveProvider(rawModel) {
+    if (!rawModel || typeof rawModel !== 'string') {
       return this.fallbackProvider;
     }
 
+    // Resolve any model aliases (e.g. 'fast' -> 'gpt-4o-mini')
+    const model = aliasRegistry.resolve(rawModel);
     const lower = model.toLowerCase();
 
     // Anthropic models
@@ -68,6 +74,18 @@ class ProviderRegistry {
       return p.isConfigured() ? p : this.fallbackProvider;
     }
 
+    // xAI / Grok models
+    if (lower.startsWith('grok-') || lower.startsWith('xai/')) {
+      const p = this.providers.get('xai');
+      return p.isConfigured() ? p : this.fallbackProvider;
+    }
+
+    // Perplexity models
+    if (lower.startsWith('sonar-') || lower.startsWith('perplexity/')) {
+      const p = this.providers.get('perplexity');
+      return p.isConfigured() ? p : this.fallbackProvider;
+    }
+
     // OpenAI models (gpt-4, gpt-4o, gpt-3.5-turbo, o1, o3, etc.)
     if (lower.startsWith('gpt-') || lower.startsWith('o1') || lower.startsWith('o3') || lower.startsWith('openai/')) {
       const p = this.providers.get('openai');
@@ -93,9 +111,12 @@ class ProviderRegistry {
     return active;
   }
 
+  getCircuitBreakerStatus() {
+    return circuitBreaker.getStatus();
+  }
+
   getUnifiedModelsList() {
-    const now = Math.trunc(Date.now() / 1000);
-    return [
+    const baseModels = [
       // OpenAI
       { id: 'gpt-4o', object: 'model', created: 1715558400, owned_by: 'openai' },
       { id: 'gpt-4o-mini', object: 'model', created: 1721260800, owned_by: 'openai' },
@@ -128,8 +149,17 @@ class ProviderRegistry {
 
       // Mistral
       { id: 'mistral-large-latest', object: 'model', created: 1708905600, owned_by: 'mistralai' },
-      { id: 'codestral-latest', object: 'model', created: 1716940800, owned_by: 'mistralai' }
+      { id: 'codestral-latest', object: 'model', created: 1716940800, owned_by: 'mistralai' },
+
+      // Embeddings
+      { id: 'text-embedding-3-small', object: 'model', created: 1705977600, owned_by: 'openai' },
+      { id: 'text-embedding-3-large', object: 'model', created: 1705977600, owned_by: 'openai' },
+      { id: 'text-embedding-004', object: 'model', created: 1715644800, owned_by: 'google' }
     ];
+
+    // Append virtual aliases
+    const aliases = aliasRegistry.getAll();
+    return [...baseModels, ...aliases];
   }
 }
 

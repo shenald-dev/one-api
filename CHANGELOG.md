@@ -1,4 +1,14 @@
-## [Unreleased]
+## [2.1.0] - 2026-11-03
+### Major Feature Release: Tool Translation, Circuit Breakers, Embeddings & Edge Dashboard
+* **Universal Tool & Function Calling Translation:** Added cross-provider function calling translation (`src/engine/tools.js`) bridging OpenAI `tools` and `tool_choice` schemas with Anthropic Claude (`tools` / `tool_use` / `tool_result`) and Google Gemini (`functionDeclarations` / `functionResponse`).
+* **Resilience Engine & Model Fallback Chains:** Added provider circuit breaker (`src/engine/resilience.js`) with automatic failover (e.g. `claude-3-5-sonnet` -> `gpt-4o` -> `gemini-1.5-pro`) on 429 rate limits or upstream 5xx errors, returning `X-Fallback-Applied: true` and `X-Served-By-Model` headers.
+* **Universal Embeddings Endpoint (`POST /v1/embeddings`):** Implemented standard OpenAI embeddings route (`src/routes/embeddings.js`) with upstream adapters for OpenAI and Gemini, plus built-in zero-config deterministic 1536-dimensional L2-normalized vectors for offline development.
+* **Multi-Key Load Balancing with Cooldown:** Added `KeyPool` (`src/engine/key-pool.js`) supporting comma-separated API keys with automatic temporary cooldown on 429/401 responses.
+* **Virtual Models & Semantic Aliases:** Added `ModelAliasRegistry` (`src/engine/aliases.js`) enabling semantic model aliases (`fast`, `smart`, `reasoning`, `code`, `vision`) with dynamic discovery in `/v1/models`.
+* **Prompt Safety & PII Guardrails:** Added `Guardrails` (`src/engine/guardrails.js`) scanning messages for leaked credentials (OpenAI, Anthropic, GitHub, AWS, private keys), SSNs, and credit cards with configurable redaction or blocking.
+* **Financial Token Valuation & Cost Tracking:** Integrated real-time pricing calculation (`src/engine/cost.js`) returning `X-Token-Cost-USD` headers and aggregating costs in `/v1/metrics`.
+* **Cyberpunk Edge Gateway Web Dashboard:** Embedded zero-dependency live UI (`public/index.html`) accessible at `/dashboard` and `/` with real-time telemetry, model playground, provider health badges, and cache management.
+* **Expanded Verification Suite:** Increased test suite from 55 to 82 automated tests across 19 test suites with 100% pass rate.
 
 **[Pruned]:** Removed unused `nodemon` dev dependency.
 

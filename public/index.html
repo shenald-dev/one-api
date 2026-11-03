@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>one-api — Universal Edge LLM Gateway</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌌</text></svg>">
+  <style>
+    :root {
+      --bg: #090c10;
+      --card-bg: #161b22;
+      --card-border: #30363d;
+      --text: #f0f6fc;
+      --text-muted: #8b949e;
+      --cyan: #00f0ff;
+      --cyan-dim: rgba(0, 240, 255, 0.1);
+      --green: #2ea043;
+      --green-dim: rgba(46, 160, 67, 0.15);
+      --yellow: #d29922;
+      --red: #f85149;
+      --purple: #a371f7;
+      --code-bg: #0d1117;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+    }
+
+    .brand span.badge {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: var(--cyan-dim);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      font-family: var(--font-mono);
+    }
+
+    .header-links {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .header-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .header-links a:hover { color: var(--cyan); }
+
+    .container {
+      max-width: 1200px;
+      margin: 28px auto;
+      padding: 0 20px;
+      display: grid;
+      gap: 24px;
+    }
+
+    /* Metric Grid */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric-card .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-card .value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--cyan);
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(22, 27, 34, 0.8);
+    }
+
+    .section-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-body { padding: 20px; }
+
+    /* Provider Badges */
+    .providers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .provider-pill {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .provider-pill.active { border-color: rgba(46, 160, 67, 0.5); }
+    .provider-pill .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #484f58;
+    }
+    .provider-pill.active .status-dot {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    /* Playground */
+    .playground-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 850px) {
+      .playground-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    select, input, textarea {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    select:focus, input:focus, textarea:focus { border-color: var(--cyan); }
+    textarea { font-family: var(--font-mono); resize: vertical; min-height: 90px; }
+
+    .btn {
+      background: var(--cyan);
+      color: #050505;
+      font-weight: 700;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: var(--code-bg);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+    }
+    .btn-secondary:hover { border-color: var(--text-muted); }
+
+    .output-box {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      min-height: 220px;
+      max-height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #c9d1d9;
+    }
+
+    /* Model Table */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th, td { padding: 10px 16px; border-bottom: 1px solid var(--card-border); }
+    th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+    .tag {
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      background: var(--card-border);
+    }
+    .tag-alias { background: rgba(163, 113, 247, 0.2); color: var(--purple); border: 1px solid rgba(163, 113, 247, 0.4); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span>🌌 one-api</span>
+      <span class="badge">v2.1.0 Gateway</span>
+    </div>
+    <div class="header-links">
+      <a href="/v1/models" target="_blank">Models API</a>
+      <a href="/v1/metrics" target="_blank">Telemetry JSON</a>
+      <a href="/health/detailed" target="_blank">Health Ping</a>
+      <a href="https://github.com/shenald-dev/one-api" target="_blank">GitHub</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Metrics Bar -->
+    <div class="metric-grid">
+      <div class="metric-card">
+        <span class="label">Total Requests</span>
+        <span class="value" id="val-requests">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="label">Avg Latency</span>
+        <span class="value" id="val-latency">0ms</span>
+      </div>
+      <div class="metric-card">
+        <span class="label">Cache Hit Rate</span>
+        <span class="value" id="val-cache">0%</span>
+      </div>
+      <div class="metric-card">
+        <span class="label">Total Tokens</span>
+        <span class="value" id="val-tokens">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="label">Est. Total Cost</span>
+        <span class="value" id="val-cost" style="color: var(--purple);">$0.00</span>
+      </div>
+    </div>
+
+    <!-- Active Providers & Circuit Breakers -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>⚡ Provider Adapters & Health</h2>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Circuit Breakers Active</span>
+      </div>
+      <div class="section-body">
+        <div class="providers-grid" id="providers-container">
+          <div class="provider-pill active"><span>OpenAI</span><span class="status-dot"></span></div>
+          <div class="provider-pill active"><span>Anthropic</span><span class="status-dot"></span></div>
+          <div class="provider-pill active"><span>Gemini</span><span class="status-dot"></span></div>
+          <div class="provider-pill active"><span>DeepSeek</span><span class="status-dot"></span></div>
+          <div class="provider-pill active"><span>Groq</span><span class="status-dot"></span></div>
+          <div class="provider-pill active"><span>Ollama (Local)</span><span class="status-dot"></span></div>
+          <div class="provider-pill active"><span>Smart Local Fallback</span><span class="status-dot"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Playground -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>🧪 Live Gateway Playground</h2>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Test streaming & completions</span>
+      </div>
+      <div class="section-body">
+        <div class="playground-grid">
+          <div>
+            <div class="form-group">
+              <label>Target Model / Alias</label>
+              <select id="model-select">
+                <option value="fast">fast (alias -> gpt-4o-mini)</option>
+                <option value="smart">smart (alias -> claude-3-5-sonnet)</option>
+                <option value="reasoning">reasoning (alias -> deepseek-reasoner)</option>
+                <option value="code">code (alias -> claude-3-5-sonnet)</option>
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="claude-3-5-sonnet-20241022">claude-3-5-sonnet-20241022</option>
+                <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                <option value="deepseek-chat">deepseek-chat</option>
+                <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>System Prompt (Optional)</label>
+              <input type="text" id="system-prompt" value="You are a helpful, concise AI engineer." />
+            </div>
+            <div class="form-group">
+              <label>User Message</label>
+              <textarea id="user-prompt">Explain why an edge LLM gateway is critical for AI agents in two bullet points.</textarea>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <button class="btn" id="send-btn" onclick="sendPrompt()">🚀 Send Completion</button>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; text-transform: none;">
+                <input type="checkbox" id="stream-toggle" checked /> Stream SSE
+              </label>
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label id="output-meta">Response Output (Waiting for prompt...)</label>
+              <div class="output-box" id="output-box">Press "Send Completion" to execute request.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Models Catalog Explorer -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>📚 Unified Models & Virtual Aliases Catalog</h2>
+        <button class="btn btn-secondary" onclick="purgeCache()" style="padding: 6px 12px; font-size: 0.8rem;">Purge LRU Cache</button>
+      </div>
+      <div class="section-body" style="padding: 0;">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Model ID</th>
+                <th>Owner / Upstream</th>
+                <th>Classification</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="models-table">
+              <tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading catalog...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function refreshTelemetry() {
+      try {
+        const res = await fetch('/v1/metrics');
+        if (!res.ok) return;
+        const data = await res.json();
+        const t = data.telemetry;
+        document.getElementById('val-requests').textContent = t.requests.total;
+        document.getElementById('val-latency').textContent = t.latency.avg_ms + 'ms';
+        document.getElementById('val-tokens').textContent = t.tokens.total.toLocaleString();
+        if (t.tokens.total_cost_usd !== undefined) {
+          document.getElementById('val-cost').textContent = '$' + t.tokens.total_cost_usd.toFixed(4);
+        }
+        if (data.cache) {
+          document.getElementById('val-cache').textContent = data.cache.hitRate + '%';
+        }
+      } catch (_) {}
+    }
+
+    async function loadModels() {
+      try {
+        const res = await fetch('/v1/models');
+        if (!res.ok) return;
+        const data = await res.json();
+        const tbody = document.getElementById('models-table');
+        tbody.innerHTML = '';
+        for (const m of data.data) {
+          const tr = document.createElement('tr');
+          const isAlias = m.is_alias;
+          tr.innerHTML = `
+            <td><code>${m.id}</code></td>
+            <td><span class="tag ${isAlias ? 'tag-alias' : ''}">${m.owned_by}</span></td>
+            <td>${isAlias ? 'Virtual Alias ➔ ' + m.target_model : (m.id.includes('embedding') ? 'Embedding Vector' : 'Chat Completion')}</td>
+            <td><span style="color: var(--green);">● Active</span></td>
+          `;
+          tbody.appendChild(tr);
+        }
+      } catch (_) {}
+    }
+
+    async function purgeCache() {
+      try {
+        await fetch('/v1/cache/clear', { method: 'POST' });
+        alert('Gateway in-memory cache successfully purged.');
+        refreshTelemetry();
+      } catch (_) {}
+    }
+
+    async function sendPrompt() {
+      const model = document.getElementById('model-select').value;
+      const sysPrompt = document.getElementById('system-prompt').value;
+      const userPrompt = document.getElementById('user-prompt').value;
+      const stream = document.getElementById('stream-toggle').checked;
+      const outputBox = document.getElementById('output-box');
+      const outputMeta = document.getElementById('output-meta');
+      const sendBtn = document.getElementById('send-btn');
+
+      const messages = [];
+      if (sysPrompt) messages.push({ role: 'system', content: sysPrompt });
+      messages.push({ role: 'user', content: userPrompt });
+
+      outputBox.textContent = '';
+      outputMeta.textContent = `Streaming from ${model}...`;
+      sendBtn.disabled = true;
+
+      const startTime = performance.now();
+
+      try {
+        const response = await fetch('/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model, messages, stream })
+        });
+
+        const servedModel = response.headers.get('X-Served-By-Model') || model;
+        const costUsd = response.headers.get('X-Token-Cost-USD') || '0.00';
+        const fallback = response.headers.get('X-Fallback-Applied');
+
+        if (stream) {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let fullText = '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                try {
+                  const parsed = JSON.parse(line.slice(6));
+                  const delta = parsed.choices[0]?.delta?.content || '';
+                  fullText += delta;
+                  outputBox.textContent = fullText;
+                } catch (_) {}
+              }
+            }
+          }
+        } else {
+          const data = await response.json();
+          outputBox.textContent = data.choices[0]?.message?.content || JSON.stringify(data, null, 2);
+        }
+
+        const elapsed = Math.round(performance.now() - startTime);
+        outputMeta.textContent = `Completed in ${elapsed}ms | Model: ${servedModel} | Cost: $${costUsd}${fallback ? ' (Fallback Triggered)' : ''}`;
+      } catch (err) {
+        outputBox.textContent = 'Error: ' + err.message;
+      } finally {
+        sendBtn.disabled = false;
+        refreshTelemetry();
+      }
+    }
+
+    refreshTelemetry();
+    loadModels();
+    setInterval(refreshTelemetry, 5000);
+  </script>
+</body>
+</html>

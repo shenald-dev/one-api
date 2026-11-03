@@ -1,16 +1,18 @@
-// Google Gemini Provider Adapter
+// Google Gemini Provider Adapter (Multi-Key Pooling & Full Tool Calling Translation)
 const BaseProvider = require('./base');
+const KeyPool = require('../engine/key-pool');
 const { formatOpenAIChunk } = require('../engine/sse');
+const { hasTools, toGeminiTools, extractGeminiToolCalls } = require('../engine/tools');
 
 class GeminiProvider extends BaseProvider {
   constructor(config = {}) {
     super('gemini', config);
-    this.apiKey = config.apiKey || '';
+    this.keyPool = new KeyPool(config.apiKey || '');
     this.baseUrl = config.baseUrl || 'https://generativelanguage.googleapis.com/v1beta';
   }
 
   isConfigured() {
-    return Boolean(this.apiKey);
+    return this.keyPool.hasKeys();
   }
 
   transformMessages(messages) {
@@ -22,14 +24,52 @@ class GeminiProvider extends BaseProvider {
         const text = typeof msg.content === 'string'
           ? msg.content
           : Array.isArray(msg.content)
-            ? msg.content.map(p => p.text || '').join('\n')
+            ? msg.content.map((p) => p.text || '').join('\n')
             : '';
         systemInstruction = { parts: [{ text }] };
+      } else if (msg.role === 'tool') {
+        // Function / Tool response in Gemini
+        let responseContent = {};
+        try {
+          responseContent = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
+        } catch {
+          responseContent = { content: msg.content };
+        }
+        contents.push({
+          role: 'function',
+          parts: [
+            {
+              functionResponse: {
+                name: msg.name || 'tool_response',
+                response: responseContent
+              }
+            }
+          ]
+        });
       } else {
         const role = msg.role === 'assistant' ? 'model' : 'user';
         let parts = [];
 
-        if (typeof msg.content === 'string') {
+        // If assistant has tool_calls, construct functionCall parts
+        if (role === 'model' && Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0) {
+          if (msg.content) {
+            parts.push({ text: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) });
+          }
+          for (const tc of msg.tool_calls) {
+            let parsedArgs = {};
+            try {
+              parsedArgs = typeof tc.function.arguments === 'string' ? JSON.parse(tc.function.arguments) : tc.function.arguments;
+            } catch {
+              parsedArgs = {};
+            }
+            parts.push({
+              functionCall: {
+                name: tc.function.name,
+                args: parsedArgs
+              }
+            });
+          }
+        } else if (typeof msg.content === 'string') {
           parts.push({ text: msg.content });
         } else if (Array.isArray(msg.content)) {
           for (const item of msg.content) {
@@ -62,12 +102,11 @@ class GeminiProvider extends BaseProvider {
   }
 
   cleanModelName(model) {
-    // Remove "gemini/" or "google/" prefix if passed
     return model.replace(/^(gemini|google)\//i, '');
   }
 
   async complete(params) {
-    const { model, messages, temperature, max_tokens, top_p } = params;
+    const { model, messages, temperature, max_tokens, top_p, tools } = params;
     const targetModel = this.cleanModelName(model);
     const { systemInstruction, contents } = this.transformMessages(messages);
 
@@ -81,7 +120,12 @@ class GeminiProvider extends BaseProvider {
       }
     };
 
-    const url = `${this.baseUrl}/models/${targetModel}:generateContent?key=${this.apiKey}`;
+    if (hasTools(tools)) {
+      body.tools = toGeminiTools(tools);
+    }
+
+    const apiKey = this.keyPool.getNextKey();
+    const url = `${this.baseUrl}/models/${targetModel}:generateContent?key=${apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -89,6 +133,7 @@ class GeminiProvider extends BaseProvider {
     });
 
     if (!response.ok) {
+      this.keyPool.recordFailure(apiKey, response.status);
       const errText = await response.text();
       let errJson;
       try { errJson = JSON.parse(errText); } catch (_) {}
@@ -98,10 +143,27 @@ class GeminiProvider extends BaseProvider {
       throw error;
     }
 
+    this.keyPool.recordSuccess(apiKey);
     const data = await response.json();
     const candidate = data.candidates?.[0];
-    const textPart = candidate?.content?.parts?.find(p => p.text);
+    const textPart = candidate?.content?.parts?.find((p) => p.text);
     const content = textPart?.text || '';
+
+    const toolCalls = extractGeminiToolCalls(candidate?.content?.parts);
+    const finishReason = toolCalls
+      ? 'tool_calls'
+      : candidate?.finishReason === 'STOP'
+        ? 'stop'
+        : (candidate?.finishReason?.toLowerCase() || 'stop');
+
+    const message = {
+      role: 'assistant',
+      content: content || (toolCalls ? null : '')
+    };
+
+    if (toolCalls) {
+      message.tool_calls = toolCalls;
+    }
 
     return {
       id: `chatcmpl-${Date.now()}`,
@@ -111,11 +173,8 @@ class GeminiProvider extends BaseProvider {
       choices: [
         {
           index: 0,
-          message: {
-            role: 'assistant',
-            content
-          },
-          finish_reason: candidate?.finishReason === 'STOP' ? 'stop' : (candidate?.finishReason?.toLowerCase() || 'stop')
+          message,
+          finish_reason: finishReason
         }
       ],
       usage: {
@@ -127,7 +186,7 @@ class GeminiProvider extends BaseProvider {
   }
 
   async stream(params, onChunk, signal) {
-    const { model, messages, temperature, max_tokens, top_p, id = Date.now() } = params;
+    const { model, messages, temperature, max_tokens, top_p, tools, id = Date.now() } = params;
     const targetModel = this.cleanModelName(model);
     const { systemInstruction, contents } = this.transformMessages(messages);
 
@@ -141,7 +200,12 @@ class GeminiProvider extends BaseProvider {
       }
     };
 
-    const url = `${this.baseUrl}/models/${targetModel}:streamGenerateContent?alt=sse&key=${this.apiKey}`;
+    if (hasTools(tools)) {
+      body.tools = toGeminiTools(tools);
+    }
+
+    const apiKey = this.keyPool.getNextKey();
+    const url = `${this.baseUrl}/models/${targetModel}:streamGenerateContent?alt=sse&key=${apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -150,12 +214,14 @@ class GeminiProvider extends BaseProvider {
     });
 
     if (!response.ok) {
+      this.keyPool.recordFailure(apiKey, response.status);
       const errText = await response.text();
       const error = new Error(`Gemini stream error: ${errText}`);
       error.status = response.status;
       throw error;
     }
 
+    this.keyPool.recordSuccess(apiKey);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';

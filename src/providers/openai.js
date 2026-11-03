@@ -1,19 +1,20 @@
-// OpenAI and OpenAI-Compatible Provider Adapter (OpenAI, DeepSeek, Groq, Mistral, Together)
+// OpenAI and OpenAI-Compatible Provider Adapter (Multi-Key Pooling & Native Tools)
 const BaseProvider = require('./base');
+const KeyPool = require('../engine/key-pool');
 
 class OpenAIProvider extends BaseProvider {
   constructor(name = 'openai', config = {}) {
     super(name, config);
-    this.apiKey = config.apiKey || '';
+    this.keyPool = new KeyPool(config.apiKey || '');
     this.baseUrl = config.baseUrl || 'https://api.openai.com/v1';
   }
 
   isConfigured() {
-    return Boolean(this.apiKey);
+    return this.keyPool.hasKeys();
   }
 
   async complete(params) {
-    const { model, messages, temperature, max_tokens, top_p, stream, ...rest } = params;
+    const { model, messages, temperature, max_tokens, top_p, stream, tools, tool_choice, ...rest } = params;
     const url = `${this.baseUrl}/chat/completions`;
 
     const body = {
@@ -22,19 +23,23 @@ class OpenAIProvider extends BaseProvider {
       ...(temperature !== undefined && { temperature }),
       ...(max_tokens !== undefined && { max_tokens }),
       ...(top_p !== undefined && { top_p }),
+      ...(tools !== undefined && { tools }),
+      ...(tool_choice !== undefined && { tool_choice }),
       ...rest
     };
 
+    const apiKey = this.keyPool.getNextKey();
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify(body)
     });
 
     if (!response.ok) {
+      this.keyPool.recordFailure(apiKey, response.status);
       const errText = await response.text();
       let errJson;
       try { errJson = JSON.parse(errText); } catch (_) {}
@@ -44,11 +49,12 @@ class OpenAIProvider extends BaseProvider {
       throw error;
     }
 
+    this.keyPool.recordSuccess(apiKey);
     return await response.json();
   }
 
   async stream(params, onChunk, signal) {
-    const { model, messages, temperature, max_tokens, top_p, ...rest } = params;
+    const { model, messages, temperature, max_tokens, top_p, tools, tool_choice, ...rest } = params;
     const url = `${this.baseUrl}/chat/completions`;
 
     const body = {
@@ -58,26 +64,31 @@ class OpenAIProvider extends BaseProvider {
       ...(temperature !== undefined && { temperature }),
       ...(max_tokens !== undefined && { max_tokens }),
       ...(top_p !== undefined && { top_p }),
+      ...(tools !== undefined && { tools }),
+      ...(tool_choice !== undefined && { tool_choice }),
       ...rest
     };
 
+    const apiKey = this.keyPool.getNextKey();
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify(body),
       signal
     });
 
     if (!response.ok) {
+      this.keyPool.recordFailure(apiKey, response.status);
       const errText = await response.text();
       const error = new Error(`Upstream ${this.name} stream error: ${errText}`);
       error.status = response.status;
       throw error;
     }
 
+    this.keyPool.recordSuccess(apiKey);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
