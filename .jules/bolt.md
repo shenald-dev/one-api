@@ -269,3 +269,11 @@ Replaced `req.body` destructuring in `src/index.js` with explicit property acces
 ## 2026-11-01 — Refactor Error Handler Headers and IP Proxy Trust Security
 - **Learning:** Relying on `req.headers['x-forwarded-for']` directly allows arbitrary IP spoofing by attackers, which can easily bypass rate limiters, because it trusts client-supplied headers without proper proxy configuration. Also, the error handler explicitly set `Content-Type: application/json` headers directly even though the application already uses global middleware `app.use` to do this.
 - **Action:** Updated rate limiting to rely purely on `req.ip` and removed redundant header setting in `src/middleware/error.js`.
+
+## 2026-11-03 — Optimize Hot Path Array Allocations
+
+Learning:
+In highly trafficked components like `RateLimiter`, using `Array.prototype.filter` to manage a sliding window of timestamps allocates a new array on every request. This generates unnecessary garbage collection pressure and increases latency under load. Furthermore, because timestamps are sequentially appended, the array is inherently sorted, making iteration over the whole array inefficient.
+
+Action:
+Replaced the `filter` approach in `RateLimiter` with an in-place mutation approach (`splice`) for expired timestamps, finding the cut-off index via a `while` loop. For counting, implemented a reverse `for` loop that breaks early once it reaches timestamps outside the window. This reduces allocations and transforms the search from $O(N)$ to amortized $O(1)$.
