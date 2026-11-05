@@ -1,0 +1,568 @@
+
+> one-api@2.1.0 test
+> node tests/test.js && node --test tests/*.test.js
+
+Running 10 iterations...
+.....
+
+Average: 0.57ms
+Throughput: 1751.37 ops/sec
+TAP version 13
+# Subtest: module loads
+ok 1 - module loads
+  ---
+  duration_ms: 24.222966
+  type: 'test'
+  ...
+# Subtest: main function exists
+ok 2 - main function exists
+  ---
+  duration_ms: 0.313781
+  type: 'test'
+  ...
+# Subtest: main function returns expected performance metrics
+ok 3 - main function returns expected performance metrics
+  ---
+  duration_ms: 7.325657
+  type: 'test'
+  ...
+1..3
+# tests 3
+# suites 0
+# pass 3
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 43.589307
+TAP version 13
+# ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+# ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+# Subtest: Aliases: resolves built-in virtual aliases
+ok 1 - Aliases: resolves built-in virtual aliases
+  ---
+  duration_ms: 1.13215
+  type: 'test'
+  ...
+# Subtest: Aliases: registers dynamic custom aliases
+ok 2 - Aliases: registers dynamic custom aliases
+  ---
+  duration_ms: 0.305872
+  type: 'test'
+  ...
+# Subtest: Aliases: POST /v1/chat/completions resolves virtual alias and serves request
+ok 3 - Aliases: POST /v1/chat/completions resolves virtual alias and serves request
+  ---
+  duration_ms: 47.298247
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+# ◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+# Subtest: GET /health returns 200
+ok 4 - GET /health returns 200
+  ---
+  duration_ms: 32.956466
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions works with valid data
+ok 5 - POST /v1/chat/completions works with valid data
+  ---
+  duration_ms: 23.881412
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions works with multiple messages
+ok 6 - POST /v1/chat/completions works with multiple messages
+  ---
+  duration_ms: 7.538046
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions works with multimodal data
+ok 7 - POST /v1/chat/completions works with multimodal data
+  ---
+  duration_ms: 8.191278
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions fails without model
+ok 8 - POST /v1/chat/completions fails without model
+  ---
+  duration_ms: 5.331571
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions fails when messages is not an array
+ok 9 - POST /v1/chat/completions fails when messages is not an array
+  ---
+  duration_ms: 14.776678
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions fails with empty messages array
+ok 10 - POST /v1/chat/completions fails with empty messages array
+  ---
+  duration_ms: 14.438356
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions fails with malformed message objects
+ok 11 - POST /v1/chat/completions fails with malformed message objects
+  ---
+  duration_ms: 6.025025
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions fails when one of multiple messages is malformed
+ok 12 - POST /v1/chat/completions fails when one of multiple messages is malformed
+  ---
+  duration_ms: 6.718424
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions fails with invalid JSON gracefully
+ok 13 - POST /v1/chat/completions fails with invalid JSON gracefully
+  ---
+  duration_ms: 5.518677
+  type: 'test'
+  ...
+# Subtest: Generic error handler returns 500 without leaking stack traces
+ok 14 - Generic error handler returns 500 without leaking stack traces
+  ---
+  duration_ms: 4.477567
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions fails with more than 1000 messages
+ok 15 - POST /v1/chat/completions fails with more than 1000 messages
+  ---
+  duration_ms: 8.403975
+  type: 'test'
+  ...
+# Subtest: isValidMessage validation helper
+ok 16 - isValidMessage validation helper
+  ---
+  duration_ms: 0.361462
+  type: 'test'
+  ...
+# Subtest: isValidModel validation helper
+ok 17 - isValidModel validation helper
+  ---
+  duration_ms: 0.148377
+  type: 'test'
+  ...
+# Subtest: isValidMessagesArray validation helper
+ok 18 - isValidMessagesArray validation helper
+  ---
+  duration_ms: 0.128027
+  type: 'test'
+  ...
+# Subtest: 404 handler returns proper JSON and does not leak path
+ok 19 - 404 handler returns proper JSON and does not leak path
+  ---
+  duration_ms: 5.179196
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions fails when message role is only whitespace
+ok 20 - POST /v1/chat/completions fails when message role is only whitespace
+  ---
+  duration_ms: 4.670401
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions returns accurate unix timestamp without drift
+ok 21 - POST /v1/chat/completions returns accurate unix timestamp without drift
+  ---
+  duration_ms: 5.945634
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions compresses response with gzip on Accept-Encoding
+ok 22 - POST /v1/chat/completions compresses response with gzip on Accept-Encoding
+  ---
+  duration_ms: 4.682828
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions respects ENABLE_COMPRESSION=false override
+ok 23 - POST /v1/chat/completions respects ENABLE_COMPRESSION=false override
+  ---
+  duration_ms: 3.481984
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+# ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+# Subtest: POST /v1/chat/completions handles undefined req.body (e.g. non-JSON content-type)
+ok 24 - POST /v1/chat/completions handles undefined req.body (e.g. non-JSON content-type)
+  ---
+  duration_ms: 37.910325
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions handles unsupported charset gracefully
+ok 25 - POST /v1/chat/completions handles unsupported charset gracefully
+  ---
+  duration_ms: 7.376439
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions handles unsupported encoding gracefully
+ok 26 - POST /v1/chat/completions handles unsupported encoding gracefully
+  ---
+  duration_ms: 4.353806
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions handles aborted requests gracefully
+ok 27 - POST /v1/chat/completions handles aborted requests gracefully
+  ---
+  duration_ms: 5.259661
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions handles payload too large gracefully
+ok 28 - POST /v1/chat/completions handles payload too large gracefully
+  ---
+  duration_ms: 12.813685
+  type: 'test'
+  ...
+# Subtest: JSON error handler safely skips without crashing if headers are already sent
+ok 29 - JSON error handler safely skips without crashing if headers are already sent
+  ---
+  duration_ms: 3.746703
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions handles extremely large model names gracefully
+ok 30 - POST /v1/chat/completions handles extremely large model names gracefully
+  ---
+  duration_ms: 29.361506
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions handles request.size.invalid gracefully
+ok 31 - POST /v1/chat/completions handles request.size.invalid gracefully
+  ---
+  duration_ms: 10.388044
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions handles entity.parse.failed gracefully
+ok 32 - POST /v1/chat/completions handles entity.parse.failed gracefully
+  ---
+  duration_ms: 5.973702
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+# ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+# Subtest: Gateway Auth: enforces ONE_API_KEY when configured
+ok 33 - Gateway Auth: enforces ONE_API_KEY when configured
+  ---
+  duration_ms: 59.094493
+  type: 'test'
+  ...
+# Subtest: RateLimiter unit test: limits requests per minute
+ok 34 - RateLimiter unit test: limits requests per minute
+  ---
+  duration_ms: 0.474545
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+# ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+# Subtest: ResponseCache unit test - get, set, LRU and stats
+ok 35 - ResponseCache unit test - get, set, LRU and stats
+  ---
+  duration_ms: 2.130625
+  type: 'test'
+  ...
+# Subtest: POST /v1/chat/completions serves cached responses when enabled
+ok 36 - POST /v1/chat/completions serves cached responses when enabled
+  ---
+  duration_ms: 59.581137
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+# ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+# ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+# Subtest: CORS defaults to false when ALLOWED_ORIGINS is not set
+ok 37 - CORS defaults to false when ALLOWED_ORIGINS is not set
+  ---
+  duration_ms: 127.815129
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+# Subtest: CORS restricts to specific origins when ALLOWED_ORIGINS is set
+ok 38 - CORS restricts to specific origins when ALLOWED_ORIGINS is set
+  ---
+  duration_ms: 12.77967
+  type: 'test'
+  ...
+# Subtest: CORS allows * when ALLOWED_ORIGINS contains *
+ok 39 - CORS allows * when ALLOWED_ORIGINS contains *
+  ---
+  duration_ms: 5.995299
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+# ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+# Subtest: Cost: calculates pricing accurately for major models
+ok 40 - Cost: calculates pricing accurately for major models
+  ---
+  duration_ms: 1.439906
+  type: 'test'
+  ...
+# Subtest: Cost: formats dollar amounts cleanly
+ok 41 - Cost: formats dollar amounts cleanly
+  ---
+  duration_ms: 0.21102
+  type: 'test'
+  ...
+# Subtest: Cost: POST /v1/chat/completions injects cost and model tracking headers
+ok 42 - Cost: POST /v1/chat/completions injects cost and model tracking headers
+  ---
+  duration_ms: 47.03004
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+# ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+# Subtest: Dashboard: GET /dashboard returns HTML edge gateway dashboard
+ok 43 - Dashboard: GET /dashboard returns HTML edge gateway dashboard
+  ---
+  duration_ms: 30.554323
+  type: 'test'
+  ...
+# Subtest: Dashboard: GET / negotiates HTML vs JSON depending on Accept header
+ok 44 - Dashboard: GET / negotiates HTML vs JSON depending on Accept header
+  ---
+  duration_ms: 11.609907
+  type: 'test'
+  ...
+# Subtest: Dashboard: POST /v1/cache/clear empties in-memory cache
+ok 45 - Dashboard: POST /v1/cache/clear empties in-memory cache
+  ---
+  duration_ms: 4.341863
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+# ◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+# Subtest: Embeddings: generates deterministic normalized embeddings
+ok 46 - Embeddings: generates deterministic normalized embeddings
+  ---
+  duration_ms: 11.601452
+  type: 'test'
+  ...
+# Subtest: Embeddings: POST /v1/embeddings handles single string input
+ok 47 - Embeddings: POST /v1/embeddings handles single string input
+  ---
+  duration_ms: 54.739161
+  type: 'test'
+  ...
+# Subtest: Embeddings: POST /v1/embeddings handles batch array inputs
+ok 48 - Embeddings: POST /v1/embeddings handles batch array inputs
+  ---
+  duration_ms: 22.897831
+  type: 'test'
+  ...
+# Subtest: Embeddings: POST /v1/embeddings rejects missing input
+ok 49 - Embeddings: POST /v1/embeddings rejects missing input
+  ---
+  duration_ms: 17.29427
+  type: 'test'
+  ...
+# Subtest: Guardrails: redacts leaked API keys and sensitive tokens
+ok 50 - Guardrails: redacts leaked API keys and sensitive tokens
+  ---
+  duration_ms: 2.533138
+  type: 'test'
+  ...
+# Subtest: Guardrails: redacts SSN and credit card numbers
+ok 51 - Guardrails: redacts SSN and credit card numbers
+  ---
+  duration_ms: 0.656819
+  type: 'test'
+  ...
+# Subtest: Guardrails: blocks request when action=block
+ok 52 - Guardrails: blocks request when action=block
+  ---
+  duration_ms: 0.676015
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+# ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+# Subtest: heavyComputation returns correct result
+ok 53 - heavyComputation returns correct result
+  ---
+  duration_ms: 1.464045
+  type: 'test'
+  ...
+# Subtest: heavyComputation is memoized
+ok 54 - heavyComputation is memoized
+  ---
+  duration_ms: 6.26751
+  type: 'test'
+  ...
+# Subtest: heavyComputation implements LRU eviction
+ok 55 - heavyComputation implements LRU eviction
+  ---
+  duration_ms: 11.465698
+  type: 'test'
+  ...
+# Subtest: heavyComputation handles null correctly
+ok 56 - heavyComputation handles null correctly
+  ---
+  duration_ms: 0.505041
+  type: 'test'
+  ...
+# Subtest: heavyComputation handles negative iterations correctly
+ok 57 - heavyComputation handles negative iterations correctly
+  ---
+  duration_ms: 0.412613
+  type: 'test'
+  ...
+# Subtest: KeyPool: round-robin rotates across multiple keys
+ok 58 - KeyPool: round-robin rotates across multiple keys
+  ---
+  duration_ms: 1.572709
+  type: 'test'
+  ...
+# Subtest: KeyPool: cooldown skips rate-limited key
+ok 59 - KeyPool: cooldown skips rate-limited key
+  ---
+  duration_ms: 0.354887
+  type: 'test'
+  ...
+# Subtest: KeyPool: single key behavior without rotation overhead
+ok 60 - KeyPool: single key behavior without rotation overhead
+  ---
+  duration_ms: 0.222411
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+# ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+# Subtest: GET /v1/models returns unified list of models
+ok 61 - GET /v1/models returns unified list of models
+  ---
+  duration_ms: 31.978697
+  type: 'test'
+  ...
+# Subtest: GET /v1/models/:model returns individual model details
+ok 62 - GET /v1/models/:model returns individual model details
+  ---
+  duration_ms: 7.138416
+  type: 'test'
+  ...
+# Subtest: GET /v1/models/:model returns 404 for non-existent model
+ok 63 - GET /v1/models/:model returns 404 for non-existent model
+  ---
+  duration_ms: 4.678628
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+# Subtest: AnthropicProvider: transforms OpenAI messages correctly
+ok 64 - AnthropicProvider: transforms OpenAI messages correctly
+  ---
+  duration_ms: 1.7803
+  type: 'test'
+  ...
+# Subtest: GeminiProvider: transforms OpenAI messages to contents/systemInstruction
+ok 65 - GeminiProvider: transforms OpenAI messages to contents/systemInstruction
+  ---
+  duration_ms: 0.481296
+  type: 'test'
+  ...
+# Subtest: OllamaProvider: model cleanup
+ok 66 - OllamaProvider: model cleanup
+  ---
+  duration_ms: 0.359497
+  type: 'test'
+  ...
+# Subtest: ProviderRegistry: routes models intelligently
+ok 67 - ProviderRegistry: routes models intelligently
+  ---
+  duration_ms: 0.385942
+  type: 'test'
+  ...
+# Subtest: CircuitBreaker: transitions CLOSED -> OPEN -> HALF_OPEN -> CLOSED
+ok 68 - CircuitBreaker: transitions CLOSED -> OPEN -> HALF_OPEN -> CLOSED
+  ---
+  duration_ms: 1.772836
+  type: 'test'
+  ...
+# Subtest: CircuitBreaker: probe in HALF_OPEN resets upon consecutive successes
+ok 69 - CircuitBreaker: probe in HALF_OPEN resets upon consecutive successes
+  ---
+  duration_ms: 46.288156
+  type: 'test'
+  ...
+# Subtest: retryWithBackoff: retries transient errors and succeeds
+ok 70 - retryWithBackoff: retries transient errors and succeeds
+  ---
+  duration_ms: 12.505415
+  type: 'test'
+  ...
+# Subtest: retryWithBackoff: does not retry non-retryable 4xx errors
+ok 71 - retryWithBackoff: does not retry non-retryable 4xx errors
+  ---
+  duration_ms: 1.019616
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+# ◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+# Subtest: POST /v1/chat/completions supports streaming SSE
+ok 72 - POST /v1/chat/completions supports streaming SSE
+  ---
+  duration_ms: 42.924766
+  type: 'test'
+  ...
+# ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+# ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+# Subtest: GET /health/detailed returns system metrics and active providers
+ok 73 - GET /health/detailed returns system metrics and active providers
+  ---
+  duration_ms: 31.162412
+  type: 'test'
+  ...
+# Subtest: GET /v1/metrics returns gateway request statistics
+ok 74 - GET /v1/metrics returns gateway request statistics
+  ---
+  duration_ms: 26.474114
+  type: 'test'
+  ...
+# Subtest: Tokenizer: estimates text and message tokens accurately
+ok 75 - Tokenizer: estimates text and message tokens accurately
+  ---
+  duration_ms: 1.3641
+  type: 'test'
+  ...
+# Subtest: Tools: hasTools identifies tool arrays accurately
+ok 76 - Tools: hasTools identifies tool arrays accurately
+  ---
+  duration_ms: 1.232948
+  type: 'test'
+  ...
+# Subtest: Tools: toAnthropicTools converts OpenAI tools to Anthropic format
+ok 77 - Tools: toAnthropicTools converts OpenAI tools to Anthropic format
+  ---
+  duration_ms: 1.132212
+  type: 'test'
+  ...
+# Subtest: Tools: extractAnthropicToolCalls parses tool_use blocks
+ok 78 - Tools: extractAnthropicToolCalls parses tool_use blocks
+  ---
+  duration_ms: 0.307494
+  type: 'test'
+  ...
+# Subtest: Tools: toGeminiTools converts OpenAI tools to functionDeclarations
+ok 79 - Tools: toGeminiTools converts OpenAI tools to functionDeclarations
+  ---
+  duration_ms: 1.982533
+  type: 'test'
+  ...
+# Subtest: Tools: extractGeminiToolCalls extracts functionCall parts
+ok 80 - Tools: extractGeminiToolCalls extracts functionCall parts
+  ---
+  duration_ms: 0.49546
+  type: 'test'
+  ...
+# Subtest: Tools: AnthropicProvider message transformer handles tool role & assistant tool_calls
+ok 81 - Tools: AnthropicProvider message transformer handles tool role & assistant tool_calls
+  ---
+  duration_ms: 0.676487
+  type: 'test'
+  ...
+# Subtest: Tools: GeminiProvider message transformer handles tool role & assistant tool_calls
+ok 82 - Tools: GeminiProvider message transformer handles tool role & assistant tool_calls
+  ---
+  duration_ms: 0.588188
+  type: 'test'
+  ...
+1..82
+# tests 82
+# suites 0
+# pass 82
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1594.682845
