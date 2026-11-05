@@ -40,6 +40,9 @@ const app = express();
 app.set('etag', false);
 app.disable('x-powered-by');
 
+// Trust the first upstream proxy (e.g. load balancer) to securely resolve client IP
+app.set('trust proxy', 1);
+
 // Health endpoint registered before security/CORS middlewares for zero-overhead load balancer pings
 app.get('/health', handleHealth);
 

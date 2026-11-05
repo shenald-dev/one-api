@@ -193,6 +193,10 @@
 ### Changed
 * **[Performance]:** Optimized test module mock loading in `tests/test.js` by utilizing a persistent `Set` for O(1) lookup performance.
 
+## [Unreleased]
+### Changed
+* **[Fixed]:** Fixed IP Proxy Trust Security Vulnerability by configuring Express to securely resolve client IP from the first upstream proxy using `app.set('trust proxy', 1)`.
+
 ## [1.1.38] - 2026-10-30
 ### Changed
 * **[Security]:** Fixed generic error handler logging to securely log the full error object internally via `console.error` for debuggability, without leaking the stack traces in HTTP JSON responses.
