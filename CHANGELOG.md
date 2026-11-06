@@ -1,3 +1,6 @@
+## [Unreleased]
+**[Added]:** Added edge-case unit tests for RateLimiter.
+
 ## [2.1.0] - 2026-11-03
 ### Major Feature Release: Tool Translation, Circuit Breakers, Embeddings & Edge Dashboard
 * **Universal Tool & Function Calling Translation:** Added cross-provider function calling translation (`src/engine/tools.js`) bridging OpenAI `tools` and `tool_choice` schemas with Anthropic Claude (`tools` / `tool_use` / `tool_result`) and Google Gemini (`functionDeclarations` / `functionResponse`).
