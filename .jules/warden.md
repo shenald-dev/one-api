@@ -289,8 +289,12 @@ Run unit tests, all passed. Ran `depcheck` and `find-unused-exports` confirming 
 - **QA & Veto Actions:** Fixed IP Proxy Trust Security Vulnerability by configuring Express to securely resolve client IP from the first upstream proxy using `app.set('trust proxy', 1)`.
 - **Entropy Pruned:** Verified via `npx depcheck` and `npx find-unused-exports`. Zero dead code identified (0 lines deleted).
 - **Deferred / Blocked:** No safe patch/minor dependencies to update.
-
 ## 2026-11-04 — Assessment & Lifecycle
 - **QA & Veto Actions:** Fixed a DoS vulnerability in `/v1/embeddings` endpoint by ensuring `dimensions` does not exceed 10000. Verified behavior by adding specific tests inside `tests/embeddings.test.js`. Cleaned up leftover ad-hoc test files. All tests passed.
 - **Entropy Pruned:** Checked codebase using `npx depcheck` and `npx find-unused-exports`. 0 dead lines deleted. Verified no orphaned or leftover scratchpad files.
 - **Deferred / Blocked:** No safe patch/minor dependencies to update.
+
+## 2026-11-06 — Lifecycle & Assurance Ledger
+- **QA & Veto Actions:** Wrote missing edge-case unit tests for RateLimiter (`tests/ratelimit.test.js`). Audited baseline test suite and execution behavior. No regressions detected. Tests pass.
+- **Entropy Pruned:** Checked codebase using `npx depcheck` and `npx find-unused-exports`. Zero dead code identified (0 lines deleted). Verified no orphaned or leftover scratchpad files.
+- **Deferred / Blocked:** Verified dependencies using `npm outdated`. Deferred major update for `dotenv` (v17.4.2 -> v18.0.9) as breaking updates are disallowed by guardrails.
