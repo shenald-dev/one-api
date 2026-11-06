@@ -57,3 +57,29 @@ test('Embeddings: POST /v1/embeddings rejects missing input', async () => {
   assert.strictEqual(res.statusCode, 400);
   assert.strictEqual(res.body.error.param, 'input');
 });
+
+test('Embeddings: POST /v1/embeddings accepts valid dimensions', async () => {
+  const res = await request(app)
+    .post('/v1/embeddings')
+    .send({
+      model: 'text-embedding-3-small',
+      input: 'Universal Edge LLM Gateway',
+      dimensions: 10000
+    });
+
+  assert.strictEqual(res.statusCode, 200);
+});
+
+test('Embeddings: POST /v1/embeddings rejects excessive dimensions to prevent DoS', async () => {
+  const res = await request(app)
+    .post('/v1/embeddings')
+    .send({
+      model: 'text-embedding-3-small',
+      input: 'Universal Edge LLM Gateway',
+      dimensions: 10001
+    });
+
+  assert.strictEqual(res.statusCode, 400);
+  assert.strictEqual(res.body.error.param, 'dimensions');
+  assert.strictEqual(res.body.error.code, 'invalid_parameter');
+});

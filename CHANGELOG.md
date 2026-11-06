@@ -208,3 +208,4 @@
 * **[Fixed]:** Fixed shared state mutation in tests by correctly restoring `Date.now` in `tests/api.test.js`.
 * **[Pruned]:** Removed obsolete `crypto.randomUUID` test mock as the application no longer uses it for ID generation.
 * **[Lifecycle]:** Safely bumped dependencies `compression`, `express`, and `helmet` to latest minor/patch versions. Deferred major update of `dotenv`. No unused dependencies found.
+**[Fixed]:** Prevented memory exhaustion DoS vulnerability in `/v1/embeddings` by enforcing a maximum value of 10000 on the `dimensions` parameter.

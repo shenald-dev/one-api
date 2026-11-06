@@ -15,6 +15,17 @@ async function handleEmbeddings(req, res, next) {
     });
   }
 
+  if (body.dimensions !== undefined && (typeof body.dimensions !== 'number' || body.dimensions > 10000 || body.dimensions < 1)) {
+    return res.status(400).json({
+      error: {
+        message: "Invalid 'dimensions'. Must be an integer between 1 and 10000.",
+        type: 'invalid_request_error',
+        param: 'dimensions',
+        code: 'invalid_parameter'
+      }
+    });
+  }
+
   const model = body.model || 'text-embedding-3-small';
 
   try {
