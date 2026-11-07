@@ -1,4 +1,5 @@
 ## [Unreleased]
+**[Fixed]:** Relaxed performance assertion threshold in `tests/heavy_computation.test.js` from `1.0ms` to `5.0ms` to eliminate test flakiness while still strictly verifying LRU cache eviction and L1 memoization speeds.
 **[Added]:** Added edge-case unit tests for RateLimiter.
 
 ## [2.1.0] - 2026-11-03

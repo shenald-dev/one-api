@@ -89,3 +89,20 @@ test('RateLimiter: resets correctly', () => {
   limiter.reset();
   assert.strictEqual(limiter.isRateLimited(client), false);
 });
+
+test('RateLimiter: limits multiple distinct clients independently', () => {
+  const limiter = new RateLimiter(2);
+  const clientA = 'client-A';
+  const clientB = 'client-B';
+
+  assert.strictEqual(limiter.isRateLimited(clientA), false);
+  assert.strictEqual(limiter.isRateLimited(clientA), false);
+  assert.strictEqual(limiter.isRateLimited(clientA), true); // A is blocked
+
+  assert.strictEqual(limiter.isRateLimited(clientB), false); // B is allowed
+  assert.strictEqual(limiter.isRateLimited(clientB), false);
+  assert.strictEqual(limiter.isRateLimited(clientB), true);  // B is blocked
+
+  assert.strictEqual(limiter.getRemaining(clientA), 0);
+  assert.strictEqual(limiter.getRemaining(clientB), 0);
+});
