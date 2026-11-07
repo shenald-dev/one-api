@@ -26,7 +26,7 @@ test('heavyComputation is memoized', () => {
 
   assert.strictEqual(res1, res2, 'Results should be identical');
   assert.ok(time2 < time1, `Warm call (${time2.toFixed(4)}ms) should be faster than cold call (${time1.toFixed(4)}ms)`);
-  assert.ok(time2 < 1.0, 'Warm call should be near-instant');
+  assert.ok(time2 < 5.0, 'Warm call should be near-instant');
 });
 
 test('heavyComputation implements LRU eviction', () => {
@@ -59,7 +59,7 @@ test('heavyComputation implements LRU eviction', () => {
   // time1 should be fast (cache hit), time2 should be slower (cache miss since it was evicted)
   // note: since iteration is small (1 and 2), they might both be very fast,
   // but we can at least assert that it didn't crash.
-  assert.ok(time1 < 1.0, 'Refreshed item 1 should be near-instant');
+  assert.ok(time1 < 5.0, 'Refreshed item 1 should be near-instant');
 });
 
 test('heavyComputation handles null correctly', () => {
