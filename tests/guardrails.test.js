@@ -53,3 +53,23 @@ test('Guardrails: blocks request when action=block', () => {
   guardrails.action = 'redact';
   guardrails.enabled = false;
 });
+
+test('Guardrails: scanText detects and redacts standard and project OpenAI API keys', () => {
+  guardrails.enabled = true;
+  guardrails.action = 'redact';
+
+  const standardKey = 'sk-123456789012345678901234567890123456';
+  const resStandard = guardrails.scanText(`Here is standard key: ${standardKey}`);
+  assert.ok(resStandard.violations.includes('OPENAI_KEY'));
+  assert.ok(!resStandard.text.includes(standardKey));
+  assert.strictEqual(resStandard.text, 'Here is standard key: [REDACTED_OPENAI_KEY]');
+
+  const projectKey = 'sk-proj-abc1234567890abcdef1234567890abcdef1234567890';
+  const resProject = guardrails.scanText(`Here is project key: ${projectKey}`);
+  assert.ok(resProject.violations.includes('OPENAI_KEY'));
+  assert.ok(!resProject.text.includes(projectKey));
+  assert.strictEqual(resProject.text, 'Here is project key: [REDACTED_OPENAI_KEY]');
+
+  // Reset to default
+  guardrails.enabled = false;
+});

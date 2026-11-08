@@ -3,7 +3,7 @@
 const SENSITIVE_PATTERNS = [
   {
     name: 'OPENAI_KEY',
-    regex: /\b(sk-[a-zA-Z0-9]{20,T3BlbkFJ[a-zA-Z0-9]{20,}|sk-proj-[a-zA-Z0-9_-]{40,})\b/g,
+    regex: /\b(sk-(?:proj-)?[a-zA-Z0-9_-]{32,}|sk-[a-zA-Z0-9]{20}T3BlbkFJ[a-zA-Z0-9]{20,})\b/g,
     placeholder: '[REDACTED_OPENAI_KEY]'
   },
   {
