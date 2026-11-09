@@ -37,19 +37,28 @@ jobs:
         run: |
           PKG_NAME=$(node -p "require('./package.json').name")
           LOCAL_VER=$(node -p "require('./package.json').version")
-          NPM_VER=$(npm view "$PKG_NAME" version 2>/dev/null || echo "0.0.0")
+          NPM_VERS=$(npm view "$PKG_NAME" versions --json 2>/dev/null || echo "[]")
+          ALREADY_PUBLISHED=$(node -e "try { const v = JSON.parse(process.argv[1]); console.log(Array.isArray(v) ? v.includes('$LOCAL_VER') : v === '$LOCAL_VER'); } catch { console.log(false); }" "$NPM_VERS")
           echo "Package: $PKG_NAME"
           echo "Local Version: $LOCAL_VER"
-          echo "NPM Version: $NPM_VER"
-          if [ "$LOCAL_VER" != "$NPM_VER" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event_name }}" = "release" ]; then
-            echo "should_publish=true" >> $GITHUB_OUTPUT
-          else
+          echo "Already Published on NPM: $ALREADY_PUBLISHED"
+          if [ "$ALREADY_PUBLISHED" = "true" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
             echo "Version $LOCAL_VER is already published on npm. Skipping publish."
             echo "should_publish=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_publish=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Publish to NPM
         if: steps.check_version.outputs.should_publish == 'true'
-        run: npm publish --access public --provenance || npm publish --access public
+        run: |
+          OUTPUT=$(npm publish --access public 2>&1) || {
+            if echo "$OUTPUT" | grep -q "previously published"; then
+              echo "Version is already published on npm."
+            else
+              echo "$OUTPUT"
+              exit 1
+            fi
+          }
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
