@@ -10,6 +10,8 @@
   <br/>
   
   [![Release](https://img.shields.io/github/v/release/shenald-dev/one-api?color=blue)](https://github.com/shenald-dev/one-api/releases/tag/v2.1.0)
+  [![NPM Version](https://img.shields.io/npm/v/@shenald/one-api?color=cb3837&logo=npm)](https://www.npmjs.com/package/@shenald/one-api)
+  [![NPM Downloads](https://img.shields.io/npm/dt/@shenald/one-api?color=00d4ff&logo=npm)](https://www.npmjs.com/package/@shenald/one-api)
   [![GitHub Stars](https://img.shields.io/github/stars/shenald-dev/one-api?style=social)](https://github.com/shenald-dev/one-api/stargazers)
   [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
   [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://docker.com)
@@ -123,7 +125,19 @@ graph TD
 
 ## 🚀 Quick Start
 
-### 1. Installation
+### ⚡ Instant Run via npx
+```bash
+# Run immediately without cloning or installing
+npx @shenald/one-api
+```
+
+Or install globally:
+```bash
+npm install -g @shenald/one-api
+one-api
+```
+
+### 📦 Or Clone & Run Locally
 ```bash
 git clone https://github.com/shenald-dev/one-api
 cd one-api
