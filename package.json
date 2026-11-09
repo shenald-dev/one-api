@@ -1,6 +1,6 @@
 {
   "name": "@shenald/one-api",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "One API to rule them all. Universal Edge LLM Gateway for 20+ providers. OpenAI-compatible, real-time SSE streaming, tool calling, embeddings & zero config.",
   "main": "src/index.js",
   "bin": {
