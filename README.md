@@ -17,7 +17,7 @@
   [![MCP](https://img.shields.io/badge/MCP-Native%202024--11--05-blueviolet.svg)](https://modelcontextprotocol.io)
   [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://docker.com)
   [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-  [![Tests](https://img.shields.io/badge/Tests-114%20Passing-brightgreen.svg)]()
+  [![Tests](https://img.shields.io/badge/Tests-129%20Passing-brightgreen.svg)]()
 </div>
 
 ---
