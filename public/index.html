@@ -78,7 +78,7 @@
     .header-links a:hover { color: var(--cyan); }
 
     .container {
-      max-width: 1200px;
+      max-width: 1240px;
       margin: 28px auto;
       padding: 0 20px;
       display: grid;
@@ -158,18 +158,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 0.9rem;
     }
 
-    .provider-pill.active { border-color: rgba(46, 160, 67, 0.5); }
-    .provider-pill .status-dot {
+    .status-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #484f58;
-    }
-    .provider-pill.active .status-dot {
       background: var(--green);
-      box-shadow: 0 0 8px var(--green);
+      box-shadow: 0 0 6px var(--green);
     }
 
     /* Playground */
@@ -178,7 +175,8 @@
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
-    @media (max-width: 850px) {
+
+    @media (max-width: 800px) {
       .playground-grid { grid-template-columns: 1fr; }
     }
 
@@ -186,17 +184,22 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
-    label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
     select, input, textarea {
       background: var(--code-bg);
       border: 1px solid var(--card-border);
       border-radius: 6px;
-      padding: 10px 12px;
+      padding: 10px 14px;
       color: var(--text);
-      font-family: inherit;
       font-size: 0.9rem;
       outline: none;
     }
@@ -237,7 +240,7 @@
       color: #c9d1d9;
     }
 
-    /* Model Table */
+    /* Model Table & Traces Table */
     .table-container { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
     th, td { padding: 10px 16px; border-bottom: 1px solid var(--card-border); }
@@ -251,16 +254,20 @@
       background: var(--card-border);
     }
     .tag-alias { background: rgba(163, 113, 247, 0.2); color: var(--purple); border: 1px solid rgba(163, 113, 247, 0.4); }
+    .tag-cache-exact { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46, 160, 67, 0.4); }
+    .tag-cache-semantic { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(0, 240, 255, 0.4); }
   </style>
 </head>
 <body>
   <header>
     <div class="brand">
       <span>🌌 one-api</span>
-      <span class="badge">v2.1.0 Gateway</span>
+      <span class="badge">v3.0.0 Gateway</span>
     </div>
     <div class="header-links">
       <a href="/v1/models" target="_blank">Models API</a>
+      <a href="/v1/mcp" target="_blank">MCP Server</a>
+      <a href="/v1/traces" target="_blank">Flight Traces</a>
       <a href="/v1/metrics" target="_blank">Telemetry JSON</a>
       <a href="/health/detailed" target="_blank">Health Ping</a>
       <a href="https://github.com/shenald-dev/one-api" target="_blank">GitHub</a>
@@ -306,6 +313,7 @@
           <div class="provider-pill active"><span>DeepSeek</span><span class="status-dot"></span></div>
           <div class="provider-pill active"><span>Groq</span><span class="status-dot"></span></div>
           <div class="provider-pill active"><span>Ollama (Local)</span><span class="status-dot"></span></div>
+          <div class="provider-pill active"><span>MCP Server Hub</span><span class="status-dot"></span></div>
           <div class="provider-pill active"><span>Smart Local Fallback</span><span class="status-dot"></span></div>
         </div>
       </div>
@@ -360,6 +368,38 @@
       </div>
     </div>
 
+    <!-- Flight Recorder & Incident Traces Stream -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>🛫 Live Incident Flight Recorder & Traces</h2>
+        <div style="display: flex; gap: 8px;">
+          <a href="/v1/traces/export" target="_blank" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; text-decoration: none;">Export OpenTelemetry</a>
+          <button class="btn btn-secondary" onclick="loadTraces()" style="padding: 6px 12px; font-size: 0.8rem;">Refresh Traces</button>
+        </div>
+      </div>
+      <div class="section-body" style="padding: 0;">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Trace ID</th>
+                <th>Model</th>
+                <th>Provider</th>
+                <th>Total Latency</th>
+                <th>TTFT</th>
+                <th>Status</th>
+                <th>Cache</th>
+                <th>Cost</th>
+              </tr>
+            </thead>
+            <tbody id="traces-table">
+              <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 20px;">No recent traces captured yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- Models Catalog Explorer -->
     <div class="section-card">
       <div class="section-header">
@@ -401,6 +441,35 @@
         }
         if (data.cache) {
           document.getElementById('val-cache').textContent = data.cache.hitRate + '%';
+        }
+      } catch (_) {}
+    }
+
+    async function loadTraces() {
+      try {
+        const res = await fetch('/v1/traces?limit=10');
+        if (!res.ok) return;
+        const data = await res.json();
+        const tbody = document.getElementById('traces-table');
+        if (!data.traces || data.traces.length === 0) return;
+        tbody.innerHTML = '';
+        for (const t of data.traces) {
+          const tr = document.createElement('tr');
+          const cacheTag = t.cached
+            ? (t.cache_type === 'SEMANTIC' ? '<span class="tag tag-cache-semantic">SEMANTIC</span>' : '<span class="tag tag-cache-exact">EXACT</span>')
+            : '<span class="tag" style="color: var(--text-muted);">MISS</span>';
+          const statusColor = t.status < 400 ? 'var(--green)' : 'var(--red)';
+          tr.innerHTML = `
+            <td><code>${(t.trace_id || '').slice(0, 12)}...</code></td>
+            <td><strong>${t.resolved_model || t.model || '-'}</strong></td>
+            <td><span class="tag">${t.provider || 'local'}</span></td>
+            <td>${t.spans?.total_ms || 0}ms</td>
+            <td>${t.spans?.ttft_ms ? t.spans.ttft_ms + 'ms' : '-'}</td>
+            <td><span style="color: ${statusColor}; font-weight: 600;">${t.status}</span></td>
+            <td>${cacheTag}</td>
+            <td>$${(t.tokens?.cost_usd || 0).toFixed(5)}</td>
+          `;
+          tbody.appendChild(tr);
         }
       } catch (_) {}
     }
@@ -496,12 +565,15 @@
       } finally {
         sendBtn.disabled = false;
         refreshTelemetry();
+        loadTraces();
       }
     }
 
     refreshTelemetry();
     loadModels();
+    loadTraces();
     setInterval(refreshTelemetry, 5000);
+    setInterval(loadTraces, 10000);
   </script>
 </body>
 </html>

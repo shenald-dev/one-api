@@ -1,15 +1,16 @@
+// Unified Benchmark Runner for one-api
 async function run() {
   const mod = require('../src/index.js');
   const func = mod.main || mod.runBenchmark || mod.runExperiment;
 
-  if (!func) {
-    console.error('No benchmark function found');
-    process.exit(1);
+  if (func) {
+    await func();
   }
 
-  // Delegate iteration and performance reporting to the target function
-  // to prevent redundant logic and inaccurate timing results.
-  await func();
+  const { runBenchmarkSuite } = require('./gateway.bench');
+  if (typeof runBenchmarkSuite === 'function') {
+    await runBenchmarkSuite();
+  }
 }
 
 run().catch(console.error);

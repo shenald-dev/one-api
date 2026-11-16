@@ -1,4 +1,4 @@
-// OpenAI-Compatible Chat Completions Route with Fallbacks, Circuit Breakers, Guardrails & Cost Headers
+// OpenAI-Compatible Chat Completions Route with Fallbacks, Circuit Breakers, Guardrails, Cache & Flight Recorder
 const crypto = require('crypto');
 const config = require('../config');
 const registry = require('../providers');
@@ -88,12 +88,25 @@ async function handleChatCompletions(req, res, next) {
 
   // Guardrails: PII & Sensitive Credential Redaction / Safety
   try {
+    const gStart = Date.now();
     const guardrailResult = guardrails.processMessages(messages);
     messages = guardrailResult.messages;
+
+    if (req.flightContext) {
+      req.flightContext.spans.guardrails_ms = Math.max(0, Date.now() - gStart);
+      if (guardrailResult.violations.length > 0) {
+        req.flightContext.guardrailViolated = true;
+        req.flightContext.guardrailViolations = guardrailResult.violations;
+      }
+    }
+
     if (guardrailResult.violations.length > 0) {
       res.setHeader('X-Guardrails-Violated', 'true');
     }
   } catch (err) {
+    if (req.flightContext) {
+      req.flightContext.error = { code: err.code || 'GUARDRAILS_VIOLATION', message: err.message, status: err.status || 400 };
+    }
     return res.status(err.status || 400).json({ error: err.message });
   }
 
@@ -106,19 +119,48 @@ async function handleChatCompletions(req, res, next) {
   }
   const id = reqIdPrefix + (reqIdCounter++);
   const isStream = Boolean(body.stream);
+  const promptText = cache.extractPromptText(messages);
 
   // Cache Check
   if (config.cache.enabled && !isStream && req.headers['x-cache-bypass'] !== 'true') {
+    const cStart = Date.now();
     const cacheKey = cache.generateKey(resolvedModel, messages, body);
-    const cachedResponse = cache.get(cacheKey);
-    if (cachedResponse) {
+    const cachedEntry = cache.getWithMeta(cacheKey, promptText, {
+      model: resolvedModel,
+      temperature: body.temperature,
+      allowSemanticCache: req.headers['x-allow-semantic-cache'] === 'true' || body.temperature === 0
+    });
+
+    if (req.flightContext) {
+      req.flightContext.spans.cache_lookup_ms = Math.max(0, Date.now() - cStart);
+    }
+
+    if (cachedEntry) {
       res.setHeader('X-Cache', 'HIT');
-      return res.status(200).json(cachedResponse);
+      if (cachedEntry.type === 'SEMANTIC') {
+        res.setHeader('X-Cache-Type', 'SEMANTIC');
+        res.setHeader('X-Cache-Similarity', String(cachedEntry.similarity));
+      }
+      if (req.flightContext) {
+        req.flightContext.cached = true;
+        req.flightContext.cacheType = cachedEntry.type;
+        req.flightContext.cacheSimilarity = cachedEntry.similarity;
+        req.flightContext.model = rawModel;
+        req.flightContext.resolvedModel = resolvedModel;
+        req.flightContext.tokens = {
+          prompt_tokens: cachedEntry.value?.usage?.prompt_tokens || 0,
+          completion_tokens: cachedEntry.value?.usage?.completion_tokens || 0,
+          total_tokens: cachedEntry.value?.usage?.total_tokens || 0,
+          cost_usd: 0
+        };
+      }
+      return res.status(200).json(cachedEntry.value);
     }
     res.setHeader('X-Cache', 'MISS');
   }
 
   try {
+    const rStart = Date.now();
     let targetModel = resolvedModel;
     let provider = registry.resolveProvider(targetModel);
     let fallbackApplied = false;
@@ -138,30 +180,60 @@ async function handleChatCompletions(req, res, next) {
       }
     }
 
+    if (req.flightContext) {
+      req.flightContext.spans.routing_ms = Math.max(0, Date.now() - rStart);
+      req.flightContext.model = rawModel;
+      req.flightContext.resolvedModel = targetModel;
+      req.flightContext.provider = provider.name;
+      req.flightContext.fallbackApplied = fallbackApplied;
+    }
+
     if (isStream) {
       initSSE(res);
 
       const abortController = new AbortController();
       req.on('close', () => abortController.abort());
 
+      const streamStart = Date.now();
+      let firstChunkReceived = false;
+
       try {
         await provider.stream(
           { ...body, model: targetModel, messages, id },
-          (chunk) => sendSSEChunk(res, chunk),
+          (chunk) => {
+            if (!firstChunkReceived) {
+              firstChunkReceived = true;
+              if (req.flightContext) {
+                req.flightContext.spans.ttft_ms = Math.max(0, Date.now() - streamStart);
+              }
+            }
+            sendSSEChunk(res, chunk);
+          },
           abortController.signal
         );
         circuitBreaker.recordSuccess(provider.name);
+        if (req.flightContext) {
+          req.flightContext.spans.upstream_ms = Math.max(0, Date.now() - streamStart);
+        }
       } catch (streamErr) {
         circuitBreaker.recordFailure(provider.name, streamErr);
+        if (req.flightContext) {
+          req.flightContext.error = { code: streamErr.code || 'STREAM_ERROR', message: streamErr.message, status: streamErr.status || 500 };
+        }
         throw streamErr;
       }
 
       sendSSEDone(res);
     } else {
       let responseData;
+      const uStart = Date.now();
+
       try {
         responseData = await provider.complete({ ...body, model: targetModel, messages, id });
         circuitBreaker.recordSuccess(provider.name);
+        if (req.flightContext) {
+          req.flightContext.spans.upstream_ms = Math.max(0, Date.now() - uStart);
+        }
       } catch (err) {
         circuitBreaker.recordFailure(provider.name, err);
 
@@ -173,11 +245,18 @@ async function handleChatCompletions(req, res, next) {
           const candidateProvider = registry.resolveProvider(candidate);
           if (!circuitBreaker.isOpen(candidateProvider.name)) {
             try {
+              const fbStart = Date.now();
               responseData = await candidateProvider.complete({ ...body, model: candidate, messages, id });
               circuitBreaker.recordSuccess(candidateProvider.name);
               targetModel = candidate;
               fallbackApplied = true;
               fallbackSuccess = true;
+              if (req.flightContext) {
+                req.flightContext.resolvedModel = candidate;
+                req.flightContext.provider = candidateProvider.name;
+                req.flightContext.fallbackApplied = true;
+                req.flightContext.spans.upstream_ms = Math.max(0, Date.now() - fbStart);
+              }
               break;
             } catch (fallbackErr) {
               circuitBreaker.recordFailure(candidateProvider.name, fallbackErr);
@@ -186,6 +265,9 @@ async function handleChatCompletions(req, res, next) {
         }
 
         if (!fallbackSuccess) {
+          if (req.flightContext) {
+            req.flightContext.error = { code: err.code || 'UPSTREAM_ERROR', message: err.message, status: err.status || 500 };
+          }
           throw err;
         }
       }
@@ -204,6 +286,15 @@ async function handleChatCompletions(req, res, next) {
         metrics.recordTokens(promptTokens, completionTokens, costInfo.totalCost);
       }
 
+      if (req.flightContext) {
+        req.flightContext.tokens = {
+          prompt_tokens: promptTokens,
+          completion_tokens: completionTokens,
+          total_tokens: promptTokens + completionTokens,
+          cost_usd: costInfo.totalCost
+        };
+      }
+
       // Headers
       res.setHeader('X-Served-By-Model', targetModel);
       res.setHeader('X-Token-Cost-USD', String(costInfo.totalCost));
@@ -214,12 +305,15 @@ async function handleChatCompletions(req, res, next) {
       // Store in Cache if enabled
       if (config.cache.enabled) {
         const cacheKey = cache.generateKey(resolvedModel, messages, body);
-        cache.set(cacheKey, responseData);
+        cache.set(cacheKey, responseData, undefined, promptText, resolvedModel);
       }
 
       res.status(200).json(responseData);
     }
   } catch (err) {
+    if (req.flightContext && !req.flightContext.error) {
+      req.flightContext.error = { code: err.code || 'COMPLETION_ERROR', message: err.message, status: err.status || 500 };
+    }
     next(err);
   }
 }

@@ -1,15 +1,25 @@
-// Prompt Safety & Sensitive Data Redaction Engine
+// Neuro-Symbolic Prompt Safety, PII Redaction & Jailbreak Detection Engine
 
 const SENSITIVE_PATTERNS = [
   {
+    name: 'ANTHROPIC_KEY',
+    regex: /\b(sk-ant-[a-zA-Z0-9_-]{32,})\b/g,
+    placeholder: '[REDACTED_ANTHROPIC_KEY]'
+  },
+  {
     name: 'OPENAI_KEY',
-    regex: /\b(sk-(?:proj-)?[a-zA-Z0-9_-]{32,}|sk-[a-zA-Z0-9]{20}T3BlbkFJ[a-zA-Z0-9]{20,})\b/g,
+    regex: /\b(sk-(?!ant-)(?:proj-)?[a-zA-Z0-9_-]{32,}|sk-[a-zA-Z0-9]{20}T3BlbkFJ[a-zA-Z0-9]{20,})\b/g,
     placeholder: '[REDACTED_OPENAI_KEY]'
   },
   {
-    name: 'ANTHROPIC_KEY',
-    regex: /\b(sk-ant-[a-zA-Z0-9_-]{40,})\b/g,
-    placeholder: '[REDACTED_ANTHROPIC_KEY]'
+    name: 'GOOGLE_KEY',
+    regex: /\b(AIza[0-9A-Za-z-_]{30,40})\b/g,
+    placeholder: '[REDACTED_GOOGLE_KEY]'
+  },
+  {
+    name: 'HUGGINGFACE_TOKEN',
+    regex: /\b(hf_[a-zA-Z0-9]{30,40})\b/g,
+    placeholder: '[REDACTED_HUGGINGFACE_TOKEN]'
   },
   {
     name: 'GITHUB_TOKEN',
@@ -20,6 +30,11 @@ const SENSITIVE_PATTERNS = [
     name: 'AWS_KEY',
     regex: /\b(AKIA[0-9A-Z]{16})\b/g,
     placeholder: '[REDACTED_AWS_KEY]'
+  },
+  {
+    name: 'JWT_TOKEN',
+    regex: /\b(eyJ[a-zA-Z0-9_-]{10,}\.eyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,})\b/g,
+    placeholder: '[REDACTED_JWT_TOKEN]'
   },
   {
     name: 'PRIVATE_KEY',
@@ -38,10 +53,37 @@ const SENSITIVE_PATTERNS = [
   }
 ];
 
+const INJECTION_PATTERNS = [
+  {
+    name: 'INJECTION_SYSTEM_OVERRIDE',
+    regex: /(?:ignore|disregard|forget|bypass)\s+(?:all\s+)?(?:previous|prior|above)\s+(?:instructions|directives|prompts|rules)/i
+  },
+  {
+    name: 'INJECTION_JAILBREAK_ROLEPLAY',
+    regex: /(?:you are now in|switch to|enable)\s+(?:dan|developer mode|jailbreak|unrestricted mode)/i
+  },
+  {
+    name: 'INJECTION_DELIMITER_ATTACK',
+    regex: /(?:<\|im_start\|>system|\[SYSTEM PROMPT\]|```system\b)/i
+  }
+];
+
 class Guardrails {
   constructor(options = {}) {
     this.enabled = options.enabled || process.env.GUARDRAILS_ENABLED === 'true';
     this.action = options.action || process.env.GUARDRAILS_ACTION || 'redact'; // 'redact' | 'block'
+    this.injectionCheck = options.injectionCheck ?? (process.env.GUARDRAILS_INJECTION_CHECK === 'true');
+  }
+
+  detectPromptInjection(text) {
+    if (!text || typeof text !== 'string') return [];
+    const detections = [];
+    for (const pat of INJECTION_PATTERNS) {
+      if (pat.regex.test(text)) {
+        detections.push(pat.name);
+      }
+    }
+    return detections;
   }
 
   scanText(text) {
@@ -51,14 +93,22 @@ class Guardrails {
     let processed = text;
 
     for (const pat of SENSITIVE_PATTERNS) {
+      pat.regex.lastIndex = 0;
       if (pat.regex.test(processed)) {
         violations.push(pat.name);
         if (this.action === 'redact') {
+          pat.regex.lastIndex = 0;
           processed = processed.replace(pat.regex, pat.placeholder);
         }
       }
-      // Reset regex state for global flags
       pat.regex.lastIndex = 0;
+    }
+
+    if (this.injectionCheck) {
+      const injections = this.detectPromptInjection(processed);
+      if (injections.length > 0) {
+        violations.push(...injections);
+      }
     }
 
     return { text: processed, violations };
@@ -103,6 +153,23 @@ class Guardrails {
 
     return { messages: sanitizedMessages, violations: allViolations };
   }
+
+  createStreamGuardrail() {
+    return (chunkText) => {
+      let safeText = chunkText;
+      for (const pat of SENSITIVE_PATTERNS) {
+        pat.regex.lastIndex = 0;
+        if (pat.regex.test(safeText)) {
+          pat.regex.lastIndex = 0;
+          safeText = safeText.replace(pat.regex, pat.placeholder);
+        }
+        pat.regex.lastIndex = 0;
+      }
+      return safeText;
+    };
+  }
 }
 
-module.exports = new Guardrails();
+const guardrailsInstance = new Guardrails();
+
+module.exports = guardrailsInstance;

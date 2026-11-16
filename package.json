@@ -1,7 +1,7 @@
 {
   "name": "@shenald/one-api",
-  "version": "2.1.1",
-  "description": "One API to rule them all. Universal Edge LLM Gateway for 20+ providers. OpenAI-compatible, real-time SSE streaming, tool calling, embeddings & zero config.",
+  "version": "3.0.0",
+  "description": "One API to rule them all. Universal Edge LLM Gateway & Distributed Agent Runtime for 20+ providers. Native MCP Server, SSE streaming, hybrid semantic cache, deterministic flight recorder & zero config.",
   "main": "src/index.js",
   "bin": {
     "one-api": "bin/cli.js"
@@ -18,18 +18,25 @@
     "dev": "node --watch src/index.js --server",
     "test": "node tests/test.js && node --test tests/*.test.js",
     "benchmark": "node benchmarks/run.js",
+    "doctor": "node src/index.js doctor",
+    "chat": "node src/index.js chat",
+    "mcp": "node src/index.js --mcp",
     "docker:build": "docker build -t shenald/one-api .",
     "docker:run": "docker run -p 3000:3000 shenald/one-api"
   },
   "keywords": [
     "llm",
     "api-gateway",
+    "model-context-protocol",
+    "mcp-server",
     "openai",
     "anthropic",
     "gemini",
     "deepseek",
     "groq",
     "ollama",
+    "distributed-tracing",
+    "semantic-cache",
     "unified-api",
     "vibe-coder"
   ],

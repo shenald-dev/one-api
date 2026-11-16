@@ -1,4 +1,5 @@
-// one-api — Universal Edge LLM Gateway
+#!/usr/bin/env node
+// one-api — Universal Edge LLM Gateway (v3.0.0 Flagship Evolution)
 const path = require('path');
 const fs = require('fs');
 const { performance } = require('perf_hooks');
@@ -11,6 +12,16 @@ require('dotenv').config();
 const config = require('./config');
 const authMiddleware = require('./middleware/auth');
 const metrics = require('./middleware/metrics');
+const { flightRecorder } = require('./engine/flight-recorder');
+const { mcpServer } = require('./mcp/server');
+const { handleMcpSse, handleMcpJsonRpc } = require('./routes/mcp');
+const {
+  handleGetTraces,
+  handleGetTraceById,
+  handleGetTraceStats,
+  handleExportOpenTelemetry,
+  handleReplayTrace
+} = require('./routes/traces');
 const { clientErrorHandler, notFoundHandler, genericErrorHandler } = require('./middleware/error');
 const { handleHealth, handleDetailedHealth, handleGetMetrics } = require('./routes/telemetry');
 const { handleListModels, handleGetModel } = require('./routes/models');
@@ -23,7 +34,7 @@ const {
 } = require('./routes/completions');
 const { handleEmbeddings } = require('./routes/embeddings');
 
-// Self-healing / Process Management
+// Process Management
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
   process.exit(1);
@@ -40,7 +51,7 @@ const app = express();
 app.set('etag', false);
 app.disable('x-powered-by');
 
-// Trust the first upstream proxy (e.g. load balancer) to securely resolve client IP
+// Trust the first upstream proxy to securely resolve client IP
 app.set('trust proxy', 1);
 
 // Health endpoint registered before security/CORS middlewares for zero-overhead load balancer pings
@@ -49,7 +60,7 @@ app.get('/health', handleHealth);
 // Configure CORS
 let corsOptions = { origin: false, maxAge: 86400 };
 if (process.env.ALLOWED_ORIGINS) {
-  const origins = process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean);
+  const origins = process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean);
   if (origins.includes('*')) {
     corsOptions.origin = '*';
   } else {
@@ -67,6 +78,9 @@ app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   next();
 });
+
+// Deterministic W3C Distributed Tracing & Flight Recorder Middleware
+app.use(flightRecorder.middleware());
 
 // Telemetry & metrics collector
 app.use(metrics.middleware());
@@ -95,7 +109,7 @@ app.get('/', (req, res) => {
   }
   res.status(200).json({
     gateway: 'one-api',
-    version: '2.1.0',
+    version: '3.0.0',
     status: 'online',
     dashboard: '/dashboard',
     endpoints: {
@@ -103,6 +117,8 @@ app.get('/', (req, res) => {
       embeddings: '/v1/embeddings',
       models: '/v1/models',
       metrics: '/v1/metrics',
+      traces: '/v1/traces',
+      mcp: '/v1/mcp',
       health: '/health'
     }
   });
@@ -111,13 +127,31 @@ app.get('/', (req, res) => {
 // Gateway Authentication
 app.use(authMiddleware);
 
-// Route Handlers
+// Model Context Protocol (MCP) Endpoints
+app.get('/mcp', handleMcpSse);
+app.post('/mcp', jsonParser, handleMcpJsonRpc);
+app.post('/mcp/messages', jsonParser, handleMcpJsonRpc);
+app.get('/v1/mcp', handleMcpSse);
+app.post('/v1/mcp', jsonParser, handleMcpJsonRpc);
+
+// Telemetry & Traces Routes
 app.get('/health/detailed', handleDetailedHealth);
 app.get('/v1/metrics', handleGetMetrics);
+app.get('/v1/traces', handleGetTraces);
+app.get('/v1/traces/stats', handleGetTraceStats);
+app.get('/v1/traces/export', handleExportOpenTelemetry);
+app.get('/v1/traces/:traceId', handleGetTraceById);
+app.post('/v1/traces/:traceId/replay', jsonParser, compressMiddleware, handleReplayTrace);
+
+// Models Catalog Routes
 app.get('/v1/models', handleListModels);
 app.get('/v1/models/:model', handleGetModel);
+
+// Inference Routes
 app.post('/v1/chat/completions', jsonParser, compressMiddleware, handleChatCompletions);
 app.post('/v1/embeddings', jsonParser, compressMiddleware, handleEmbeddings);
+
+// Cache Management Route
 app.post('/v1/cache/clear', (req, res) => {
   cache.clear();
   res.status(200).json({ ok: true, message: 'Response cache cleared' });
@@ -128,7 +162,7 @@ app.use(clientErrorHandler);
 app.use(notFoundHandler);
 app.use(genericErrorHandler);
 
-// Heavy Computation Cache & Logic (Benchmark compatibility)
+// Heavy Computation Cache & Logic (Benchmark and backward compatibility)
 const computationCache = new Map();
 let lastIterations = Symbol('UNINITIALIZED');
 let lastResult = undefined;
@@ -188,20 +222,43 @@ async function main() {
   return { avg, throughput: 1000 / avg };
 }
 
+// CLI Execution Router
 if (require.main === module) {
-  if (process.argv.includes('--server')) {
+  const args = process.argv.slice(2);
+  const command = args[0] || '';
+
+  if (command === 'doctor' || args.includes('--doctor')) {
+    const { runDoctor } = require('./cli/doctor');
+    runDoctor().then(() => process.exit(0)).catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+  } else if (command === 'chat' || args.includes('--chat')) {
+    const { runChat } = require('./cli/chat');
+    runChat(args[1] || 'smart');
+  } else if (command === 'mcp' || args.includes('--mcp')) {
+    mcpServer.startStdio();
+  } else if (command === 'benchmark' || args.includes('--benchmark')) {
+    const { runBenchmarkSuite } = require('../benchmarks/gateway.bench');
+    runBenchmarkSuite().then(() => process.exit(0)).catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+  } else if (args.includes('--server') || command === 'start' || command === 'server') {
     const PORT = process.env.PORT || 3000;
     const server = app.listen(PORT, () => {
-      console.log('\n' + '='.repeat(50));
-      console.log(`🌌 one-api Gateway v2.1.0 listening on port ${PORT}`);
+      console.log('\n' + '='.repeat(60));
+      console.log(`🌌 one-api Gateway v3.0.0 listening on port ${PORT}`);
       console.log(`📡 Endpoints:`);
-      console.log(`   - Dashboard: http://localhost:${PORT}/dashboard`);
-      console.log(`   - POST http://localhost:${PORT}/v1/chat/completions`);
-      console.log(`   - POST http://localhost:${PORT}/v1/embeddings`);
-      console.log(`   - GET  http://localhost:${PORT}/v1/models`);
-      console.log(`   - GET  http://localhost:${PORT}/v1/metrics`);
-      console.log(`   - GET  http://localhost:${PORT}/health`);
-      console.log('='.repeat(50) + '\n');
+      console.log(`   - Dashboard:      http://localhost:${PORT}/dashboard`);
+      console.log(`   - Chat API:       POST http://localhost:${PORT}/v1/chat/completions`);
+      console.log(`   - Embeddings:     POST http://localhost:${PORT}/v1/embeddings`);
+      console.log(`   - Models Catalog: GET  http://localhost:${PORT}/v1/models`);
+      console.log(`   - MCP Server:     GET/POST http://localhost:${PORT}/v1/mcp`);
+      console.log(`   - Flight Traces:  GET  http://localhost:${PORT}/v1/traces`);
+      console.log(`   - Telemetry:      GET  http://localhost:${PORT}/v1/metrics`);
+      console.log(`   - Health:         GET  http://localhost:${PORT}/health`);
+      console.log('='.repeat(60) + '\n');
     });
 
     server.keepAliveTimeout = 65000;
@@ -234,12 +291,13 @@ if (require.main === module) {
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
   } else {
+    // Default fallback for legacy benchmark compatibility
     main()
-      .then(r => {
+      .then((r) => {
         console.log('Results:', r);
         process.exit(0);
       })
-      .catch(e => {
+      .catch((e) => {
         console.error(e);
         process.exit(1);
       });
@@ -252,5 +310,7 @@ module.exports = {
   heavyComputation,
   isValidModel,
   isValidMessagesArray,
-  isValidMessage
+  isValidMessage,
+  flightRecorder,
+  mcpServer
 };
