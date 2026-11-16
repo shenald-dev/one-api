@@ -3,8 +3,16 @@ const crypto = require('crypto');
 
 function extractShingles(text) {
   if (!text || typeof text !== 'string') return new Set();
-  const normalized = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  // Normalize accents and support international Unicode characters (Latin, CJK, Cyrillic, Arabic, etc.)
+  const normalized = text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   const shingles = new Set();
+  if (!normalized) return shingles;
 
   // Word unigrams
   const words = normalized.split(' ');
@@ -12,9 +20,13 @@ function extractShingles(text) {
     if (w.length > 0) shingles.add(`w:${w}`);
   }
 
-  // Character 3-grams
-  for (let i = 0; i <= normalized.length - 3; i++) {
-    shingles.add(`c:${normalized.slice(i, i + 3)}`);
+  // Character 2-grams and 3-grams with full Unicode code point support
+  const chars = Array.from(normalized);
+  for (let i = 0; i <= chars.length - 2; i++) {
+    shingles.add(`c2:${chars[i]}${chars[i + 1]}`);
+  }
+  for (let i = 0; i <= chars.length - 3; i++) {
+    shingles.add(`c3:${chars[i]}${chars[i + 1]}${chars[i + 2]}`);
   }
 
   return shingles;
@@ -63,7 +75,8 @@ class ResponseCache {
       messages: canonicalMessages,
       temperature: options.temperature ?? 1,
       max_tokens: options.max_tokens ?? null,
-      top_p: options.top_p ?? 1
+      top_p: options.top_p ?? 1,
+      tools: options.tools || null
     });
     return crypto.createHash('sha256').update(payload).digest('hex');
   }
@@ -111,10 +124,18 @@ class ResponseCache {
 
       let bestMatch = null;
       let highestSimilarity = 0;
+      let bestCached = null;
 
       for (let i = this.semanticEntries.length - 1; i >= 0; i--) {
         const item = this.semanticEntries[i];
         if (now > item.expiresAt) {
+          this.semanticEntries.splice(i, 1);
+          continue;
+        }
+
+        // Validate that the entry is still alive in the map (prevent shadow eviction false-misses)
+        const cached = this.map.get(item.key);
+        if (!cached || now > cached.expiresAt) {
           this.semanticEntries.splice(i, 1);
           continue;
         }
@@ -125,20 +146,18 @@ class ResponseCache {
         if (sim >= this.semanticThreshold && sim > highestSimilarity) {
           highestSimilarity = sim;
           bestMatch = item;
+          bestCached = cached;
         }
       }
 
-      if (bestMatch) {
-        const cached = this.map.get(bestMatch.key);
-        if (cached && now <= cached.expiresAt) {
-          this.stats.hits++;
-          this.stats.semanticHits++;
-          return {
-            value: cached.value,
-            type: 'SEMANTIC',
-            similarity: parseFloat(highestSimilarity.toFixed(4))
-          };
-        }
+      if (bestMatch && bestCached) {
+        this.stats.hits++;
+        this.stats.semanticHits++;
+        return {
+          value: bestCached.value,
+          type: 'SEMANTIC',
+          similarity: parseFloat(highestSimilarity.toFixed(4))
+        };
       }
     }
 
@@ -149,10 +168,22 @@ class ResponseCache {
   set(key, value, ttlMs, promptText = '', model = null) {
     if (this.map.has(key)) {
       this.map.delete(key);
+      // Clean up previous semantic entry for this key to prevent duplicate indexing
+      for (let i = this.semanticEntries.length - 1; i >= 0; i--) {
+        if (this.semanticEntries[i].key === key) {
+          this.semanticEntries.splice(i, 1);
+        }
+      }
     } else if (this.map.size >= this.maxEntries) {
       const oldestKey = this.map.keys().next().value;
       this.map.delete(oldestKey);
       this.stats.evictions++;
+      // Clean up evicted key from semantic entries
+      for (let i = this.semanticEntries.length - 1; i >= 0; i--) {
+        if (this.semanticEntries[i].key === oldestKey) {
+          this.semanticEntries.splice(i, 1);
+        }
+      }
     }
 
     const expiresAt = Date.now() + (ttlMs || this.defaultTTL);

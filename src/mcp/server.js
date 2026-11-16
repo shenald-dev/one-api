@@ -197,20 +197,36 @@ class MCPServer {
         }
 
         case 'tools/call': {
-          const callResult = await this.executeTool(params?.name, params?.arguments || {});
-          return {
-            jsonrpc: '2.0',
-            id,
-            result: {
-              content: [
-                {
-                  type: 'text',
-                  text: typeof callResult === 'string' ? callResult : JSON.stringify(callResult, null, 2)
-                }
-              ],
-              isError: false
-            }
-          };
+          try {
+            const callResult = await this.executeTool(params?.name, params?.arguments || {});
+            return {
+              jsonrpc: '2.0',
+              id,
+              result: {
+                content: [
+                  {
+                    type: 'text',
+                    text: typeof callResult === 'string' ? callResult : JSON.stringify(callResult, null, 2)
+                  }
+                ],
+                isError: false
+              }
+            };
+          } catch (toolErr) {
+            return {
+              jsonrpc: '2.0',
+              id,
+              result: {
+                content: [
+                  {
+                    type: 'text',
+                    text: `Tool execution failed: ${toolErr.message}`
+                  }
+                ],
+                isError: true
+              }
+            };
+          }
         }
 
         case 'resources/list': {
@@ -337,8 +353,8 @@ class MCPServer {
       }
 
       case 'oneapi_evaluate_guardrails': {
-        const { text } = args;
-        const scan = guardrails.scanText(text);
+        const { text, action = 'redact' } = args;
+        const scan = guardrails.scanText(text, { action });
         return {
           clean: scan.violations.length === 0,
           violations: scan.violations,
@@ -432,6 +448,11 @@ class MCPServer {
   }
 
   startStdio() {
+    // In stdio MCP mode, redirect standard console logging to stderr to prevent
+    // corrupting the client's JSON-RPC stream on stdout
+    console.log = (...args) => process.stderr.write(args.join(' ') + '\n');
+    console.info = (...args) => process.stderr.write(args.join(' ') + '\n');
+
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,

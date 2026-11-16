@@ -52,5 +52,9 @@ if (portIndex !== -1 && args[portIndex + 1]) {
   process.env.PORT = args[portIndex + 1];
 }
 
+// Default command is 'start' when no arguments are provided to the CLI binary
+const cliArgs = args.length === 0 ? ['start'] : args;
+
 // Dispatch to src/index.js with appropriate arguments
-require('../src/index.js');
+const { runCli } = require('../src/index.js');
+runCli(cliArgs);

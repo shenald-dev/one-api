@@ -141,6 +141,8 @@ async function handleChatCompletions(req, res, next) {
         res.setHeader('X-Cache-Type', 'SEMANTIC');
         res.setHeader('X-Cache-Similarity', String(cachedEntry.similarity));
       }
+      res.setHeader('X-Served-By-Model', resolvedModel);
+      res.setHeader('X-Token-Cost-USD', '0');
       if (req.flightContext) {
         req.flightContext.cached = true;
         req.flightContext.cacheType = cachedEntry.type;
@@ -196,18 +198,33 @@ async function handleChatCompletions(req, res, next) {
 
       const streamStart = Date.now();
       let firstChunkReceived = false;
+      const streamDLP = guardrails.enabled ? guardrails.createStreamGuardrail() : null;
 
       try {
         await provider.stream(
           { ...body, model: targetModel, messages, id },
           (chunk) => {
+            let processedChunk = chunk;
+            if (streamDLP) {
+              processedChunk = streamDLP(chunk);
+              if (streamDLP.violations.length > 0 && req.flightContext) {
+                req.flightContext.guardrailViolated = true;
+                req.flightContext.guardrailViolations = [
+                  ...new Set([...req.flightContext.guardrailViolations, ...streamDLP.violations])
+                ];
+                if (!res.headersSent) {
+                  res.setHeader('X-Guardrails-Violated', 'true');
+                }
+              }
+            }
+
             if (!firstChunkReceived) {
               firstChunkReceived = true;
               if (req.flightContext) {
                 req.flightContext.spans.ttft_ms = Math.max(0, Date.now() - streamStart);
               }
             }
-            sendSSEChunk(res, chunk);
+            sendSSEChunk(res, processedChunk);
           },
           abortController.signal
         );
@@ -269,6 +286,25 @@ async function handleChatCompletions(req, res, next) {
             req.flightContext.error = { code: err.code || 'UPSTREAM_ERROR', message: err.message, status: err.status || 500 };
           }
           throw err;
+        }
+      }
+
+      // Guardrails DLP on model response
+      if (guardrails.enabled && responseData && Array.isArray(responseData.choices)) {
+        for (const choice of responseData.choices) {
+          if (choice?.message && typeof choice.message.content === 'string') {
+            const scan = guardrails.scanText(choice.message.content);
+            if (scan.violations.length > 0) {
+              choice.message.content = scan.text;
+              if (req.flightContext) {
+                req.flightContext.guardrailViolated = true;
+                req.flightContext.guardrailViolations = [
+                  ...new Set([...(req.flightContext.guardrailViolations || []), ...scan.violations])
+                ];
+              }
+              res.setHeader('X-Guardrails-Violated', 'true');
+            }
+          }
         }
       }
 

@@ -1,5 +1,5 @@
 // Centralized Gateway Configuration
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const config = {
   // Server

@@ -537,16 +537,19 @@
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
           let fullText = '';
+          let sseBuffer = '';
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
+            sseBuffer += decoder.decode(value, { stream: true });
+            const lines = sseBuffer.split('\n');
+            sseBuffer = lines.pop() || '';
             for (const line of lines) {
-              if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+              const trimmed = line.trim();
+              if (trimmed.startsWith('data: ') && trimmed !== 'data: [DONE]') {
                 try {
-                  const parsed = JSON.parse(line.slice(6));
-                  const delta = parsed.choices[0]?.delta?.content || '';
+                  const parsed = JSON.parse(trimmed.slice(6));
+                  const delta = parsed.choices?.[0]?.delta?.content || '';
                   fullText += delta;
                   outputBox.textContent = fullText;
                 } catch (_) {}

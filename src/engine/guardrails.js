@@ -86,9 +86,11 @@ class Guardrails {
     return detections;
   }
 
-  scanText(text) {
-    if (!text || typeof text !== 'string') return { text, violations: [] };
+  scanText(text, options = {}) {
+    if (!text || typeof text !== 'string') return { text: text || '', violations: [] };
 
+    const action = options.action || this.action;
+    const injectionCheck = options.injectionCheck ?? this.injectionCheck;
     const violations = [];
     let processed = text;
 
@@ -96,7 +98,7 @@ class Guardrails {
       pat.regex.lastIndex = 0;
       if (pat.regex.test(processed)) {
         violations.push(pat.name);
-        if (this.action === 'redact') {
+        if (action === 'redact') {
           pat.regex.lastIndex = 0;
           processed = processed.replace(pat.regex, pat.placeholder);
         }
@@ -104,7 +106,7 @@ class Guardrails {
       pat.regex.lastIndex = 0;
     }
 
-    if (this.injectionCheck) {
+    if (injectionCheck) {
       const injections = this.detectPromptInjection(processed);
       if (injections.length > 0) {
         violations.push(...injections);
@@ -155,11 +157,13 @@ class Guardrails {
   }
 
   createStreamGuardrail() {
-    return (chunkText) => {
+    const handler = (chunkText) => {
+      if (typeof chunkText !== 'string') return chunkText;
       let safeText = chunkText;
       for (const pat of SENSITIVE_PATTERNS) {
         pat.regex.lastIndex = 0;
         if (pat.regex.test(safeText)) {
+          handler.violations.push(pat.name);
           pat.regex.lastIndex = 0;
           safeText = safeText.replace(pat.regex, pat.placeholder);
         }
@@ -167,6 +171,8 @@ class Guardrails {
       }
       return safeText;
     };
+    handler.violations = [];
+    return handler;
   }
 }
 

@@ -7,7 +7,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const config = require('./config');
 const authMiddleware = require('./middleware/auth');
@@ -223,24 +223,24 @@ async function main() {
 }
 
 // CLI Execution Router
-if (require.main === module) {
-  const args = process.argv.slice(2);
+function runCli(customArgs) {
+  const args = customArgs || process.argv.slice(2);
   const command = args[0] || '';
 
   if (command === 'doctor' || args.includes('--doctor')) {
     const { runDoctor } = require('./cli/doctor');
-    runDoctor().then(() => process.exit(0)).catch((err) => {
+    return runDoctor().then(() => process.exit(0)).catch((err) => {
       console.error(err);
       process.exit(1);
     });
   } else if (command === 'chat' || args.includes('--chat')) {
     const { runChat } = require('./cli/chat');
-    runChat(args[1] || 'smart');
+    return runChat(args[1] || 'smart');
   } else if (command === 'mcp' || args.includes('--mcp')) {
-    mcpServer.startStdio();
+    return mcpServer.startStdio();
   } else if (command === 'benchmark' || args.includes('--benchmark')) {
     const { runBenchmarkSuite } = require('../benchmarks/gateway.bench');
-    runBenchmarkSuite().then(() => process.exit(0)).catch((err) => {
+    return runBenchmarkSuite().then(() => process.exit(0)).catch((err) => {
       console.error(err);
       process.exit(1);
     });
@@ -290,9 +290,10 @@ if (require.main === module) {
 
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
+    return server;
   } else {
     // Default fallback for legacy benchmark compatibility
-    main()
+    return main()
       .then((r) => {
         console.log('Results:', r);
         process.exit(0);
@@ -304,6 +305,10 @@ if (require.main === module) {
   }
 }
 
+if (require.main === module) {
+  runCli();
+}
+
 module.exports = {
   main,
   app,
@@ -312,5 +317,6 @@ module.exports = {
   isValidMessagesArray,
   isValidMessage,
   flightRecorder,
-  mcpServer
+  mcpServer,
+  runCli
 };

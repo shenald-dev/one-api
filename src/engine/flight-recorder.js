@@ -3,7 +3,8 @@ const crypto = require('crypto');
 
 class FlightRecorder {
   constructor(options = {}) {
-    this.capacity = options.capacity || parseInt(process.env.FLIGHT_RECORDER_CAPACITY || '1000', 10);
+    const rawCapacity = parseInt(options.capacity || process.env.FLIGHT_RECORDER_CAPACITY || '1000', 10);
+    this.capacity = isNaN(rawCapacity) || rawCapacity < 1 ? 1000 : Math.min(Math.max(1, rawCapacity), 100000);
     this.buffer = new Array(this.capacity);
     this.head = 0;
     this.size = 0;
@@ -164,9 +165,10 @@ class FlightRecorder {
       const entry = this.buffer[i];
       if (!entry) continue;
 
-      const startTimeUnixNano = (entry.timestamp || Date.now()) * 1000000;
-      const durationNano = (entry.spans?.total_ms || 0) * 1000000;
-      const endTimeUnixNano = startTimeUnixNano + durationNano;
+      const startTimeMs = BigInt(entry.timestamp || Date.now());
+      const startTimeUnixNano = (startTimeMs * 1000000n).toString();
+      const durationMs = BigInt(Math.max(0, Math.round(entry.spans?.total_ms || 0)));
+      const endTimeUnixNano = ((startTimeMs + durationMs) * 1000000n).toString();
 
       spans.push({
         traceId: entry.trace_id,
@@ -228,11 +230,21 @@ class FlightRecorder {
       const incomingTraceparent = req.headers['traceparent'];
       const parsed = this.parseTraceparent(incomingTraceparent);
 
-      const traceId = parsed?.traceId || req.headers['x-trace-id'] || req.headers['x-request-id'] || this.generateTraceId();
+      let traceId = parsed?.traceId;
+      if (!traceId) {
+        const customId = req.headers['x-trace-id'] || req.headers['x-request-id'];
+        if (customId && /^[0-9a-f]{32}$/i.test(customId)) {
+          traceId = customId.toLowerCase();
+        } else {
+          traceId = this.generateTraceId();
+        }
+      }
+
       const parentSpanId = parsed?.parentSpanId || null;
       const spanId = this.generateSpanId();
       const traceparent = this.formatTraceparent(traceId, spanId);
 
+      const clientReqId = req.headers['x-request-id'] || traceId;
       req.traceId = traceId;
       req.spanId = spanId;
       req.parentSpanId = parentSpanId;
@@ -266,7 +278,7 @@ class FlightRecorder {
       };
 
       res.setHeader('X-Trace-Id', traceId);
-      res.setHeader('X-Request-Id', traceId);
+      res.setHeader('X-Request-Id', clientReqId);
       res.setHeader('traceparent', traceparent);
 
       res.on('finish', () => {

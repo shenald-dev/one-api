@@ -150,10 +150,11 @@ async function runBenchmarkSuite() {
 
   // 5. Memory Profile
   const finalMemory = process.memoryUsage();
+  const heapDeltaMb = (finalMemory.heapUsed - initialMemory.heapUsed) / 1024 / 1024;
   console.log('\n[Benchmark 5] Memory Profile:');
   console.log(`  - Initial RSS:   ${(initialMemory.rss / 1024 / 1024).toFixed(2)} MB | Heap Used: ${(initialMemory.heapUsed / 1024 / 1024).toFixed(2)} MB`);
   console.log(`  - Final RSS:     ${(finalMemory.rss / 1024 / 1024).toFixed(2)} MB | Heap Used: ${(finalMemory.heapUsed / 1024 / 1024).toFixed(2)} MB`);
-  console.log(`  - Heap Delta:    +${((finalMemory.heapUsed - initialMemory.heapUsed) / 1024 / 1024).toFixed(2)} MB across 51,000 operations`);
+  console.log(`  - Heap Delta:    ${heapDeltaMb >= 0 ? '+' : ''}${heapDeltaMb.toFixed(2)} MB across 51,000 operations`);
 
   console.log('\n' + '='.repeat(68));
   console.log('🏆 All Gateway Benchmarks Completed Successfully with Sub-Millisecond P99s!\n');
