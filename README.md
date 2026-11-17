@@ -106,7 +106,7 @@ curl -N -X POST http://localhost:3000/v1/chat/completions \
 
 ---
 
-## 🚀 Breakthrough v3.0 Architecture & Innovations
+## 🚀 v3.0 Architecture & Innovations
 
 ### 1. Native Model Context Protocol (MCP) Server (Dual Transport)
 - Complies with Anthropic's Model Context Protocol (MCP) standard specification (JSON-RPC 2.0).
